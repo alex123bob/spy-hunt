@@ -124,5 +124,8 @@
   "result.shareFailed": "Could not share.",
   "result.cardCivilians": "Spy Hunt 🕵️ Civilians won in round {n}",
   "result.cardSpies": "Spy Hunt 🕵️ Spies won in round {n}",
-  "result.cardLine": "Spy: {spies} · You: {role} {mark}"
+  "result.cardLine": "Spy: {spies} · You: {role} {mark}",
+  "reveal.voteCount": "{n} votes",
+  "reveal.voteCountOne": "1 vote",
+  "reveal.abstainedList": "Abstained: {names}"
 }

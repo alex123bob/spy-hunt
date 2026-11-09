@@ -124,5 +124,8 @@
   "result.shareFailed": "分享失败。",
   "result.cardCivilians": "谁是卧底 🕵️ 平民在第 {n} 轮获胜",
   "result.cardSpies": "谁是卧底 🕵️ 卧底在第 {n} 轮获胜",
-  "result.cardLine": "卧底：{spies} · 我：{role} {mark}"
+  "result.cardLine": "卧底：{spies} · 我：{role} {mark}",
+  "reveal.voteCount": "{n} 票",
+  "reveal.voteCountOne": "1 票",
+  "reveal.abstainedList": "弃权：{names}"
 }

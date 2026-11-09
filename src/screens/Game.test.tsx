@@ -116,3 +116,56 @@ test('the tie result lists the tied players and counts down to the next stage', 
   expect(screen.getByText(/tie/i)).toHaveTextContent('P1, P2')
   expect(screen.getByRole('timer')).toHaveTextContent('5')
 })
+
+describe('reveal vote grouping', () => {
+  const reveal = (votes: { voter: number; target: number | null }[], over = {}) =>
+    snap({
+      phase: 'reveal',
+      players: [player(0), player(1), player(2), player(3)],
+      reveal: { round: 1, stage: 0, outcome: 'eliminated', eliminated: 1, tied: [], votes, role: 'civilian', ...over },
+    })
+
+  test('shows grouped votes with counts and voter names', async () => {
+    const { Reveal } = await import('./Reveal')
+    render(<Reveal state={reveal([{ voter: 0, target: 1 }, { voter: 2, target: 1 }, { voter: 3, target: 1 }])} />)
+    expect(screen.getByText('●●● 3 votes')).toBeInTheDocument()
+    expect(screen.getByText('P0, P2, P3')).toBeInTheDocument()
+  })
+
+  test('one vote uses the singular', async () => {
+    const { Reveal } = await import('./Reveal')
+    render(<Reveal state={reveal([{ voter: 0, target: 1 }])} />)
+    expect(screen.getByText('● 1 vote')).toBeInTheDocument()
+  })
+
+  test('abstained names are listed', async () => {
+    const { Reveal } = await import('./Reveal')
+    render(<Reveal state={reveal([{ voter: 0, target: 1 }, { voter: 3, target: null }, { voter: 2, target: null }])} />)
+    expect(screen.getByText('Abstained: P2, P3')).toBeInTheDocument()
+  })
+
+  test('a departed voter shows ?', async () => {
+    const { Reveal } = await import('./Reveal')
+    render(<Reveal state={reveal([{ voter: 9, target: 1 }])} />)
+    expect(screen.getByText('?')).toBeInTheDocument()
+  })
+
+  test('more than six votes cap the dots but show the number', async () => {
+    const { Reveal } = await import('./Reveal')
+    const votes = Array.from({ length: 8 }, (_, i) => ({ voter: 10 + i, target: 1 }))
+    render(<Reveal state={reveal(votes)} />)
+    expect(screen.getByText('●●●●●● 8 votes')).toBeInTheDocument()
+  })
+
+  test('the tie line is unchanged next to the grouped votes', async () => {
+    const { Reveal } = await import('./Reveal')
+    render(
+      <Reveal
+        state={reveal([{ voter: 0, target: 1 }, { voter: 1, target: 2 }], { outcome: 'tiebreak', eliminated: null, tied: [1, 2], role: undefined })}
+        holdUntil={Date.now() + 5000}
+      />,
+    )
+    expect(screen.getByText(/tie/i)).toHaveTextContent('P1, P2')
+    expect(screen.getAllByText('● 1 vote')).toHaveLength(2)
+  })
+})
