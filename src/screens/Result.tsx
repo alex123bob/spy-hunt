@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { request } from '../api/client'
+import { LANGS, type Role } from '../api/types'
 import { shareResult } from '../daily/share'
 import { resultInfo, resultShareText } from '../game/result'
 import { t, useLang } from '../i18n'
@@ -12,6 +13,7 @@ export function Result({ state }: { state: Snapshot }) {
   const isHost = state.me.is_host
   const rematch = () => void request('POST', `/rooms/${state.code}/rematch`).catch(() => {})
   const leave = () => void request('POST', `/rooms/${state.code}/leave`).catch(() => {})
+  const roles: Role[] = ['civilian', 'spy']
   const info = resultInfo(state, lang)
   const card = info.outcome === 'ended' ? null : resultShareText(state, info, `${window.location.origin}/`)
 
@@ -38,6 +40,16 @@ export function Result({ state }: { state: Snapshot }) {
             <div key={s.name} className="row between">
               <strong className="wrap">{s.name}</strong>
               {s.word && <span className="wrap">{s.word}</span>}
+            </div>
+          ))}
+        </section>
+      )}
+      {state.words && (
+        <section className="panel" data-testid="words-panel">
+          <p className="muted">{t('result.words')}</p>
+          {roles.map((r) => (
+            <div key={r} className="wrap">
+              <strong>{t(`role.${r}`)}</strong>: {LANGS.map((l) => state.words?.[r]?.[l]).filter(Boolean).join(' / ')}
             </div>
           ))}
         </section>

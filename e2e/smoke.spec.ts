@@ -52,8 +52,11 @@ test('two players create, join, play with bots to game over', async ({ browser }
   expect(finished).toBe(true)
 
   for (const p of pages) {
-    await expect(p.getByText('Words')).toBeVisible()
-    await expect(p.getByText(/Civilian:/)).toBeVisible()
-    await expect(p.getByText(/Spy:/)).toBeVisible()
+    const words = p.getByTestId('words-panel')
+    await expect(words).toBeVisible()
+    await expect(words).toContainText(/Civilian:/)
+    await expect(words).toContainText(/Spy:/)
+    await expect(p.getByTestId('spy-panel')).toBeVisible()
+    await expect(p.getByText(/You (won|lost)/)).toBeVisible()
   }
 })

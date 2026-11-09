@@ -104,3 +104,10 @@ test('host sees Play again, others see waiting', () => {
   view(finished({ host: false }))
   expect(screen.getByText('Waiting for the host to start a rematch…')).toBeInTheDocument()
 })
+
+test('the words panel still shows both words, so a spy learns the civilian word', () => {
+  view(finished({ me: 'spy', winner: 'spies' }))
+  const panel = screen.getByTestId('words-panel')
+  expect(within(panel).getByText((_, el) => el?.textContent === 'Civilian: piano / 钢琴')).toBeInTheDocument()
+  expect(within(panel).getByText((_, el) => el?.textContent === 'Spy: organ / 风琴')).toBeInTheDocument()
+})
