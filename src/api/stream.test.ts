@@ -72,3 +72,22 @@ test('resume sends after=<last id>', async () => {
   expect(got).toHaveLength(1)
   expect(calls[1]).toContain('after=7')
 })
+
+test('reconnectNow skips the backoff wait', async () => {
+  const statuses: string[] = []
+  let calls = 0
+  const fetchImpl = vi.fn(async () => {
+    calls += 1
+    if (calls === 1) throw new TypeError('down')
+    return new Response(new ReadableStream({ start() {} }), { status: 200 })
+  })
+  const s = openRoomStream('ABCD', () => {}, (st) => statuses.push(st), {
+    fetchImpl: fetchImpl as unknown as typeof fetch,
+    sleep: () => new Promise<void>(() => {}), // a backoff that never ends on its own
+  })
+  await vi.waitFor(() => expect(statuses).toContain('reconnecting'))
+  expect(fetchImpl).toHaveBeenCalledTimes(1)
+  s.reconnectNow()
+  await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(2))
+  s.close()
+})

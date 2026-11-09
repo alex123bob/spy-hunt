@@ -4,6 +4,7 @@ import { ApiError, request } from '../api/client'
 import { openRoomStream } from '../api/stream'
 import type { Snapshot } from '../api/types'
 import { setLang, t, useLang } from '../i18n'
+import { reloadDelay } from '../state/backoff'
 import { RoomStore, useRoomStore } from '../state/roomStore'
 import { useHeldScreen, type Screen } from '../state/useHeldScreen'
 import { ensureGuest, forgetGuest, getSession, setName as saveName } from '../state/session'
@@ -36,6 +37,7 @@ export function Room() {
   const [nameInput, setNameInput] = useState(getSession().name)
   const [attempt, setAttempt] = useState(0)
   const gen = useRef(0)
+  const failedStreams = useRef(0)
 
   const load = useCallback(async (retried = false, myGen = ++gen.current): Promise<void> => {
     const stale = () => myGen !== gen.current
@@ -82,12 +84,17 @@ export function Room() {
   const ready = boot.kind === 'ready'
   useEffect(() => {
     if (!ready) return
+    let reload: ReturnType<typeof setTimeout> | undefined
     const s = openRoomStream(
       code,
       (ev) => store.dispatch(ev),
       (st) => {
         store.setStatus(st)
-        if (st === 'failed') setAttempt((a) => a + 1)
+        if (st === 'open') failedStreams.current = 0
+        if (st === 'failed') {
+          reload = setTimeout(() => setAttempt((a) => a + 1), reloadDelay(failedStreams.current))
+          failedStreams.current += 1
+        }
       },
       { after: store.state?.last_seq },
     )
@@ -97,6 +104,7 @@ export function Room() {
     document.addEventListener('visibilitychange', onVisible)
     return () => {
       document.removeEventListener('visibilitychange', onVisible)
+      clearTimeout(reload)
       s.close()
     }
   }, [ready, code, store])

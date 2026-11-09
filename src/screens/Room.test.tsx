@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { Room } from './Room'
 import { ApiError, request } from '../api/client'
+import { openRoomStream } from '../api/stream'
 import type { Snapshot } from '../api/types'
 
 vi.mock('../api/client', async (orig) => {
@@ -70,4 +71,56 @@ test('a member in playing/describe renders Table', async () => {
   vi.mocked(request).mockResolvedValue(playing())
   go()
   await waitFor(() => expect(screen.getByTestId('screen-Table')).toBeInTheDocument())
+})
+
+describe('a failed stream reloads with a growing delay', () => {
+  const gets = () => vi.mocked(request).mock.calls.filter((c) => c[0] === 'GET').length
+  const statusOf = (n: number) => vi.mocked(openRoomStream).mock.calls[n][2]
+  const advance = (ms: number) => act(async () => { await vi.advanceTimersByTimeAsync(ms) })
+
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    vi.mocked(request).mockResolvedValue(playing())
+    vi.mocked(openRoomStream).mockClear()
+  })
+  afterEach(() => vi.useRealTimers())
+
+  test('not immediately, then after 1 s, then after 2 s', async () => {
+    go()
+    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(1))
+    expect(gets()).toBe(1)
+    act(() => statusOf(0)('failed'))
+    expect(gets()).toBe(1)
+    await advance(999)
+    expect(gets()).toBe(1)
+    await advance(2)
+    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(2))
+    expect(gets()).toBe(2)
+    act(() => statusOf(1)('failed'))
+    await advance(1999)
+    expect(gets()).toBe(2)
+    await advance(2)
+    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(3))
+  })
+
+  test('an open stream resets the delay to 1 s', async () => {
+    go()
+    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(1))
+    act(() => statusOf(0)('failed'))
+    await advance(1001)
+    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(2))
+    act(() => statusOf(1)('open'))
+    act(() => statusOf(1)('failed'))
+    await advance(1001)
+    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(3))
+  })
+
+  test('leaving the page cancels a pending reload', async () => {
+    const { unmount } = go()
+    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(1))
+    act(() => statusOf(0)('failed'))
+    unmount()
+    await advance(5000)
+    expect(gets()).toBe(1)
+  })
 })

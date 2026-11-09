@@ -50,3 +50,20 @@ test('concurrent ensureGuest calls share one POST /guests', async () => {
   expect(f).toHaveBeenCalledTimes(1)
   expect(a.playerId).toBe(b.playerId)
 })
+
+test('identity survives a reload when only sessionStorage works', async () => {
+  sessionStorage.clear()
+  vi.stubGlobal('localStorage', {
+    getItem() { throw new Error('blocked') },
+    setItem() { throw new Error('blocked') },
+    removeItem() { throw new Error('blocked') },
+  })
+  const f = guestFetch()
+  const first = await ensureGuest()
+  resetSessionForTests() // a page reload: memory is gone
+  expect(getSession().playerId).toBe(first.playerId)
+  await ensureGuest()
+  expect(f).toHaveBeenCalledTimes(1)
+  vi.unstubAllGlobals()
+  sessionStorage.clear()
+})

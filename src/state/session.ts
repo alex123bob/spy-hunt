@@ -12,12 +12,40 @@ export interface Session {
 const KEY = 'spy-hunt.session'
 let memory: Partial<Session> | null = null
 
+// localStorage first; sessionStorage keeps the identity across reloads when it is blocked
+const stores = (): Storage[] => {
+  const out: Storage[] = []
+  for (const name of ['localStorage', 'sessionStorage'] as const) {
+    try {
+      out.push(globalThis[name])
+    } catch {
+      // access itself can throw
+    }
+  }
+  return out
+}
+
 function readStore(): Partial<Session> {
-  try {
-    const raw = localStorage.getItem(KEY)
-    return raw ? (JSON.parse(raw) as Partial<Session>) : {}
-  } catch {
-    return {}
+  for (const st of stores()) {
+    try {
+      const raw = st.getItem(KEY)
+      if (raw) return JSON.parse(raw) as Partial<Session>
+    } catch {
+      // try the next storage
+    }
+  }
+  return {}
+}
+
+function writeStore(value: unknown): void {
+  const json = JSON.stringify(value)
+  for (const st of stores()) {
+    try {
+      st.setItem(KEY, json)
+      return
+    } catch {
+      // try the next storage
+    }
   }
 }
 
@@ -33,11 +61,7 @@ function load(): Partial<Session> {
 
 function save(patch: Partial<Session>): void {
   memory = { ...load(), ...patch }
-  try {
-    localStorage.setItem(KEY, JSON.stringify(memory))
-  } catch {
-    // storage blocked: the in-memory copy keeps the session alive
-  }
+  writeStore(memory)
 }
 
 export function getSession(): Session {
@@ -81,11 +105,7 @@ export function ensureGuest(): Promise<Session> {
 export function forgetGuest(): void {
   memory = { ...load(), playerId: undefined, token: undefined }
   setCredentials(null)
-  try {
-    localStorage.setItem(KEY, JSON.stringify({ lang: memory.lang, name: memory.name }))
-  } catch {
-    // ignore
-  }
+  writeStore({ lang: memory.lang, name: memory.name })
 }
 
 export function resetSessionForTests(): void {

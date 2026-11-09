@@ -74,6 +74,19 @@ export function openRoomStream(
   let ctrl: AbortController | null = null
   let polling = false
   let status: StreamStatus | null = null
+  let wake: (() => void) | null = null
+  let skipWait = false
+
+  const backoffWait = (ms: number): Promise<void> => {
+    if (skipWait) {
+      skipWait = false
+      return Promise.resolve()
+    }
+    return new Promise<void>((resolve) => {
+      wake = resolve
+      void sleep(ms).then(resolve)
+    })
+  }
 
   const setStatus = (s: StreamStatus) => {
     if (s !== status) {
@@ -169,7 +182,7 @@ export function openRoomStream(
       } else {
         setStatus('reconnecting')
       }
-      await sleep(backoff[Math.min(Math.max(failures - 1, 0), backoff.length - 1)] ?? 15000)
+      await backoffWait(backoff[Math.min(Math.max(failures - 1, 0), backoff.length - 1)] ?? 15000)
     }
   }
 
@@ -181,6 +194,8 @@ export function openRoomStream(
     },
     reconnectNow() {
       ctrl?.abort()
+      skipWait = true
+      wake?.()
     },
   }
 }
