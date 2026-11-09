@@ -1,0 +1,20 @@
+# Local symlink to the Flask backend (a separate repo: PP-AI-Service). Never commit it.
+/backend
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+
+# OS and editor files
+.DS_Store
+.vscode/
+.idea/
+*.log
