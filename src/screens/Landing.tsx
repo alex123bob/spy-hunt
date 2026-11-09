@@ -4,6 +4,7 @@ import { request } from '../api/client'
 import type { Lang, Snapshot } from '../api/types'
 import { LangPicker } from '../components/LangPicker'
 import { setLang, t, useLang } from '../i18n'
+import { currentStreak, playedToday, todayUtc } from '../daily/streak'
 import { ensureGuest, getSession, setName as saveName, setSessionLang } from '../state/session'
 
 export function Landing() {
@@ -13,6 +14,9 @@ export function Landing() {
   const [code, setCode] = useState('')
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
+  const today = todayUtc()
+  const played = playedToday(today)
+  const streak = currentStreak(today)
 
   const pickLang = (l: Lang) => {
     setLang(l)
@@ -56,6 +60,11 @@ export function Landing() {
       <LangPicker value={lang} onChange={pickLang} />
       <h1>{t('app.title')}</h1>
       <p className="muted">{t('landing.tagline')}</p>
+      <button type="button" className="btn daily-card" onClick={() => nav('/daily')}>
+        <strong>{t('daily.card')}</strong>
+        <span className="muted">{played ? t('daily.doneToday') : t('daily.play')}</span>
+        {streak >= 1 && <span>{t('daily.streak', { n: streak })}</span>}
+      </button>
       <label>
         <span className="muted">{t('landing.name')}</span>
         <input value={name} maxLength={16} onChange={(e) => setName(e.target.value)} autoComplete="nickname" />

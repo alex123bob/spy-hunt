@@ -11,6 +11,12 @@ from flask import Flask  # noqa: E402
 
 from ai_svc.spy_hunt import spy_hunt_bp  # noqa: E402
 
+from ai_svc.spy_hunt import db, puzzles  # noqa: E402
+from ai_svc.spy_hunt.tests.puzzle_fixtures import sample_puzzle  # noqa: E402
+
+db.init_db()
+puzzles.insert_ready(*sample_puzzle(), 2, "p-e2e")  # spy is seat 2 (Pip), spy word "organ" (option 0)
+
 app = Flask(__name__)
 app.register_blueprint(spy_hunt_bp)
 

@@ -49,3 +49,14 @@ Serve `dist/`, proxy `/api/`, and fall back to `index.html` so `/r/<code>` links
     }
 
 The back end must run as a single process (see its README).
+
+## Daily puzzle
+
+`/daily` is a Wordle-style puzzle: everyone gets the same bot-vs-bot transcript each UTC day.
+Read it, tap the spy (two tries), optionally pick the spy's word, then share an emoji result card.
+The landing page has a "Daily Spy Hunter" card that shows your streak and whether you are done today.
+
+- **Streaks** live in the browser (`localStorage`, key `spy-hunt.daily`): current, best and a per-day history. Clearing browser data clears them.
+- **Scoring and timing** are done on the server; the answer is never sent before you finish.
+- **Puzzles** come from a queue on the backend. To refill it, run `python -m ai_svc.spy_hunt.scripts.build_puzzles --count 14` in the backend repo (uses the real model). `--review` lists the ready puzzles with answers and `--veto ID` drops one. With no puzzle ready, `/daily` shows "come back soon".
+- The e2e backend (`e2e/backend.py`) seeds one fixed puzzle (spy Pip, word "organ") so `e2e/daily.spec.ts` can run with the fake model.

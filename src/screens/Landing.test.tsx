@@ -13,6 +13,13 @@ vi.mock('../state/session', async () => {
   }
 })
 
+const daily = vi.hoisted(() => ({ played: false, streak: 0 }))
+vi.mock('../daily/streak', () => ({
+  todayUtc: () => '2026-11-10',
+  playedToday: () => daily.played,
+  currentStreak: () => daily.streak,
+}))
+
 function Where() { return <div data-testid="loc">{useLocation().pathname}</div> }
 
 function renderLanding() {
@@ -23,7 +30,11 @@ function renderLanding() {
   )
 }
 
-beforeEach(() => setLang('en'))
+beforeEach(() => {
+  setLang('en')
+  daily.played = false
+  daily.streak = 0
+})
 
 test('join code is uppercased and trimmed', async () => {
   renderLanding()
@@ -37,4 +48,24 @@ test('name input is limited to 16 characters and language picker is visible', ()
   renderLanding()
   expect(screen.getByLabelText('Your name')).toHaveAttribute('maxLength', '16')
   expect(screen.getByRole('radio', { name: 'English' })).toBeInTheDocument()
+})
+
+test('the daily card links to the daily puzzle', async () => {
+  renderLanding()
+  fireEvent.click(screen.getByRole('button', { name: /Daily Spy Hunter/ }))
+  await waitFor(() => expect(screen.getByTestId('loc')).toHaveTextContent('/daily'))
+  expect(screen.queryByText(/Streak/)).toBeNull()
+})
+
+test('the daily card shows the streak', () => {
+  daily.streak = 4
+  renderLanding()
+  expect(screen.getByText('Streak 4 🔥')).toBeInTheDocument()
+})
+
+test('the daily card says done today once played', () => {
+  daily.played = true
+  renderLanding()
+  expect(screen.getByText('Done today ✅')).toBeInTheDocument()
+  expect(screen.queryByText("Play today's puzzle")).toBeNull()
 })
