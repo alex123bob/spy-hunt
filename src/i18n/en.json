@@ -108,5 +108,21 @@
   "daily.loading": "Loading…",
   "daily.card": "Daily Spy Hunter",
   "daily.play": "Play today's puzzle",
-  "daily.doneToday": "Done today ✅"
+  "daily.doneToday": "Done today ✅",
+  "result.won": "You won! 🎉",
+  "result.lost": "You lost",
+  "result.ended": "Game ended",
+  "result.yourRole": "Your role: {role}",
+  "result.yourWord": "Your word: {word}",
+  "result.theSpy": "The spy",
+  "result.theSpies": "The spies",
+  "result.everyone": "Everyone",
+  "result.rounds": "Rounds played: {n}",
+  "result.share": "Share",
+  "result.shared": "Shared",
+  "result.copied": "Copied",
+  "result.shareFailed": "Could not share.",
+  "result.cardCivilians": "Spy Hunt 🕵️ Civilians won in round {n}",
+  "result.cardSpies": "Spy Hunt 🕵️ Spies won in round {n}",
+  "result.cardLine": "Spy: {spies} · You: {role} {mark}"
 }
