@@ -93,3 +93,14 @@ Accounts, server-side streaks, leaderboards, real human games as sources (hybrid
 
 1. UTC day boundary is simple but means a new puzzle arrives at 08:00 Beijing time. Acceptable, or use the Asia/Shanghai day?
 2. Should the app block a second attempt on the same day (as designed), or allow replays without score?
+
+## 11. Deferred to the deployment phase (owner decision, 2026-11-09)
+
+Not built now, because the project is still in development and has no host yet.
+
+- **Automatic queue top-up.** Today the queue is filled by hand with `build_puzzles --count 14`; with it empty, `/daily` answers `503 no_puzzle`. At deployment, add both:
+  1. a daily cron job running `build_puzzles --count 14` (about 14 model calls per puzzle), and
+  2. a built-in safety net: when ready puzzles drop below a threshold (about 5), a background thread refills the queue, guarded by a lock so two requests cannot start it twice.
+- **Alerting** when the ready queue is short (for example fewer than 3).
+
+Other items deferred from the final review (see the branch history): reject a candidate when the round-1 solver call errors, the "all five equally ranked" gate, stricter mixed-language detection, server-side streaks and anti-replay (needed before any leaderboard).
