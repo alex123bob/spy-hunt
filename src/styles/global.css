@@ -67,3 +67,5 @@ label { display: flex; flex-direction: column; gap: 6px; }
 .daily .share { white-space: pre-wrap; margin: 0; font: inherit; }
 .daily-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }
 .daily .history { max-height: none; overflow: visible; }
+.spy-panel { border: 1px solid var(--danger); }
+.panel.share { white-space: pre-wrap; margin: 0; font: inherit; }
