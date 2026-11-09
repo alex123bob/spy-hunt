@@ -60,3 +60,6 @@ label { display: flex; flex-direction: column; gap: 6px; }
 .btn.target { min-height: 64px; font-size: 20px; text-align: left; }
 .role.spy { color: var(--danger); font-weight: 700; }
 .role.civilian { color: var(--ok); font-weight: 700; }
+.history { max-height: 45vh; overflow-y: auto; }
+.history .round { display: flex; flex-direction: column; gap: 6px; }
+.history .round + .round { border-top: 1px solid #2f3646; padding-top: 8px; }

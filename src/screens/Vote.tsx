@@ -3,6 +3,7 @@ import { request } from '../api/client'
 import type { Snapshot } from '../api/types'
 import { Countdown } from '../components/Countdown'
 import { t } from '../i18n'
+import { StatementHistory } from '../components/StatementHistory'
 import { WordCard } from './WordCard'
 
 export function Vote({ state, offset = 0 }: { state: Snapshot; offset?: number }) {
@@ -37,6 +38,7 @@ export function Vote({ state, offset = 0 }: { state: Snapshot; offset?: number }
         <Countdown deadline={state.phase_deadline} offset={offset} />
       </header>
       <WordCard word={state.me.my_word} />
+      <StatementHistory state={state} />
       {out && <p className="muted">{t('vote.out')}</p>}
       {iAmTied && <p className="muted">{t('vote.waitingTied')}</p>}
       {canVote && (

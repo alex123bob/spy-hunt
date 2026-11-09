@@ -74,5 +74,6 @@
   "result.words": "Words",
   "result.rematch": "Play again",
   "result.waitingRematch": "Waiting for the host to start a rematch…",
-  "result.home": "Leave"
+  "result.home": "Leave",
+  "vote.statements": "What everyone said"
 }

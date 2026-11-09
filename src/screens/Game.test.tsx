@@ -88,3 +88,20 @@ describe('Countdown', () => {
     expect(vib.mock.calls.length).toBe(calls)
   })
 })
+
+test('the vote screen lists what everyone said, current round first, with translations', () => {
+  const s = snap({
+    phase: 'vote', round: 2,
+    players: [player(0), player(1, { lang: 'zh-Hans' }), player(2), player(3, { is_bot: true })],
+    messages: [
+      msg(1, { round: 1, seat: 0, text: 'old clue' }),
+      msg(2, { round: 2, seat: 2, text: 'fresh clue', translations: { 'zh-Hans': '新线索' } }),
+    ],
+  })
+  render(<Vote state={s} />)
+  const rounds = screen.getAllByTestId(/^round-/).map((e) => e.getAttribute('data-testid'))
+  expect(rounds).toEqual(['round-2', 'round-1'])
+  expect(screen.getByText('old clue')).toBeInTheDocument()
+  expect(screen.getByText('fresh clue')).toBeInTheDocument()
+  expect(screen.getByText('新线索')).toBeInTheDocument()
+})
