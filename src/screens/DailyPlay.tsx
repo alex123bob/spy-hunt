@@ -11,7 +11,6 @@ interface Props {
 
 export function DailyPlay({ puzzle, me, onGuess }: Props) {
   const lang = useLang()
-  const [wrong, setWrong] = useState<number[]>([])
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState(false)
   const nameOf = (seat: number | null) => puzzle.players.find((p) => p.seat === seat)?.name ?? ''
@@ -22,8 +21,7 @@ export function DailyPlay({ puzzle, me, onGuess }: Props) {
     setBusy(true)
     setErr(false)
     try {
-      const r = await onGuess(seat)
-      if (!r.correct) setWrong((w) => [...w, seat])
+      await onGuess(seat)
     } catch {
       setErr(true)
     } finally {
@@ -31,6 +29,7 @@ export function DailyPlay({ puzzle, me, onGuess }: Props) {
     }
   }
 
+  const wrong = me.wrong
   const last = wrong[wrong.length - 1]
   return (
     <main className="screen daily">

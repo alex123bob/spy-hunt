@@ -106,6 +106,7 @@ export interface DailyMe {
   stage: DailyStage
   tries: number
   tries_left: number
+  wrong: number[]
 }
 
 export interface DailyState {

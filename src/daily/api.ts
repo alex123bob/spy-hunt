@@ -7,17 +7,17 @@ export async function getDaily(): Promise<DailyState> {
   return request<DailyState>('GET', '/daily')
 }
 
-export async function guessSpy(seat: number): Promise<GuessResult> {
+export async function guessSpy(seat: number, day: string): Promise<GuessResult> {
   await ensureGuest()
-  return request<GuessResult>('POST', '/daily/guess', { spy_seat: seat })
+  return request<GuessResult>('POST', '/daily/guess', { spy_seat: seat, day })
 }
 
-export async function guessWord(option: number | null): Promise<WordResult> {
+export async function guessWord(option: number | null, day: string): Promise<WordResult> {
   await ensureGuest()
-  return request<WordResult>('POST', '/daily/word', { option })
+  return request<WordResult>('POST', '/daily/word', { option, day })
 }
 
-export async function getResult(): Promise<DailyResult> {
+export async function getResult(day: string): Promise<DailyResult> {
   await ensureGuest()
-  return request<DailyResult>('GET', '/daily/result')
+  return request<DailyResult>('GET', `/daily/result?day=${day}`)
 }

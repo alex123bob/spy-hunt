@@ -16,19 +16,19 @@ test('getDaily gets /daily after making sure a guest exists', async () => {
   expect(request).toHaveBeenCalledWith('GET', '/daily')
 })
 
-test('guessSpy posts the seat', async () => {
-  await guessSpy(3)
-  expect(request).toHaveBeenCalledWith('POST', '/daily/guess', { spy_seat: 3 })
+test('guessSpy posts the seat and the puzzle day', async () => {
+  await guessSpy(3, '2026-11-10')
+  expect(request).toHaveBeenCalledWith('POST', '/daily/guess', { spy_seat: 3, day: '2026-11-10' })
 })
 
 test('guessWord posts the option, null to skip', async () => {
-  await guessWord(1)
-  expect(request).toHaveBeenLastCalledWith('POST', '/daily/word', { option: 1 })
-  await guessWord(null)
-  expect(request).toHaveBeenLastCalledWith('POST', '/daily/word', { option: null })
+  await guessWord(1, '2026-11-10')
+  expect(request).toHaveBeenLastCalledWith('POST', '/daily/word', { option: 1, day: '2026-11-10' })
+  await guessWord(null, '2026-11-10')
+  expect(request).toHaveBeenLastCalledWith('POST', '/daily/word', { option: null, day: '2026-11-10' })
 })
 
-test('getResult gets /daily/result', async () => {
-  await getResult()
-  expect(request).toHaveBeenCalledWith('GET', '/daily/result')
+test('getResult asks for the puzzle day', async () => {
+  await getResult('2026-11-10')
+  expect(request).toHaveBeenCalledWith('GET', '/daily/result?day=2026-11-10')
 })

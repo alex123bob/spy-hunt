@@ -25,10 +25,11 @@ export function Daily() {
   useEffect(load, [load])
 
   const stage = state?.me.stage
+  const day = state?.puzzle.day
   useEffect(() => {
-    if (stage !== 'done') return
-    getResult().then(setResult).catch(() => setFailure('error'))
-  }, [stage])
+    if (stage !== 'done' || !day) return
+    getResult(day).then(setResult).catch(() => setFailure('error'))
+  }, [stage, day])
 
   if (failure === 'no_puzzle') {
     return (
@@ -50,15 +51,19 @@ export function Daily() {
 
   if (state.me.stage === 'spy') {
     const onGuess = async (seat: number) => {
-      const r = await guessSpy(seat)
-      setState((s) => (s ? { ...s, me: { stage: r.stage, tries: r.tries, tries_left: r.tries_left } } : s))
+      const r = await guessSpy(seat, state.puzzle.day)
+      setState((s) =>
+        s
+          ? { ...s, me: { stage: r.stage, tries: r.tries, tries_left: r.tries_left, wrong: r.correct ? s.me.wrong : [...s.me.wrong, seat] } }
+          : s,
+      )
       return r
     }
     return <DailyPlay puzzle={state.puzzle} me={state.me} onGuess={onGuess} />
   }
   if (state.me.stage === 'word') {
     const onPick = async (option: number | null) => {
-      await guessWord(option)
+      await guessWord(option, state.puzzle.day)
       setState((s) => (s ? { ...s, me: { ...s.me, stage: 'done' } } : s))
     }
     return <DailyWord puzzle={state.puzzle} onPick={onPick} />

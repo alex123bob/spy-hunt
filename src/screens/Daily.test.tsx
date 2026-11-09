@@ -27,8 +27,8 @@ const puzzle: DailyPuzzle = {
     { en: 'drum', 'zh-Hans': '鼓' }, { en: 'flute', 'zh-Hans': '长笛' },
   ],
 }
-const state = (stage: 'spy' | 'word' | 'done', tries = 0): DailyState => ({
-  puzzle, me: { stage, tries, tries_left: stage === 'spy' ? 2 - tries : 0 },
+const state = (stage: 'spy' | 'word' | 'done', tries = 0, wrong: number[] = []): DailyState => ({
+  puzzle, me: { stage, tries, tries_left: stage === 'spy' ? 2 - tries : 0, wrong },
 })
 const result: DailyResult = {
   solved: true, tries: 2, word_correct: true, elapsed_ms: 72000, score: 120,
@@ -62,7 +62,7 @@ test('tapping the spy moves to the word stage', async () => {
   render(tree)
   fireEvent.click(await screen.findByRole('button', { name: 'Pip' }))
   expect(await screen.findByText("What was the spy's word?")).toBeInTheDocument()
-  expect(guessSpy).toHaveBeenCalledWith(2)
+  expect(guessSpy).toHaveBeenCalledWith(2, '2026-11-10')
 })
 
 test('a wrong tap marks the player and shows one try left', async () => {
@@ -101,7 +101,7 @@ test('the word stage lists four options and a skip button', async () => {
   render(tree)
   for (const w of ['organ', 'guitar', 'drum', 'flute']) expect(await screen.findByRole('button', { name: w })).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Skip' }))
-  expect(guessWord).toHaveBeenCalledWith(null)
+  expect(guessWord).toHaveBeenCalledWith(null, '2026-11-10')
   expect(await screen.findByText('You found the spy!')).toBeInTheDocument()
 })
 
@@ -110,7 +110,7 @@ test('picking an option sends its index', async () => {
   vi.mocked(guessWord).mockResolvedValue({ correct: true, stage: 'done' })
   render(tree)
   fireEvent.click(await screen.findByRole('button', { name: 'drum' }))
-  expect(guessWord).toHaveBeenCalledWith(2)
+  expect(guessWord).toHaveBeenCalledWith(2, '2026-11-10')
 })
 
 test('the result shows score, stats, streak and the share preview, recording the streak once', async () => {
@@ -153,6 +153,24 @@ test('reloading in the done stage goes straight to the result', async () => {
   vi.mocked(getDaily).mockResolvedValue(state('done', 2))
   render(tree)
   expect(await screen.findByText('You found the spy!')).toBeInTheDocument()
-  expect(getResult).toHaveBeenCalled()
+  expect(getResult).toHaveBeenCalledWith('2026-11-10')
   expect(screen.queryByRole('button', { name: 'Pip' })).toBeNull()
+})
+
+test('after a reload a player already ruled out stays disabled', async () => {
+  vi.mocked(getDaily).mockResolvedValue(state('spy', 1, [2]))
+  render(tree)
+  expect(await screen.findByRole('button', { name: 'Pip' })).toBeDisabled()
+  expect(screen.getByRole('button', { name: 'Milo' })).toBeEnabled()
+  expect(screen.getByText('Tries left: 1')).toBeInTheDocument()
+})
+
+test('a second wrong tap cannot repeat the first one', async () => {
+  vi.mocked(getDaily).mockResolvedValue(state('spy'))
+  vi.mocked(guessSpy).mockResolvedValue({ correct: false, stage: 'spy', tries: 1, tries_left: 1 })
+  render(tree)
+  fireEvent.click(await screen.findByRole('button', { name: 'Pip' }))
+  await screen.findByText('Pip is not the spy.')
+  fireEvent.click(screen.getByRole('button', { name: 'Pip' }))
+  expect(guessSpy).toHaveBeenCalledTimes(1)
 })
