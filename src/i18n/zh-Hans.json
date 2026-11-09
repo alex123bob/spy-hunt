@@ -75,5 +75,7 @@
   "result.rematch": "再来一局",
   "result.waitingRematch": "等待房主发起再来一局…",
   "result.home": "离开",
-  "vote.statements": "大家的发言"
+  "vote.statements": "大家的发言",
+  "table.votingSoon": "投票即将开始",
+  "reveal.next": "即将进入下一环节"
 }

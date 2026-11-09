@@ -75,5 +75,7 @@
   "result.rematch": "Play again",
   "result.waitingRematch": "Waiting for the host to start a rematch…",
   "result.home": "Leave",
-  "vote.statements": "What everyone said"
+  "vote.statements": "What everyone said",
+  "table.votingSoon": "Voting starts in",
+  "reveal.next": "Next up in"
 }

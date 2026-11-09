@@ -105,3 +105,14 @@ test('the vote screen lists what everyone said, current round first, with transl
   expect(screen.getByText('fresh clue')).toBeInTheDocument()
   expect(screen.getByText('新线索')).toBeInTheDocument()
 })
+
+test('the tie result lists the tied players and counts down to the next stage', async () => {
+  const { Reveal } = await import('./Reveal')
+  const s = snap({
+    phase: 'tiebreak_describe',
+    reveal: { round: 1, stage: 0, outcome: 'tiebreak', eliminated: null, tied: [1, 2], votes: [] },
+  })
+  render(<Reveal state={s} holdUntil={Date.now() + 5000} />)
+  expect(screen.getByText(/tie/i)).toHaveTextContent('P1, P2')
+  expect(screen.getByRole('timer')).toHaveTextContent('5')
+})

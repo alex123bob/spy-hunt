@@ -2,14 +2,18 @@ import type { Snapshot } from '../api/types'
 import { Countdown } from '../components/Countdown'
 import { t } from '../i18n'
 
-export function Reveal({ state, offset = 0 }: { state: Snapshot; offset?: number }) {
+export function Reveal({ state, offset = 0, holdUntil = null }: { state: Snapshot; offset?: number; holdUntil?: number | null }) {
   const r = state.reveal
   const nameOf = (seat: number | null) => state.players.find((p) => p.seat === seat)?.name ?? '?'
   return (
     <main className="screen">
       <header className="row between">
         <h2>{t('reveal.title')}</h2>
-        {state.phase === 'reveal' && <Countdown deadline={state.phase_deadline} offset={offset} vibrate={false} />}
+        {state.phase === 'reveal' ? (
+          <Countdown deadline={state.phase_deadline} offset={offset} vibrate={false} />
+        ) : (
+          holdUntil != null && <Countdown deadline={holdUntil} vibrate={false} />
+        )}
       </header>
       {r && r.eliminated != null && (
         <div className="panel center">
@@ -18,7 +22,11 @@ export function Reveal({ state, offset = 0 }: { state: Snapshot; offset?: number
         </div>
       )}
       {r && r.eliminated == null && (
-        <p className="center">{r.outcome === 'tiebreak' ? t('reveal.tie') : t('reveal.nobody')}</p>
+        <p className="center wrap">
+          {r.outcome === 'tiebreak'
+            ? `${t('reveal.tie')} ${(r.tied ?? []).map(nameOf).join(', ')}`
+            : t('reveal.nobody')}
+        </p>
       )}
       {r && r.votes.length > 0 && (
         <section className="panel">

@@ -141,14 +141,14 @@ function targetScreen(state: Snapshot): Screen {
 }
 
 function RoomView({ state, status, offset }: { state: Snapshot; status: string; offset: number }) {
-  const screen = useHeldScreen(targetScreen(state), state.reveal)
+  const { screen, holdUntil } = useHeldScreen(targetScreen(state), state.reveal)
   const banner = status === 'reconnecting' || status === 'polling' ? <div className="banner">{t('room.reconnecting')}</div> : null
   let body
   if (screen === 'lobby') body = <Lobby state={state} />
   else if (screen === 'closed') body = <RoomError kind="closed" />
   else if (screen === 'result') body = <Result state={state} />
   else if (screen === 'vote') body = <Vote state={state} offset={offset} />
-  else if (screen === 'reveal') body = <Reveal state={state} offset={offset} />
-  else body = <Table state={state} offset={offset} />
+  else if (screen === 'reveal') body = <Reveal state={state} offset={offset} holdUntil={holdUntil} />
+  else body = <Table state={state} offset={offset} holdUntil={holdUntil} />
   return <>{banner}{body}</>
 }

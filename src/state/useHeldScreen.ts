@@ -16,7 +16,11 @@ interface Hold {
  * ends the game or starts a tie-break) stays up before the next screen.
  * Holds only start from live changes, never from the first render.
  */
-export function useHeldScreen(target: Screen, reveal: unknown, now: () => number = Date.now): Screen {
+export function useHeldScreen(
+  target: Screen,
+  reveal: unknown,
+  now: () => number = Date.now,
+): { screen: Screen; holdUntil: number | null } {
   const prevTarget = useRef(target)
   const prevReveal = useRef(reveal)
   const hold = useRef<Hold | null>(null)
@@ -45,5 +49,5 @@ export function useHeldScreen(target: Screen, reveal: unknown, now: () => number
     return () => clearTimeout(id)
   }, [until, now])
 
-  return active ? active.screen : target
+  return { screen: active ? active.screen : target, holdUntil: active ? active.until : null }
 }

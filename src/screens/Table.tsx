@@ -8,7 +8,7 @@ import { setLang, t, useLang } from '../i18n'
 import { setSessionLang } from '../state/session'
 import { WordCard } from './WordCard'
 
-export function Table({ state, offset = 0 }: { state: Snapshot; offset?: number }) {
+export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot; offset?: number; holdUntil?: number | null }) {
   const lang = useLang()
   const me = state.players.find((p) => p.seat === state.me.seat)
   const viewerLang = me?.lang ?? lang
@@ -64,6 +64,11 @@ export function Table({ state, offset = 0 }: { state: Snapshot; offset?: number 
           <div className="row between">
             <span className="wrap">{myTurn ? t('table.yourTurn') : t('table.speaking', { name: speaker.name })}</span>
             <Countdown deadline={state.phase_deadline} offset={offset} />
+          </div>
+        ) : holdUntil != null ? (
+          <div className="row between">
+            <span>{t('table.votingSoon')}</span>
+            <Countdown deadline={holdUntil} vibrate={false} />
           </div>
         ) : null}
         {eliminated && <p className="muted">{t('table.eliminated')}</p>}
