@@ -9,7 +9,7 @@ export function Reveal({ state, offset = 0 }: { state: Snapshot; offset?: number
     <main className="screen">
       <header className="row between">
         <h2>{t('reveal.title')}</h2>
-        <Countdown deadline={state.phase_deadline} offset={offset} vibrate={false} />
+        {state.phase === 'reveal' && <Countdown deadline={state.phase_deadline} offset={offset} vibrate={false} />}
       </header>
       {r && r.eliminated != null && (
         <div className="panel center">

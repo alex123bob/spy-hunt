@@ -5,6 +5,7 @@ import { openRoomStream } from '../api/stream'
 import type { Snapshot } from '../api/types'
 import { setLang, t, useLang } from '../i18n'
 import { RoomStore, useRoomStore } from '../state/roomStore'
+import { useHeldScreen, type Screen } from '../state/useHeldScreen'
 import { ensureGuest, forgetGuest, getSession, setName as saveName } from '../state/session'
 import { Lobby } from './Lobby'
 import { Reveal } from './Reveal'
@@ -127,14 +128,27 @@ export function Room() {
     )
   }
   if (!state) return null
+  return <RoomView state={state} status={status} offset={offset} />
+}
 
+function targetScreen(state: Snapshot): Screen {
+  if (state.status === 'lobby') return 'lobby'
+  if (state.status === 'closed') return 'closed'
+  if (state.status === 'finished') return 'result'
+  if (state.phase === 'vote' || state.phase === 'revote') return 'vote'
+  if (state.phase === 'reveal') return 'reveal'
+  return 'table'
+}
+
+function RoomView({ state, status, offset }: { state: Snapshot; status: string; offset: number }) {
+  const screen = useHeldScreen(targetScreen(state), state.reveal)
   const banner = status === 'reconnecting' || status === 'polling' ? <div className="banner">{t('room.reconnecting')}</div> : null
   let body
-  if (state.status === 'lobby') body = <Lobby state={state} />
-  else if (state.status === 'closed') body = <RoomError kind="closed" />
-  else if (state.status === 'finished') body = <Result state={state} />
-  else if (state.phase === 'vote' || state.phase === 'revote') body = <Vote state={state} offset={offset} />
-  else if (state.phase === 'reveal') body = <Reveal state={state} offset={offset} />
+  if (screen === 'lobby') body = <Lobby state={state} />
+  else if (screen === 'closed') body = <RoomError kind="closed" />
+  else if (screen === 'result') body = <Result state={state} />
+  else if (screen === 'vote') body = <Vote state={state} offset={offset} />
+  else if (screen === 'reveal') body = <Reveal state={state} offset={offset} />
   else body = <Table state={state} offset={offset} />
   return <>{banner}{body}</>
 }
