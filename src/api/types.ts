@@ -87,3 +87,50 @@ export interface Guest {
   player_id: string
   token: string
 }
+
+export type DailyStage = 'spy' | 'word' | 'done'
+export type WordPair = Record<Lang, string>
+
+export interface DailyPuzzle {
+  number: number
+  day: string
+  difficulty: 1 | 2 | 3
+  origin_lang: Lang
+  civilian_word: WordPair
+  players: { seat: number; name: string }[]
+  statements: Message[]
+  options: WordPair[]
+}
+
+export interface DailyMe {
+  stage: DailyStage
+  tries: number
+  tries_left: number
+}
+
+export interface DailyState {
+  puzzle: DailyPuzzle
+  me: DailyMe
+}
+
+export interface GuessResult {
+  correct: boolean
+  stage: DailyStage
+  tries: number
+  tries_left: number
+}
+
+export interface WordResult {
+  correct: boolean | null
+  stage: 'done'
+}
+
+export interface DailyResult {
+  solved: boolean
+  tries: number
+  word_correct: boolean | null
+  elapsed_ms: number
+  score: number
+  answer: { spy_seat: number; spy_word: WordPair; civilian_word: WordPair }
+  stats: { players: number; solved_pct: number }
+}
