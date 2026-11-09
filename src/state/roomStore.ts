@@ -55,7 +55,16 @@ function apply(s: Snapshot, type: string, d: Data): Snapshot {
       const snap = d as unknown as Snapshot
       if (!snap || !snap.code) return s
       if (s.last_seq && snap.last_seq < s.last_seq) return s // stale poll
-      return normalize({ ...snap, locked: s.locked && snap.phase === s.phase ? s.locked : [] }, s.pendingTranslations)
+      const same = snap.game_no === s.game_no && snap.round === s.round
+      return normalize(
+        {
+          ...snap,
+          locked: s.locked && snap.phase === s.phase ? s.locked : [],
+          reveal: same ? s.reveal : null,
+          tied: same ? s.tied : null,
+        },
+        s.pendingTranslations,
+      )
     }
     case 'statement': {
       const m = d.message as Message | undefined
@@ -149,9 +158,9 @@ function apply(s: Snapshot, type: string, d: Data): Snapshot {
     case 'player_left': {
       const p = d.player as Player | undefined
       if (!p) return s
-      return s.status === 'lobby'
-        ? { ...s, players: s.players.filter((x) => x.seat !== p.seat) }
-        : { ...s, players: upsertPlayer(s.players, p) }
+      return s.status === 'playing'
+        ? { ...s, players: upsertPlayer(s.players, p) }
+        : { ...s, players: s.players.filter((x) => x.seat !== p.seat) }
     }
     case 'settings':
       return { ...s, main_lang: d.main_lang ?? s.main_lang, config: { ...s.config, bot_fill: d.bot_fill ?? s.config.bot_fill } }

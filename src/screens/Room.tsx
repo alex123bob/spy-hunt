@@ -34,8 +34,10 @@ export function Room() {
   const [boot, setBoot] = useState<Boot>({ kind: 'loading' })
   const [nameInput, setNameInput] = useState(getSession().name)
   const [attempt, setAttempt] = useState(0)
+  const gen = useRef(0)
 
-  const load = useCallback(async (retried = false): Promise<void> => {
+  const load = useCallback(async (retried = false, myGen = ++gen.current): Promise<void> => {
+    const stale = () => myGen !== gen.current
     setBoot({ kind: 'loading' })
     try {
       await ensureGuest()
@@ -45,12 +47,12 @@ export function Room() {
       } catch (e) {
         if (e instanceof ApiError && e.status === 401 && !retried) {
           forgetGuest()
-          return load(true)
+          return load(true, myGen)
         }
         if (e instanceof ApiError && e.status === 403) {
           const s = getSession()
           if (!s.name.trim()) {
-            setBoot({ kind: 'needName' })
+            if (!stale()) setBoot({ kind: 'needName' })
             return
           }
           snap = await request<Snapshot>('POST', `/rooms/${code}/join`, { name: s.name.trim(), lang: s.lang })
@@ -58,17 +60,22 @@ export function Room() {
           throw e
         }
       }
+      if (stale()) return
       store.setSnapshot(snap)
       const me = snap.players.find((p) => p.seat === snap.me.seat)
       if (me) setLang(me.lang)
       setBoot({ kind: 'ready' })
     } catch (e) {
+      if (stale()) return
       setBoot({ kind: 'error', error: errorKind(e) })
     }
   }, [code, store])
 
   useEffect(() => {
     void load()
+    return () => {
+      gen.current++ // cancel any in-flight load for this effect run
+    }
   }, [load, attempt])
 
   const ready = boot.kind === 'ready'

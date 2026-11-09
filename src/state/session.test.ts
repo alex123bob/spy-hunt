@@ -42,3 +42,11 @@ test('ensureGuest creates the guest once and persists it', async () => {
   expect(s.playerId).toBe('p1')
   expect(f).toHaveBeenCalledTimes(1)
 })
+
+test('concurrent ensureGuest calls share one POST /guests', async () => {
+  localStorage.clear()
+  const f = guestFetch()
+  const [a, b] = await Promise.all([ensureGuest(), ensureGuest()])
+  expect(f).toHaveBeenCalledTimes(1)
+  expect(a.playerId).toBe(b.playerId)
+})

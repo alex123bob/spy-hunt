@@ -77,3 +77,22 @@ test('with a clock 10 minutes fast, remainingMs is still the true remainder', ()
   expect(remainingMs(serverNow + 30_000, clockOffset(serverNow, localNow), localNow)).toBe(30_000)
   expect(remainingMs(serverNow - 5, clockOffset(serverNow, localNow), localNow)).toBe(0)
 })
+
+test('a state event keeps reveal and tied for the same game and round', () => {
+  const info = { round: 1, stage: 0, outcome: 'tiebreak', eliminated: null, tied: [0, 1], votes: [] }
+  let s = reduce(base(), ev('reveal', info, '6'))
+  s = reduce(s, ev('state', { ...base(), phase: 'revote', last_seq: 8 }, '8'))
+  expect(s.tied).toEqual([0, 1])
+  expect(s.reveal).toMatchObject({ outcome: 'tiebreak' })
+  const next = reduce(s, ev('state', { ...base(), round: 2, last_seq: 12 }, '12'))
+  expect(next.tied).toBeNull()
+  expect(next.reveal).toBeNull()
+})
+
+test('player_left after game over removes the player; mid-game keeps the seat', () => {
+  const gone = { ...base().players[0], seat: 1 }
+  const over = reduce({ ...base(), status: 'finished' }, ev('player_left', { player: gone }))
+  expect(over.players.map((p) => p.seat)).toEqual([0])
+  const mid = reduce(base(), ev('player_left', { player: { ...gone, is_bot: true } }))
+  expect(mid.players.find((p) => p.seat === 1)?.is_bot).toBe(true)
+})

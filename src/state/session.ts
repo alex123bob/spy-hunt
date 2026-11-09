@@ -58,14 +58,24 @@ export function setSessionLang(lang: Lang): void {
   save({ lang })
 }
 
-export async function ensureGuest(): Promise<Session> {
+let inflight: Promise<Session> | null = null
+
+export function ensureGuest(): Promise<Session> {
   const s = getSession()
-  if (s.playerId && s.token) return s
-  setCredentials(null)
-  const g = await request<Guest>('POST', '/guests')
-  save({ playerId: g.player_id, token: g.token })
-  setCredentials({ playerId: g.player_id, token: g.token })
-  return getSession()
+  if (s.playerId && s.token) return Promise.resolve(s)
+  if (!inflight) {
+    setCredentials(null)
+    inflight = request<Guest>('POST', '/guests')
+      .then((g) => {
+        save({ playerId: g.player_id, token: g.token })
+        setCredentials({ playerId: g.player_id, token: g.token })
+        return getSession()
+      })
+      .finally(() => {
+        inflight = null
+      })
+  }
+  return inflight
 }
 
 export function forgetGuest(): void {
@@ -80,5 +90,6 @@ export function forgetGuest(): void {
 
 export function resetSessionForTests(): void {
   memory = null
+  inflight = null
   setCredentials(null)
 }
