@@ -39,3 +39,24 @@ input, select { font: inherit; width: 100%; padding: 14px; border-radius: 12px; 
 .error { color: var(--danger); margin: 0; }
 label { display: flex; flex-direction: column; gap: 6px; }
 .banner { position: sticky; top: 0; background: var(--danger); color: #fff; text-align: center; padding: 6px; font-size: 14px; z-index: 5; }
+.between { justify-content: space-between; align-items: center; }
+.narrow { flex: 0 0 auto !important; }
+.small { font-size: 13px; }
+.big { font-size: 28px; font-weight: 700; }
+.ok { color: var(--ok); }
+.wordcard { background: var(--accent); border: 0; border-radius: 16px; color: #fff; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit; cursor: pointer; }
+.wordcard .word { font-size: 30px; font-weight: 800; }
+.table .feed { flex: 1; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; min-height: 120px; }
+.bubble { background: var(--panel); border-radius: 14px; padding: 10px 12px; max-width: 100%; min-width: 0; }
+.bubble.mine { background: var(--panel-2); }
+.bubble.host { border: 1px dashed var(--accent); }
+.bubble .who { font-size: 12px; }
+.bubble .tr { border-top: 1px solid #2f3646; margin-top: 6px; padding-top: 6px; font-size: 16px; }
+.bubble.skipped { background: transparent; font-size: 14px; }
+.turnbar { position: sticky; bottom: 0; }
+.countdown { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 22px; }
+.countdown.urgent { color: var(--danger); }
+.targets { display: flex; flex-direction: column; gap: 10px; }
+.btn.target { min-height: 64px; font-size: 20px; text-align: left; }
+.role.spy { color: var(--danger); font-weight: 700; }
+.role.civilian { color: var(--ok); font-weight: 700; }

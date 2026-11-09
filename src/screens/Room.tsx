@@ -127,7 +127,7 @@ export function Room() {
   else if (state.status === 'closed') body = <RoomError kind="closed" />
   else if (state.status === 'finished') body = <Result state={state} />
   else if (state.phase === 'vote' || state.phase === 'revote') body = <Vote state={state} offset={offset} />
-  else if (state.phase === 'reveal') body = <Reveal state={state} />
+  else if (state.phase === 'reveal') body = <Reveal state={state} offset={offset} />
   else body = <Table state={state} offset={offset} />
   return <>{banner}{body}</>
 }
