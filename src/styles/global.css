@@ -38,3 +38,4 @@ input, select { font: inherit; width: 100%; padding: 14px; border-radius: 12px; 
 .link { font-size: 14px; color: var(--muted); }
 .error { color: var(--danger); margin: 0; }
 label { display: flex; flex-direction: column; gap: 6px; }
+.banner { position: sticky; top: 0; background: var(--danger); color: #fff; text-align: center; padding: 6px; font-size: 14px; z-index: 5; }
