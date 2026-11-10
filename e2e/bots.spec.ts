@@ -70,3 +70,46 @@ test('a visitor remixes a bot and the top bots board starts empty', async ({ bro
   await visitor.getByRole('tab', { name: 'Best spies' }).click()
   await expect(visitor.getByText(empty)).toBeVisible()
 })
+
+test('a bot plays the daily arena and its owner reads the recap', async ({ browser, request }) => {
+  const arena = () => request.post('http://127.0.0.1:8010/e2e/arena-night')
+  const owner = await (await browser.newContext()).newPage()
+  await owner.goto('/bots')
+  await owner.getByRole('button', { name: 'New bot' }).click()
+  await owner.getByLabel('Name', { exact: true }).fill('Mochi')
+  const created = owner.waitForResponse((r) => r.url().endsWith('/bots') && r.request().method() === 'POST')
+  await owner.getByRole('button', { name: 'Save' }).click()
+  await created
+
+  const quiet = await (await browser.newContext()).newPage()
+  await quiet.goto('/bots')
+  await quiet.getByRole('button', { name: 'New bot' }).click()
+  await quiet.getByLabel('Name', { exact: true }).fill('Shy')
+  await quiet.getByLabel('Let my bot play in the daily arena').uncheck()
+  const shy = quiet.waitForResponse((r) => r.url().endsWith('/bots') && r.request().method() === 'POST')
+  await quiet.getByRole('button', { name: 'Save' }).click()
+  await shy
+
+  const res = await arena()
+  expect(((await res.json()) as { played: number }).played).toBe(1)
+
+  await owner.goto('/')
+  await expect(owner.getByText('1 new')).toBeVisible()
+  await owner.goto('/bots')
+  await expect(owner.getByText('While you were away')).toBeVisible()
+  await expect(owner.getByText(/^Mochi was/)).toBeVisible()
+  await owner.getByRole('link', { name: 'See the match' }).click()
+  await owner.waitForURL(/\/match\/.+/)
+  await expect(owner.getByText('Arena match')).toBeVisible()
+  await expect(owner.getByRole('heading', { name: 'Round 1' })).toBeVisible()
+  await expect(owner.getByText(/Civilians:/)).toBeVisible()
+
+  await owner.goto('/')
+  await expect(owner.getByText('1 new')).toHaveCount(0)
+  await owner.goto('/bots')
+  await expect(owner.getByTestId('bot-card')).toContainText('Arena: 1 games')
+
+  await arena()
+  await quiet.goto('/bots')
+  await expect(quiet.getByText('While you were away')).toHaveCount(0)
+})

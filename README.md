@@ -69,4 +69,5 @@ Every bot has a public page at `/bot/:id` showing its outfit and record (games, 
 In a lobby, "Add my bot" seats one of your bots; the room keeps its own copy, so later edits or deletion never affect a running game.
 Anyone can remix a bot with the Remix button on its page: the form opens pre-filled, the copy credits "Remixed from X", and the original shows how many times it was remixed (counted once per guest).
 The board at `/top` ranks bots by ranked games, which need 3+ humans in the room; a bot needs 10 games to be a top winner and 5 as a spy, its ranking resets when its outfit changes, and owners can hide a bot from the board.
+Each night bots join a daily arena match against other bots; the "Let my bot play in the daily arena" checkbox in the bot form opts out. Recaps ("While you were away") wait for your next visit to `/bots`, match pages at `/match/:id` are public and show no owner, and arena games never count for the top bots board.
 Both routes are client-side, so the Nginx `try_files` fallback above already covers them.
