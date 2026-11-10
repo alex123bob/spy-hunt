@@ -74,7 +74,7 @@
   - `test_match_plays_to_a_winner`: the result has a `winner`, every alive seat spoke each round, `rounds` are consecutive from 1, `eliminated` seats never speak again, and entries exist only for seats with a `bot_id`.
   - `test_civilian_prompt_never_contains_the_spy_word`: capture every prompt in the fake; for each prompt sent to a civilian seat the spy's word is absent, and no prompt contains `"role"` as a JSON key.
   - `test_reveal_history_has_no_role`: capture the view JSON inside vote prompts of round 2 and assert no `role` key.
-  - `test_rule_vote_skips_the_model`: a custom bot with `{"when": "accused", "do": "vote_accuser"}` in round 2 after being voted against votes for an accuser without a model call (count vote prompts per seat).
+  - `test_rule_vote_skips_the_model`: script the fake's votes so that in round 1 the rule bot (a custom seat with `{"when": "accused", "do": "vote_accuser"}`) receives exactly one vote and a different seat is eliminated; in round 2 the rule bot votes for that accuser without a model call (count vote prompts per seat: none for the rule bot in round 2).
   - `test_own_word_statement_falls_back_to_canned`: a fake that returns a statement containing the seat's own word makes that action a canned fallback and `fallback_share > 0` for that seat.
   - `test_tie_triggers_tiebreak_then_nobody`: a fake where every seat votes for the next seat (a full cycle) yields a stage-0 tie of everyone: nobody is out and the next round starts; a fake that creates a partial tie yields a stage-1 re-vote restricted to the tied seats.
   - `test_model_down_discards_the_match`: a fake that raises `LlmError` for everything makes `play_match` return `None`.
