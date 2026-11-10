@@ -50,6 +50,13 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
   const setRules = (next: BotRule[]) => setDraft({ ...draft, outfit: { ...draft.outfit, rules: next } })
   const setRule = (i: number, patch: Partial<BotRule>) => setRules(rules.map((r, j) => (j === i ? { ...r, ...patch } : r)))
 
+  const used = new Set(rules.map((r) => `${r.when}|${r.do}`))
+  const duplicate = used.size < rules.length
+  const nextPair = (): BotRule => {
+    for (const when of catalog.triggers) for (const d of catalog.actions) if (!used.has(`${when}|${d}`)) return { when, do: d }
+    return { when: catalog.triggers[0] ?? '', do: catalog.actions[0] ?? '' }
+  }
+
   const save = async () => {
     const body = { ...draft, name: draft.name.trim() }
     setBusy(true)
@@ -58,7 +65,7 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
       onSaved(initial ? await updateBot(initial.id, body) : await createBot(body))
     } catch (e) {
       const code = e instanceof ApiError ? e.code : ''
-      setErr(code === 'bot_limit' ? t('bots.limit') : e instanceof ApiError && e.message && code !== 'network' ? e.message : t('bots.saveError'))
+      setErr(code === 'bot_limit' ? t('bots.limit') : code === 'bad_outfit' ? t('bots.rules.invalid') : e instanceof ApiError && e.message && code !== 'network' ? e.message : t('bots.saveError'))
       setBusy(false)
     }
   }
@@ -89,27 +96,28 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
         <span className="muted">{t('bots.rules')}</span>
         {rules.map((r, i) => (
           <div key={i} className="rule-row">
-            <select aria-label={t('bots.rules.when')} value={r.when} onChange={(e) => setRule(i, { when: e.target.value })}>
+            <select aria-label={t('bots.rules.whenN', { n: i + 1 })} value={r.when} onChange={(e) => setRule(i, { when: e.target.value })}>
               {catalog.triggers.map((id) => <option key={id} value={id}>{t(`bots.when.${id}`)}</option>)}
             </select>
-            <select aria-label={t('bots.rules.then')} value={r.do} onChange={(e) => setRule(i, { do: e.target.value })}>
+            <select aria-label={t('bots.rules.thenN', { n: i + 1 })} value={r.do} onChange={(e) => setRule(i, { do: e.target.value })}>
               {catalog.actions.map((id) => <option key={id} value={id}>{t(`bots.do.${id}`)}</option>)}
             </select>
-            <button type="button" className="btn" onClick={() => setRules(rules.filter((_, j) => j !== i))}>{t('bots.rules.remove')}</button>
+            <button type="button" className="btn" aria-label={t('bots.rules.removeN', { n: i + 1 })} onClick={() => setRules(rules.filter((_, j) => j !== i))}>{t('bots.rules.remove')}</button>
           </div>
         ))}
         <button
           type="button" className="btn" disabled={rules.length >= catalog.max_rules}
-          onClick={() => setRules([...rules, { when: catalog.triggers[0] ?? '', do: catalog.actions[0] ?? '' }])}
+          onClick={() => setRules([...rules, nextPair()])}
         >
           {t('bots.rules.add')}
         </button>
+        {duplicate && <p role="alert" className="error">{t('bots.rules.duplicate')}</p>}
         {rules.length >= catalog.max_rules && <p className="muted">{t('bots.rules.limit')}</p>}
       </div>
       <BotCardView bot={{ ...draft, name: draft.name.trim() || ' ' }} />
       {err && <p role="alert" className="error wrap">{err}</p>}
       <div className="row">
-        <button type="button" className="btn primary" disabled={busy || !draft.name.trim()} onClick={save}>{t('bots.save')}</button>
+        <button type="button" className="btn primary" disabled={busy || duplicate || !draft.name.trim()} onClick={save}>{t('bots.save')}</button>
         <button type="button" className="btn" onClick={onCancel}>{t('bots.cancel')}</button>
       </div>
     </section>

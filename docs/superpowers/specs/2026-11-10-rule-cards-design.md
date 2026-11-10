@@ -47,7 +47,7 @@ Anti-goals (a failure even if it technically works)
 
 | id | kind | effect |
 |---|---|---|
-| `counter_accuse` | statement | add: "The players at seats [..] voted for you last round. Voice suspicion toward them in the language of the statement, without revealing your word." Needs `accused`-style data, so it applies only when the latest reveal has voters for this bot; otherwise the card is skipped. |
+| `counter_accuse` | statement | add: "The players at seats [..] voted for you in the last vote. Voice suspicion toward them in the language of the statement, without revealing your word." Needs `accused`-style data, so it applies only when the latest reveal has voters for this bot; otherwise the card is skipped. |
 | `copy_previous` | statement | add: "Stay as close as possible in meaning to the previous speaker's clue." Skipped when nobody has spoken yet. |
 | `go_vague` | statement | add: "Make this clue vaguer and safer than usual, naming no distinguishing detail." |
 | `vote_accuser` | vote | vote for a player who voted for this bot in the latest reveal and is a legal target now (random among them). |

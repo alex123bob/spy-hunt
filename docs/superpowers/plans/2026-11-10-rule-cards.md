@@ -28,7 +28,7 @@
   - `late_game`: `round >= max_rounds - 1`, where `max_rounds` is a new `public_view` field from the room config.
   - Stage is 1 when the phase is `tiebreak_describe` or `revote`, else 0. In a vote phase `first_to_speak` and `last_to_speak` are never true.
 - Action semantics:
-  - `counter_accuse` (statement): applies only if the latest reveal has voters against this bot; adds one sentence naming those voters **by seat number only**, never by name: "The players at seats [<seats>] voted for you last round. Voice suspicion toward them in the language of the statement, without revealing your word."
+  - `counter_accuse` (statement): applies only if the latest reveal has voters against this bot; adds one sentence naming those voters **by seat number only**, never by name: "The players at seats [<seats>] voted for you in the last vote. Voice suspicion toward them in the language of the statement, without revealing your word."
   - `copy_previous` (statement): skipped when nobody has spoken in the current round and stage; adds "Stay as close as possible in meaning to the previous speaker's clue."
   - `go_vague` (statement): adds "Make this clue vaguer and safer than usual, naming no distinguishing detail."
   - `vote_accuser` (vote): a seat from the latest reveal's voters against this bot that is in `valid_targets`, chosen at random among them; none valid means the card is skipped.
@@ -100,7 +100,7 @@
     - `test_first_to_speak` (no statements this round: true; one statement: false; a statement from an earlier round does not count); `test_last_to_speak_only_in_stage_zero_describe` (all three others spoke: true; one missing: false; tiebreak phase: false; vote phase: false).
     - `test_after_elimination_and_late_game` (`late_game` true at `round == max_rounds - 1`, false below; missing `max_rounds` gives false).
     - `test_holds_unknown_id_is_false`.
-    - `test_counter_accuse_names_seats_only`: with accusers `(0, 2)`, the line is exactly `"The players at seats [0, 2] voted for you last round. Voice suspicion toward them in the language of the statement, without revealing your word."`; no name from `view["players"]` appears even when a name looks like an instruction; without accusers no line.
+    - `test_counter_accuse_names_seats_only`: with accusers `(0, 2)`, the line is exactly `"The players at seats [0, 2] voted for you in the last vote. Voice suspicion toward them in the language of the statement, without revealing your word."`; no name from `view["players"]` appears even when a name looks like an instruction; without accusers no line.
     - `test_copy_previous_skipped_when_nobody_spoke`, `test_go_vague_line_exact_text`; `test_statement_lines_order_and_cap` (3 holding rules give 3 lines in list order; vote actions and unknown ids give none).
     - `test_vote_accuser_picks_a_legal_accuser`: accusers `(0, 2)`, `valid_targets=[2, 3]` returns `2`; `valid_targets=[3]` returns `None`; self never returned; a seeded `random.Random` stub proves `rng.choice` is used for several candidates.
     - `test_vote_leader_needs_single_legal_leader`: leader in targets returns it; leader == my seat, a tie, or leader not in targets returns `None`.

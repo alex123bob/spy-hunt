@@ -10,8 +10,8 @@ test('a player dresses up a bot, shares its page, and plays it in a room', async
   await owner.getByRole('radio', { name: 'Metaphor' }).click()
   await owner.getByRole('radio', { name: 'Ends with a question' }).click()
   await owner.getByRole('button', { name: 'Add rule' }).click()
-  await owner.getByLabel('When', { exact: true }).selectOption({ label: 'I am accused' })
-  await owner.getByLabel('Then', { exact: true }).selectOption({ label: 'vote for who voted for me' })
+  await owner.getByLabel('When, rule 1', { exact: true }).selectOption({ label: 'I am accused' })
+  await owner.getByLabel('Then, rule 1', { exact: true }).selectOption({ label: 'vote for who voted for me' })
 
   const created = owner.waitForResponse((r) => r.url().endsWith('/bots') && r.request().method() === 'POST')
   await owner.getByRole('button', { name: 'Save' }).click()

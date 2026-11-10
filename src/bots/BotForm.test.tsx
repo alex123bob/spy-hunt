@@ -26,8 +26,8 @@ beforeEach(() => {
 test('add appends a row with first options and shows the preview line', () => {
   ui()
   add()
-  expect(screen.getByLabelText('When')).toHaveValue('accused')
-  expect(screen.getByLabelText('Then')).toHaveValue('counter_accuse')
+  expect(screen.getByLabelText('When, rule 1')).toHaveValue('accused')
+  expect(screen.getByLabelText('Then, rule 1')).toHaveValue('counter_accuse')
   expect(screen.getByText('When I am accused → counter-accuse')).toBeInTheDocument()
 })
 
@@ -41,8 +41,8 @@ test('add is disabled at the limit with a hint', () => {
 test('changing selects updates the preview', () => {
   ui()
   add()
-  fireEvent.change(screen.getByLabelText('When'), { target: { value: 'late_game' } })
-  fireEvent.change(screen.getByLabelText('Then'), { target: { value: 'go_vague' } })
+  fireEvent.change(screen.getByLabelText('When, rule 1'), { target: { value: 'late_game' } })
+  fireEvent.change(screen.getByLabelText('Then, rule 1'), { target: { value: 'go_vague' } })
   expect(screen.getByText('When it is late in the game → go vague')).toBeInTheDocument()
 })
 
@@ -50,23 +50,23 @@ test('removing the middle row keeps the others and save sends rules in order', a
   ui()
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Zed' } })
   add(); add(); add()
-  const whens = screen.getAllByLabelText('When')
+  const whens = screen.getAllByLabelText(/^When, rule/)
   fireEvent.change(whens[0], { target: { value: 'accused' } })
   fireEvent.change(whens[1], { target: { value: 'late_game' } })
   fireEvent.change(whens[2], { target: { value: 'after_elimination' } })
-  fireEvent.click(screen.getAllByRole('button', { name: 'Remove rule' })[1])
-  expect(screen.getAllByLabelText('When').map((s) => (s as HTMLSelectElement).value)).toEqual(['accused', 'after_elimination'])
+  fireEvent.click(screen.getByRole('button', { name: 'Remove rule 2' }))
+  expect(screen.getAllByLabelText(/^When, rule/).map((s) => (s as HTMLSelectElement).value)).toEqual(['accused', 'after_elimination'])
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(createBot).toHaveBeenCalled())
   expect(vi.mocked(createBot).mock.calls[0]![0]!.outfit?.rules).toEqual([
-    { when: 'accused', do: 'counter_accuse' }, { when: 'after_elimination', do: 'counter_accuse' },
+    { when: 'accused', do: 'counter_accuse' }, { when: 'after_elimination', do: 'vote_leader' },
   ])
 })
 
 test('editing prefilled rules saves them', async () => {
   ui(bot({ ...base, rules: [{ when: 'late_game', do: 'go_vague' }] }))
-  expect(screen.getAllByLabelText('When')).toHaveLength(1)
-  expect(screen.getByLabelText('When')).toHaveValue('late_game')
+  expect(screen.getAllByLabelText(/^When, rule/)).toHaveLength(1)
+  expect(screen.getByLabelText('When, rule 1')).toHaveValue('late_game')
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(updateBot).toHaveBeenCalled())
   expect(vi.mocked(updateBot).mock.calls[0]![1]!.outfit?.rules).toEqual([{ when: 'late_game', do: 'go_vague' }])
@@ -74,7 +74,7 @@ test('editing prefilled rules saves them', async () => {
 
 test('outfit without rules starts empty', async () => {
   ui(bot(base))
-  expect(screen.queryByLabelText('When')).toBeNull()
+  expect(screen.queryByLabelText('When, rule 1')).toBeNull()
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(updateBot).toHaveBeenCalled())
   expect(vi.mocked(updateBot).mock.calls[0]![1]!.outfit?.rules).toEqual([])
@@ -85,5 +85,37 @@ test('bad_outfit error is shown', async () => {
   ui()
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Zed' } })
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-  expect(await screen.findByRole('alert')).toHaveTextContent('duplicate rule')
+  expect(await screen.findByRole('alert')).toHaveTextContent('Those rules are not valid.')
+})
+
+const pairs = () => screen.getAllByLabelText(/^When, rule/).map((w, i) =>
+  [(w as HTMLSelectElement).value, (screen.getByLabelText(`Then, rule ${i + 1}`) as HTMLSelectElement).value])
+
+test('two Add clicks give two different pairs', () => {
+  ui()
+  add(); add()
+  expect(pairs()).toEqual([['accused', 'counter_accuse'], ['accused', 'go_vague']])
+})
+
+test('duplicate pair shows a message and disables Save; changing one resolves it', () => {
+  ui()
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Zed' } })
+  add(); add()
+  fireEvent.change(screen.getByLabelText('Then, rule 2'), { target: { value: 'counter_accuse' } })
+  expect(screen.getByText('Two rules are the same. Change or remove one.')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled()
+  fireEvent.change(screen.getByLabelText('Then, rule 2'), { target: { value: 'go_vague' } })
+  expect(screen.queryByText('Two rules are the same. Change or remove one.')).toBeNull()
+  expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled()
+})
+
+test('bad_outfit shows a translated message in zh-Hans', async () => {
+  setLang('zh-Hans')
+  vi.mocked(createBot).mockRejectedValue(new ApiError(400, 'bad_outfit', 'bad rule'))
+  ui()
+  fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Zed' } })
+  fireEvent.click(screen.getByRole('button', { name: '保存' }))
+  const alert = await screen.findByRole('alert')
+  expect(alert).toHaveTextContent('这些规则无效。')
+  expect(alert).not.toHaveTextContent('bad rule')
 })
