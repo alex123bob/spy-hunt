@@ -14,7 +14,7 @@ const catalog: BotCatalog = {
 const rec = { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }
 const bot = (outfit: object): BotCard => ({ id: 'abcdefgh', name: 'Bo', avatar: { emoji: '🦊', color: '#ff6b6b' }, outfit, record: rec, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false } as BotCard)
 const base = { voice: 'cheerful', style: 'concrete', quirk: 'question' }
-const ui = (initial?: BotCard) => render(<BotForm initial={initial} catalog={catalog} onSaved={() => {}} onCancel={() => {}} />)
+const ui = (initial?: BotCard, remix?: BotCard) => render(<BotForm initial={initial} remix={remix} catalog={catalog} onSaved={() => {}} onCancel={() => {}} />)
 const add = () => fireEvent.click(screen.getByRole('button', { name: 'Add rule' }))
 
 beforeEach(() => {
@@ -136,4 +136,39 @@ test('a rejected save shows mapped text, a network failure the network text', as
   vi.mocked(createBot).mockRejectedValueOnce(new ApiError(0, 'network', 'Network error'))
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Cannot reach the server. Check your connection.'))
+})
+
+test('remix starts with an empty name and the copied outfit, and sends remix_of', async () => {
+  const src = { ...bot({ ...base, rules: [{ when: 'late_game', do: 'go_vague' }] }), id: 'abc12345', name: 'Source' }
+  ui(undefined, src)
+  expect(screen.getByLabelText('Name')).toHaveValue('')
+  expect(screen.getByLabelText('When, rule 1')).toHaveValue('late_game')
+  expect(screen.getByRole('radio', { name: 'Cheerful' })).toHaveAttribute('aria-checked', 'true')
+  expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled()
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: ' Zed ' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(createBot).toHaveBeenCalled())
+  const sent = vi.mocked(createBot).mock.calls[0]![0]!
+  expect(sent.remix_of).toBe('abc12345')
+  expect(sent.name).toBe('Zed')
+  expect(sent.listed).toBe(true)
+  expect(sent.outfit?.rules).toEqual([{ when: 'late_game', do: 'go_vague' }])
+})
+
+test('listed checkbox defaults checked and unchecking sends false', async () => {
+  ui()
+  const box = screen.getByRole('checkbox', { name: 'Show on the top bots board' })
+  expect(box).toBeChecked()
+  fireEvent.click(box)
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Zed' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(createBot).toHaveBeenCalled())
+  const sent = vi.mocked(createBot).mock.calls[0]![0]!
+  expect(sent.listed).toBe(false)
+  expect(sent.remix_of).toBeUndefined()
+})
+
+test('editing a bot with listed false shows it unchecked', () => {
+  ui(bot({ ...base, rules: [] }))
+  expect(screen.getByRole('checkbox', { name: 'Show on the top bots board' })).not.toBeChecked()
 })

@@ -27,19 +27,30 @@ function Group({ label, children }: { label: string; children: React.ReactNode }
   )
 }
 
-export function BotForm({ initial, catalog, onSaved, onCancel }: {
+export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
   initial?: BotCard
+  remix?: BotCard
   catalog: BotCatalog
   onSaved: (bot: BotCard) => void
   onCancel: () => void
 }) {
-  const [draft, setDraft] = useState<BotDraft>(() => initial
-    ? { name: initial.name, avatar: { ...initial.avatar }, outfit: { ...initial.outfit, rules: Array.isArray(initial.outfit.rules) ? initial.outfit.rules.map((r) => ({ ...r })) : [] } }
-    : {
-        name: '',
-        avatar: { emoji: catalog.emojis[0] ?? '', color: catalog.colors[0] ?? '' },
-        outfit: { voice: catalog.voices[0] ?? '', style: catalog.styles[0] ?? '', quirk: catalog.quirks[0] ?? '', rules: [] },
-      })
+  const [draft, setDraft] = useState<BotDraft>(() => {
+    const src = initial ?? remix
+    if (src) {
+      return {
+        name: initial ? initial.name : '',
+        avatar: { ...src.avatar },
+        outfit: { ...src.outfit, rules: Array.isArray(src.outfit.rules) ? src.outfit.rules.map((r) => ({ ...r })) : [] },
+        listed: initial ? initial.listed : true,
+      }
+    }
+    return {
+      name: '',
+      avatar: { emoji: catalog.emojis[0] ?? '', color: catalog.colors[0] ?? '' },
+      outfit: { voice: catalog.voices[0] ?? '', style: catalog.styles[0] ?? '', quirk: catalog.quirks[0] ?? '', rules: [] },
+      listed: true,
+    }
+  })
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
 
@@ -68,7 +79,7 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
     setBusy(true)
     setErr('')
     try {
-      onSaved(initial ? await updateBot(initial.id, body) : await createBot(body))
+      onSaved(initial ? await updateBot(initial.id, body) : await createBot(remix ? { ...body, remix_of: remix.id } : body))
     } catch (e) {
       setErr(e instanceof ApiError ? errorText(e) : t('bots.saveError'))
       setBusy(false)
@@ -119,6 +130,10 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
         {duplicate && <p role="alert" className="error">{t('bots.rules.duplicate')}</p>}
         {rules.length >= catalog.max_rules && <p className="muted">{t('bots.rules.limit')}</p>}
       </div>
+      <label className="row">
+        <input type="checkbox" checked={draft.listed ?? true} onChange={(e) => setDraft({ ...draft, listed: e.target.checked })} />
+        <span>{t('bots.listed')}</span>
+      </label>
       <BotCardView bot={{ name: draft.name.trim() || ' ', avatar: draft.avatar, outfit: draft.outfit }} />
       {err && <p role="alert" className="error wrap">{err}</p>}
       <div className="row">

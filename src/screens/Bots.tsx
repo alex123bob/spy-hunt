@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { errorText } from '../api/errors'
 import type { BotCard, BotCatalog } from '../api/types'
-import { deleteBot, getCatalog, listMyBots } from '../bots/api'
+import { deleteBot, getBotCard, getCatalog, listMyBots } from '../bots/api'
 import { BotCardView } from '../bots/BotCardView'
 import { BotForm } from '../bots/BotForm'
 import { t, useLang } from '../i18n'
 
 const MAX_BOTS = 3
 
+type Remix = { kind: 'none' } | { kind: 'loading' } | { kind: 'denied' } | { kind: 'ok'; card: BotCard }
 type Load = { kind: 'loading' } | { kind: 'error' } | { kind: 'ok'; bots: BotCard[]; catalog: BotCatalog }
 
 export function Bots() {
@@ -17,6 +18,31 @@ export function Bots() {
   const [form, setForm] = useState<{ bot?: BotCard } | null>(null)
   const [confirming, setConfirming] = useState('')
   const [err, setErr] = useState('')
+  const [params, setParams] = useSearchParams()
+  const remixId = params.get('remix') ?? ''
+  const [remix, setRemix] = useState<Remix>({ kind: 'none' })
+  const count = load.kind === 'ok' ? load.bots.length : -1
+  const canRemix = count >= 0 && count < MAX_BOTS
+
+  useEffect(() => {
+    if (!remixId || !canRemix) {
+      setRemix({ kind: 'none' })
+      return
+    }
+    let live = true
+    setRemix({ kind: 'loading' })
+    getBotCard(remixId).then(
+      (card) => live && setRemix(card.remixable ? { kind: 'ok', card } : { kind: 'denied' }),
+      () => live && setRemix({ kind: 'denied' }),
+    )
+    return () => {
+      live = false
+    }
+  }, [remixId, canRemix])
+
+  const endRemix = () => {
+    if (remixId) setParams({}, { replace: true })
+  }
 
   const fetchAll = useCallback(() => {
     setLoad({ kind: 'loading' })
@@ -49,6 +75,7 @@ export function Bots() {
   const saved = (bot: BotCard) => {
     setBots((bs) => (bs.some((b) => b.id === bot.id) ? bs.map((b) => (b.id === bot.id ? bot : b)) : [...bs, bot]))
     setForm(null)
+    endRemix()
   }
 
   return (
@@ -79,8 +106,11 @@ export function Bots() {
             {t('bots.new')}
           </button>
           {load.bots.length >= MAX_BOTS && <p className="muted">{t('bots.limit')}</p>}
-          {form && (
-            <BotForm key={form.bot?.id ?? 'new'} initial={form.bot} catalog={load.catalog} onSaved={saved} onCancel={() => setForm(null)} />
+          {remixId && remix.kind === 'denied' && <p role="alert" className="error">{t('bots.remixNotAllowed')}</p>}
+          {form ? (
+            <BotForm key={form.bot?.id ?? 'new'} initial={form.bot} catalog={load.catalog} onSaved={saved} onCancel={() => { setForm(null); endRemix() }} />
+          ) : remixId && remix.kind === 'ok' && (
+            <BotForm key={`remix-${remix.card.id}`} remix={remix.card} catalog={load.catalog} onSaved={saved} onCancel={endRemix} />
           )}
         </>
       )}

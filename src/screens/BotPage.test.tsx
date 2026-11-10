@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { BotPage } from './BotPage'
 import { ApiError } from '../api/client'
 import type { BotCard } from '../api/types'
@@ -16,9 +16,13 @@ const card = (over: Partial<BotCard> = {}): BotCard => ({
   outfit: { voice: 'pirate', style: 'metaphor', quirk: 'question', rules: [] },
   record: { games: 12, wins: 7, spy_games: 5, spy_wins: 3 }, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false, ...over,
 })
+function Where() {
+  const l = useLocation()
+  return <p>at {l.pathname}{l.search}</p>
+}
 const tree = (
   <MemoryRouter initialEntries={['/bot/abc12345']}>
-    <Routes><Route path="/bot/:id" element={<BotPage />} /></Routes>
+    <Routes><Route path="/bot/:id" element={<BotPage />} /><Route path="/bots" element={<Where />} /></Routes>
   </MemoryRouter>
 )
 
@@ -89,4 +93,30 @@ test('shows the rule lines', async () => {
   vi.mocked(getBotCard).mockResolvedValue(card({ outfit: { voice: 'pirate', style: 'metaphor', quirk: 'question', rules: [{ when: 'accused', do: 'go_vague' }] } }))
   render(tree)
   expect(await screen.findByText('When I am accused → go vague')).toBeInTheDocument()
+})
+
+test('Remix shows for a non-owner and goes to the remix form', async () => {
+  render(tree)
+  fireEvent.click(await screen.findByRole('button', { name: 'Remix' }))
+  expect(await screen.findByText('at /bots?remix=abc12345')).toBeInTheDocument()
+})
+
+test('Remix is absent for the owner and for non-remixable bots', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([card()])
+  const { unmount } = render(tree)
+  await screen.findByRole('link', { name: 'Edit' })
+  expect(screen.queryByRole('button', { name: 'Remix' })).toBeNull()
+  unmount()
+  vi.mocked(listMyBots).mockResolvedValue([])
+  vi.mocked(getBotCard).mockResolvedValue(card({ remixable: false }))
+  render(tree)
+  await screen.findByText('Captain Pip')
+  expect(screen.queryByRole('button', { name: 'Remix' })).toBeNull()
+})
+
+test('with 3 bots the limit text replaces Remix', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([card({ id: 'x1' }), card({ id: 'x2' }), card({ id: 'x3' })])
+  render(tree)
+  expect(await screen.findByText('You can have up to 3 bots.')).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Remix' })).toBeNull()
 })

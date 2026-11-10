@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import type { BotCard } from '../api/types'
 import { getBotCard, listMyBots } from '../bots/api'
@@ -15,19 +15,26 @@ export function BotPage() {
   useLang()
   const [load, setLoad] = useState<Load>({ kind: 'loading' })
   const [mine, setMine] = useState(false)
+  const [count, setCount] = useState(0)
+  const navigate = useNavigate()
   const [shareState, setShareState] = useState('')
 
   useEffect(() => {
     let live = true
     setLoad({ kind: 'loading' })
     setMine(false)
+    setCount(0)
     getBotCard(id).then(
       (bot) => live && setLoad({ kind: 'ok', bot }),
       (e) => live && setLoad({ kind: e instanceof ApiError && e.status === 404 ? 'notFound' : 'error' }),
     )
     if (getSession().playerId) {
       listMyBots().then(
-        (bots) => live && setMine(bots.some((b) => b.id === id)),
+        (bots) => {
+          if (!live) return
+          setMine(bots.some((b) => b.id === id))
+          setCount(bots.length)
+        },
         () => {},
       )
     }
@@ -56,6 +63,9 @@ export function BotPage() {
       <BotCardView bot={load.bot} />
       <button type="button" className="btn" onClick={share}>{t('bots.copyLink')}</button>
       {shareState && <p role="status" className="muted center">{shareState}</p>}
+      {!mine && load.bot.remixable && (count >= 3
+        ? <p className="muted center">{t('bots.limit')}</p>
+        : <button type="button" className="btn primary" onClick={() => navigate(`/bots?remix=${load.bot.id}`)}>{t('bots.remix')}</button>)}
       {mine && <Link className="btn" to="/bots">{t('bots.edit')}</Link>}
       <Link className="btn center" to="/top">{t('top.title')}</Link>
       <Link className="btn center" to="/">{t('bots.home')}</Link>

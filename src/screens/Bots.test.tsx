@@ -3,11 +3,11 @@ import { MemoryRouter } from 'react-router-dom'
 import { Bots } from './Bots'
 import { ApiError } from '../api/client'
 import type { BotCard, BotCatalog } from '../api/types'
-import { createBot, deleteBot, getCatalog, listMyBots, updateBot } from '../bots/api'
+import { createBot, deleteBot, getBotCard, getCatalog, listMyBots, updateBot } from '../bots/api'
 import { setLang } from '../i18n'
 
 vi.mock('../bots/api', () => ({
-  getCatalog: vi.fn(), listMyBots: vi.fn(), createBot: vi.fn(), updateBot: vi.fn(), deleteBot: vi.fn(),
+  getCatalog: vi.fn(), listMyBots: vi.fn(), createBot: vi.fn(), getBotCard: vi.fn(), updateBot: vi.fn(), deleteBot: vi.fn(),
 }))
 
 const catalog: BotCatalog = {
@@ -29,6 +29,7 @@ beforeEach(() => {
   vi.mocked(getCatalog).mockReset().mockResolvedValue(catalog)
   vi.mocked(listMyBots).mockReset().mockResolvedValue([a, b])
   vi.mocked(createBot).mockReset()
+  vi.mocked(getBotCard).mockReset()
   vi.mocked(updateBot).mockReset()
   vi.mocked(deleteBot).mockReset().mockResolvedValue(undefined)
 })
@@ -70,7 +71,7 @@ test('save creates the bot and shows it', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(createBot).toHaveBeenCalledWith({
     name: 'Zed', avatar: { emoji: '🐸', color: '#222222' },
-    outfit: { voice: 'cheerful', style: 'vague', quirk: 'question', rules: [] },
+    outfit: { voice: 'cheerful', style: 'vague', quirk: 'question', rules: [] }, listed: true,
   }))
   expect(await screen.findByText('Zed')).toBeInTheDocument()
   expect(screen.queryByLabelText('Name')).toBeNull()
@@ -86,7 +87,7 @@ test('edit prefills and saves with updateBot', async () => {
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alpha2' } })
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(updateBot).toHaveBeenCalledWith('aaaaaaaa', {
-    name: 'Alpha2', avatar: a.avatar, outfit: a.outfit,
+    name: 'Alpha2', avatar: a.avatar, outfit: a.outfit, listed: false,
   }))
   expect(await screen.findByText('Alpha2')).toBeInTheDocument()
 })
@@ -137,4 +138,46 @@ test('a failed list shows an error and retry', async () => {
   expect(await screen.findByRole('alert')).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
   expect(await screen.findByText('Alpha')).toBeInTheDocument()
+})
+
+const remixTree = <MemoryRouter initialEntries={['/bots?remix=abc12345']}><Bots /></MemoryRouter>
+const src = { ...mk('abc12345', 'Source'), outfit: { voice: 'cheerful', style: 'concrete', quirk: 'question', rules: [{ when: 'accused', do: 'go_vague' }] } }
+
+test('?remix opens the prefilled form', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([a])
+  vi.mocked(getBotCard).mockResolvedValue(src)
+  render(remixTree)
+  expect(await screen.findByLabelText('Name')).toHaveValue('')
+  expect(getBotCard).toHaveBeenCalledWith('abc12345')
+  expect(screen.getByRole('radio', { name: 'Cheerful' })).toHaveAttribute('aria-checked', 'true')
+  expect(screen.getByLabelText('When, rule 1')).toHaveValue('accused')
+})
+
+test('?remix at 3 bots shows the limit and no form', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([a, b, mk('dddddddd', 'Gamma')])
+  vi.mocked(getBotCard).mockResolvedValue(src)
+  render(remixTree)
+  await screen.findByText('Alpha')
+  expect(screen.queryByLabelText('Name')).toBeNull()
+  expect(screen.getAllByText('You can have up to 3 bots.').length).toBeGreaterThan(0)
+})
+
+test('?remix with a missing or non-remixable bot shows not allowed', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([a])
+  vi.mocked(getBotCard).mockRejectedValue(new ApiError(404, 'not_found'))
+  const { unmount } = render(remixTree)
+  expect(await screen.findByText('This bot cannot be remixed.')).toBeInTheDocument()
+  expect(screen.queryByLabelText('Name')).toBeNull()
+  unmount()
+  vi.mocked(getBotCard).mockResolvedValue({ ...src, remixable: false })
+  render(remixTree)
+  expect(await screen.findByText('This bot cannot be remixed.')).toBeInTheDocument()
+  expect(screen.queryByLabelText('Name')).toBeNull()
+})
+
+test('?remix works for a visitor with no bots', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([])
+  vi.mocked(getBotCard).mockResolvedValue(src)
+  render(remixTree)
+  expect(await screen.findByLabelText('Name')).toBeInTheDocument()
 })
