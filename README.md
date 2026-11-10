@@ -67,4 +67,6 @@ Each guest can dress up to 3 bots at `/bots`: a name, an emoji avatar and colour
 Up to 3 rule cards per bot ("When I am accused → vote for who voted for me") add situational behaviour on top of the outfit.
 Every bot has a public page at `/bot/:id` showing its outfit and record (games, wins, times it fooled the table), which you can share by link.
 In a lobby, "Add my bot" seats one of your bots; the room keeps its own copy, so later edits or deletion never affect a running game.
+Anyone can remix a bot with the Remix button on its page: the form opens pre-filled, the copy credits "Remixed from X", and the original shows how many times it was remixed (counted once per guest).
+The board at `/top` ranks bots by ranked games, which need 3+ humans in the room; a bot needs 10 games to be a top winner and 5 as a spy, its ranking resets when its outfit changes, and owners can hide a bot from the board.
 Both routes are client-side, so the Nginx `try_files` fallback above already covers them.

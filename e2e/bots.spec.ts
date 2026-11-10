@@ -41,3 +41,32 @@ test('a player dresses up a bot, shares its page, and plays it in a room', async
   await owner.getByRole('button', { name: 'Start game' }).click()
   await expect(owner.getByTestId('screen-Table')).toBeVisible({ timeout: 30_000 })
 })
+
+test('a visitor remixes a bot and the top bots board starts empty', async ({ browser }) => {
+  const owner = await (await browser.newContext()).newPage()
+  await owner.goto('/bots')
+  await owner.getByRole('button', { name: 'New bot' }).click()
+  await owner.getByLabel('Name', { exact: true }).fill('Mochi')
+  await owner.getByRole('radio', { name: 'Pirate' }).click()
+  const created = owner.waitForResponse((r) => r.url().endsWith('/bots') && r.request().method() === 'POST')
+  await owner.getByRole('button', { name: 'Save' }).click()
+  const id = ((await (await created).json()) as { id: string }).id
+
+  const visitor = await (await browser.newContext()).newPage()
+  await visitor.goto(`/bot/${id}`)
+  await visitor.getByRole('button', { name: 'Remix' }).click()
+  await expect(visitor.getByRole('radio', { name: 'Pirate' })).toBeChecked()
+  await visitor.getByLabel('Name', { exact: true }).fill('Mochi Jr')
+  await visitor.getByRole('button', { name: 'Save' }).click()
+  await expect(visitor.getByTestId('bot-card')).toContainText('Remixed from Mochi')
+
+  await owner.goto(`/bot/${id}`)
+  await expect(owner.getByText('Remixed 1 times')).toBeVisible()
+
+  await visitor.goto('/top')
+  const empty = 'No ranked bots yet. Play a room with 3 or more people to get on the board.'
+  await expect(visitor.getByText('Ranked games need 3+ people in the room.')).toBeVisible()
+  await expect(visitor.getByText(empty)).toBeVisible()
+  await visitor.getByRole('tab', { name: 'Best spies' }).click()
+  await expect(visitor.getByText(empty)).toBeVisible()
+})
