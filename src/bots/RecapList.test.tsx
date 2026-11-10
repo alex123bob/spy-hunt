@@ -19,7 +19,7 @@ test('renders nothing for an empty list', () => {
 
 test('spy that won and survived', () => {
   show([base])
-  expect(screen.getByText('Mochi was the spy in a 5-bot match, accused 2 times, survived, fooled the table.')).toBeInTheDocument()
+  expect(screen.getByText('Mochi was the spy in a 5-bot match, votes against: 2, survived, fooled the table.')).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'See the match' })).toHaveAttribute('href', '/match/m1')
 })
 

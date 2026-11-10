@@ -105,7 +105,7 @@ test('arena copy exists in both languages', () => {
     "{name} 在一场 5 机器人对局中是平民"
   ],
   "arena.recap.accused": [
-    "accused {n} times",
+    "votes against: {n}",
     "被投票指认 {n} 次"
   ],
   "arena.recap.survived": [

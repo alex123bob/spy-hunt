@@ -25,7 +25,7 @@ const match = (): MatchView => ({
     {
       round: 2,
       statements: [{ seat: 0, stage: 0, text: 'a2' }, { seat: 2, stage: 1, text: 't2' }, { seat: 1, stage: 1, text: 't1' }],
-      votes: [{ voter: 2, target: 1, stage: 1 }],
+      votes: [{ voter: 2, target: 0, stage: 0 }, { voter: 2, target: 1, stage: 1 }],
       eliminated: 1,
     },
   ],
@@ -48,8 +48,8 @@ test('renders rounds in order and the reveal last', async () => {
   expect(await screen.findByRole('heading', { name: 'Arena match' })).toBeInTheDocument()
   expect(getMatch).toHaveBeenCalledWith('m1')
   const text = container.textContent ?? ''
-  const order = ['Round 1', 'Alice: alice says', 'Bob: bob says', 'Alice voted for Bob', 'Bob did not vote',
-    'Nobody was voted out.', 'Round 2', 'Bob: t1', 'Cy: t2', 'Cy voted for Bob', 'Bob was voted out.', 'Reveal']
+  const order = ['Round 1', 'Bob: bob says', 'Alice: alice says', 'Alice voted for Bob', 'Bob did not vote',
+    'Nobody was voted out.', 'Round 2', 'Alice: a2', 'Cy voted for Alice', 'Tiebreak', 'Cy: t2', 'Bob: t1', 'Cy voted for Bob', 'Bob was voted out.', 'Reveal']
   const idx = order.map((s) => text.indexOf(s))
   expect(idx.every((i) => i >= 0)).toBe(true)
   expect([...idx].sort((a, b) => a - b)).toEqual(idx)

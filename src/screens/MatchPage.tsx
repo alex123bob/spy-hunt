@@ -58,24 +58,24 @@ export function MatchPage() {
         ))}
       </div>
       {match.rounds.map((r) => {
-        const statements = [...r.statements].sort((a, b) => a.stage - b.stage || a.seat - b.seat)
-        const votes = [...r.votes].sort((a, b) => a.stage - b.stage || a.voter - b.voter)
-        const firstTie = statements.findIndex((s) => s.stage === 1)
+        const stages = [0, 1].filter((st) => r.statements.some((s) => s.stage === st) || r.votes.some((v) => v.stage === st))
         return (
           <section key={r.round}>
             <h3>{t('arena.match.round', { n: r.round })}</h3>
-            {statements.map((s, i) => (
-              <div key={`${s.seat}-${s.stage}`}>
-                {i === firstTie && <p className="muted">{t('arena.match.tiebreak')}</p>}
-                <p>{name(s.seat)}: {s.text}</p>
+            {stages.map((st) => (
+              <div key={st}>
+                {st === 1 && <p className="muted">{t('arena.match.tiebreak')}</p>}
+                {r.statements.filter((s) => s.stage === st).map((s) => (
+                  <p key={`${s.seat}-${s.stage}`}>{name(s.seat)}: {s.text}</p>
+                ))}
+                {r.votes.filter((v) => v.stage === st).map((v) => (
+                  <p key={`${v.voter}-${v.stage}`} className="muted">
+                    {v.target === null
+                      ? t('arena.match.abstain', { voter: name(v.voter) })
+                      : t('arena.match.vote', { voter: name(v.voter), target: name(v.target) })}
+                  </p>
+                ))}
               </div>
-            ))}
-            {votes.map((v) => (
-              <p key={`${v.voter}-${v.stage}`} className="muted">
-                {v.target === null
-                  ? t('arena.match.abstain', { voter: name(v.voter) })
-                  : t('arena.match.vote', { voter: name(v.voter), target: name(v.target) })}
-              </p>
             ))}
             <p>{r.eliminated === null ? t('arena.match.nobody') : t('arena.match.out', { name: name(r.eliminated) })}</p>
           </section>

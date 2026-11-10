@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Landing } from './Landing'
 import { setLang } from '../i18n'
@@ -49,6 +49,7 @@ test('shows the unseen recap count on the My bots card', async () => {
 test('shows no badge when nothing is unseen', async () => {
   renderLanding()
   await waitFor(() => expect(getRecaps).toHaveBeenCalled())
+  await act(async () => { await Promise.resolve() })
   expect(screen.queryByText(/new$/)).toBeNull()
 })
 
@@ -56,6 +57,7 @@ test('a recaps failure is silent', async () => {
   vi.mocked(getRecaps).mockRejectedValue(new Error('x'))
   renderLanding()
   await waitFor(() => expect(getRecaps).toHaveBeenCalled())
+  await act(async () => { await Promise.resolve() })
   expect(screen.queryByRole('alert')).toBeNull()
 })
 

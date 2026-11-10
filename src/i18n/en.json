@@ -243,7 +243,7 @@
   "arena.role.civilian": "Civilian",
   "arena.recap.spy": "{name} was the spy in a 5-bot match",
   "arena.recap.civilian": "{name} was a civilian in a 5-bot match",
-  "arena.recap.accused": "accused {n} times",
+  "arena.recap.accused": "votes against: {n}",
   "arena.recap.survived": "survived",
   "arena.recap.out": "voted out in round {n}",
   "arena.recap.fooled": "fooled the table",
