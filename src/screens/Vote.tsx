@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { request } from '../api/client'
+import { errorText } from '../api/errors'
 import type { Snapshot } from '../api/types'
 import { Avatar } from '../components/Avatar'
 import { Countdown } from '../components/Countdown'
@@ -28,7 +29,7 @@ export function Vote({ state, offset = 0 }: { state: Snapshot; offset?: number }
       await request('POST', `/rooms/${state.code}/vote`, { target_seat: target })
     } catch (e) {
       setPicked(null)
-      setErr((e as Error).message || t('error.generic'))
+      setErr(errorText(e))
     }
   }
 

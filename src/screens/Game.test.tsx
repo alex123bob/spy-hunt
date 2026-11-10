@@ -5,6 +5,7 @@ import { Vote } from './Vote'
 import { Countdown } from '../components/Countdown'
 import { setLang } from '../i18n'
 import { msg, player, snap } from '../test/fixtures'
+import { ApiError, request } from '../api/client'
 
 vi.mock('../api/client', async (orig) => {
   const m = await orig<typeof import('../api/client')>()
@@ -181,4 +182,22 @@ describe('reveal vote grouping', () => {
     expect(screen.getByText(/tie/i)).toHaveTextContent('P1, P2')
     expect(screen.getAllByText('● 1 vote')).toHaveLength(2)
   })
+})
+
+test('a rejected vote shows the mapped text, not the server text', async () => {
+  vi.mocked(request).mockRejectedValueOnce(new ApiError(409, 'not_member', 'English server text'))
+  const s = snap({ phase: 'vote', me: { seat: 0, is_host: true, my_word: 'river' }, players: [player(0), player(1), player(2)] })
+  render(<Vote state={s} />)
+  fireEvent.click(screen.getByRole('button', { name: 'P1' }))
+  expect(await screen.findByText('You are not in this room.')).toBeInTheDocument()
+  expect(screen.queryByText('English server text')).toBeNull()
+})
+
+test('a non-400 statement error shows the mapped text, not the server text', async () => {
+  vi.mocked(request).mockRejectedValueOnce(new ApiError(409, 'not_member', 'English server text'))
+  render(<Table state={snap({ current_speaker: 1 })} />)
+  fireEvent.change(screen.getByPlaceholderText('Describe your word…'), { target: { value: 'hi' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+  expect(await screen.findByText('You are not in this room.')).toBeInTheDocument()
+  expect(screen.queryByText('English server text')).toBeNull()
 })

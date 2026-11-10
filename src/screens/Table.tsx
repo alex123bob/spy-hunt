@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ApiError, request } from '../api/client'
+import { errorText } from '../api/errors'
 import type { Snapshot } from '../api/types'
 import { Avatar } from '../components/Avatar'
 import { Countdown } from '../components/Countdown'
@@ -41,7 +42,7 @@ export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot
       await request('POST', `/rooms/${state.code}/statement`, { text: v })
       setText('')
     } catch (e) {
-      setErr(e instanceof ApiError && e.status === 400 ? t('table.rejected') : (e as Error).message || t('error.generic'))
+      setErr(e instanceof ApiError && e.status === 400 ? t('table.rejected') : errorText(e))
     } finally {
       setBusy(false)
     }

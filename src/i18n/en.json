@@ -184,7 +184,6 @@
   "bots.rules.then": "Then",
   "bots.rules.limit": "Up to 3 rules.",
   "bots.rules.duplicate": "Two rules are the same. Change or remove one.",
-  "bots.rules.invalid": "Those rules are not valid.",
   "bots.rules.whenN": "When, rule {n}",
   "bots.rules.thenN": "Then, rule {n}",
   "bots.rules.removeN": "Remove rule {n}",

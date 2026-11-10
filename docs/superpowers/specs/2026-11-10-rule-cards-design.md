@@ -47,10 +47,10 @@ Anti-goals (a failure even if it technically works)
 
 | id | kind | effect |
 |---|---|---|
-| `counter_accuse` | statement | add: "The players at seats [..] voted for you in the last vote. Voice suspicion toward them in the language of the statement, without revealing your word." Needs `accused`-style data, so it applies only when the latest reveal has voters for this bot; otherwise the card is skipped. |
+| `counter_accuse` | statement | add: "The players at seats [..] voted for you in the last vote. Voice suspicion toward them in the language of the statement, without revealing your word." Needs `accused`-style data, so it applies only when the latest voted round (including its re-vote) has voters for this bot; otherwise the card is skipped. |
 | `copy_previous` | statement | add: "Stay as close as possible in meaning to the previous speaker's clue." Skipped when nobody has spoken yet. |
 | `go_vague` | statement | add: "Make this clue vaguer and safer than usual, naming no distinguishing detail." |
-| `vote_accuser` | vote | vote for a player who voted for this bot in the latest reveal and is a legal target now (random among them). |
+| `vote_accuser` | vote | vote for a player who voted for this bot in the latest voted round (including its re-vote) and is a legal target now (random among them). |
 | `vote_leader` | vote | vote for the seat with the most votes in the latest reveal if there is a single one, it is a legal target and not this bot. |
 
 Any `when` can pair with any `do` (`first_to_speak` and `last_to_speak` never hold in a vote phase, so with a vote action they never fire): a statement action is considered in describe phases, a vote action in vote phases. A card whose action cannot apply (no accusers, no previous speaker, no legal target) is skipped, in list order, and the next card is tried. Statement rules that hold are all applied (at most 3 sentences). For votes, the first applicable vote rule decides and the model is not called.
