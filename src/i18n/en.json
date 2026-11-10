@@ -137,7 +137,7 @@
   "bots.voice.grandma": "Grandma",
   "bots.voice.sleepy_cat": "Sleepy cat",
   "bots.voice.robot": "Robot",
-  "bots.slot.style": "Clue style",
+  "bots.slot.style": "Style",
   "bots.style.concrete": "Concrete",
   "bots.style.vague": "Vague",
   "bots.style.metaphor": "Metaphor",
@@ -150,5 +150,15 @@
   "bots.quirk.number": "Mentions a number",
   "bots.quirk.emoji": "Adds an emoji",
   "bots.quirk.honestly": "Says \"honestly\"",
-  "bots.quirk.color": "Mentions a colour"
+  "bots.quirk.color": "Mentions a colour",
+  "bots.line": "{label}: {value}",
+  "bots.record": "{games} games · {wins} wins",
+  "bots.fooled": "fooled the table {n} times",
+  "bots.copyLink": "Copy link",
+  "bots.edit": "Edit",
+  "bots.loading": "Loading…",
+  "bots.notFound": "Bot not found",
+  "bots.notFoundBody": "This bot does not exist or was deleted.",
+  "bots.error": "Could not load this bot.",
+  "bots.home": "Home"
 }

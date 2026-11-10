@@ -150,5 +150,15 @@
   "bots.quirk.number": "提到一个数字",
   "bots.quirk.emoji": "加一个表情",
   "bots.quirk.honestly": "爱说“老实说”",
-  "bots.quirk.color": "提到一种颜色"
+  "bots.quirk.color": "提到一种颜色",
+  "bots.line": "{label}：{value}",
+  "bots.record": "{games} 局 · {wins} 胜",
+  "bots.fooled": "骗过全桌 {n} 次",
+  "bots.copyLink": "复制链接",
+  "bots.edit": "编辑",
+  "bots.loading": "加载中…",
+  "bots.notFound": "找不到这个机器人",
+  "bots.notFoundBody": "这个机器人不存在或已被删除。",
+  "bots.error": "无法加载这个机器人。",
+  "bots.home": "首页"
 }
