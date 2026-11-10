@@ -1,4 +1,4 @@
-import { createBot, deleteBot, getBotCard, listMyBots, updateBot } from './api'
+import { createBot, deleteBot, getBotCard, getTopBots, listMyBots, updateBot } from './api'
 import { request } from '../api/client'
 import { ensureGuest } from '../state/session'
 
@@ -39,4 +39,15 @@ test('getBotCard encodes the id and needs no guest', async () => {
   await getBotCard('a b/c')
   expect(request).toHaveBeenCalledWith('GET', '/bots/a%20b%2Fc')
   expect(ensureGuest).not.toHaveBeenCalled()
+})
+
+test('getTopBots requests the kind and unwraps bots', async () => {
+  vi.mocked(request).mockResolvedValueOnce({ kind: 'spies', bots: [{ rank: 1, id: 'x' }] })
+  expect(await getTopBots('spies')).toEqual([{ rank: 1, id: 'x' }])
+  expect(request).toHaveBeenCalledWith('GET', '/bots/top?kind=spies')
+})
+
+test('getTopBots tolerates a body without bots', async () => {
+  vi.mocked(request).mockResolvedValueOnce({})
+  expect(await getTopBots('winners')).toEqual([])
 })

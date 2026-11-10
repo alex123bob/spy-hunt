@@ -219,5 +219,19 @@
   "bots.color.5b8cff": "蓝色",
   "bots.color.b07cff": "紫色",
   "lobby.fillHint": "至少需要 {min} 名玩家。开始时将补充 {n} 个机器人。",
-  "lobby.needMore": "至少需要 {min} 名玩家才能开始。"
+  "lobby.needMore": "至少需要 {min} 名玩家才能开始。",
+  "bots.remixedFrom": "改编自 {name}",
+  "bots.remixes": "被改编 {n} 次",
+  "bots.remix": "改编",
+  "bots.listed": "显示在机器人排行榜上",
+  "bots.remixNotAllowed": "这个机器人不能被改编。",
+  "top.title": "机器人排行榜",
+  "top.card": "机器人排行榜",
+  "top.winners": "最强赢家",
+  "top.spies": "最佳卧底",
+  "top.hint": "排名局需要房间里至少有 3 位真人。",
+  "top.empty": "还没有上榜的机器人。和 3 位以上的真人玩一局就能上榜。",
+  "top.row": "{rate}% · {games} 场排名局 · 被改编 {n} 次",
+  "top.open": "查看",
+  "top.error": "无法加载排行榜。"
 }

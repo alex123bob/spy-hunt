@@ -119,7 +119,7 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
         {duplicate && <p role="alert" className="error">{t('bots.rules.duplicate')}</p>}
         {rules.length >= catalog.max_rules && <p className="muted">{t('bots.rules.limit')}</p>}
       </div>
-      <BotCardView bot={{ ...draft, name: draft.name.trim() || ' ' }} />
+      <BotCardView bot={{ name: draft.name.trim() || ' ', avatar: draft.avatar, outfit: draft.outfit }} />
       {err && <p role="alert" className="error wrap">{err}</p>}
       <div className="row">
         <button type="button" className="btn primary" disabled={busy || duplicate || !draft.name.trim()} onClick={save}>{t('bots.save')}</button>

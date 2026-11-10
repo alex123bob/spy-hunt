@@ -27,7 +27,7 @@ function snap(isHost: boolean): Snapshot {
   }
 }
 
-const mine = (id: string, name = id) => ({ id, name, avatar: { emoji: '🦊', color: '#fff' }, outfit: { voice: 'dry', style: 'brief', quirk: 'emoji', rules: [] }, record: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 } })
+const mine = (id: string, name = id) => ({ id, name, avatar: { emoji: '🦊', color: '#fff' }, outfit: { voice: 'dry', style: 'brief', quirk: 'emoji', rules: [] }, record: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false })
 
 beforeEach(() => {
   setLang('en')

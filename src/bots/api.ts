@@ -1,5 +1,5 @@
 import { request } from '../api/client'
-import type { BotCard, BotCatalog, BotDraft } from '../api/types'
+import type { BotCard, BotCatalog, BotDraft, TopBot, TopKind } from '../api/types'
 import { ensureGuest } from '../state/session'
 
 export async function getCatalog(): Promise<BotCatalog> {
@@ -30,4 +30,9 @@ export async function deleteBot(id: string): Promise<void> {
 
 export async function getBotCard(id: string): Promise<BotCard> {
   return request<BotCard>('GET', `/bots/${encodeURIComponent(id)}`)
+}
+
+export async function getTopBots(kind: TopKind): Promise<TopBot[]> {
+  const r = await request<{ bots?: TopBot[] }>('GET', `/bots/top?kind=${kind}`)
+  return Array.isArray(r?.bots) ? r.bots : []
 }

@@ -12,7 +12,7 @@ const catalog: BotCatalog = {
   triggers: ['accused', 'late_game', 'after_elimination'], actions: ['counter_accuse', 'go_vague', 'vote_leader'], max_rules: 3,
 }
 const rec = { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }
-const bot = (outfit: object): BotCard => ({ id: 'abcdefgh', name: 'Bo', avatar: { emoji: '🦊', color: '#ff6b6b' }, outfit, record: rec } as BotCard)
+const bot = (outfit: object): BotCard => ({ id: 'abcdefgh', name: 'Bo', avatar: { emoji: '🦊', color: '#ff6b6b' }, outfit, record: rec, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false } as BotCard)
 const base = { voice: 'cheerful', style: 'concrete', quirk: 'question' }
 const ui = (initial?: BotCard) => render(<BotForm initial={initial} catalog={catalog} onSaved={() => {}} onCancel={() => {}} />)
 const add = () => fireEvent.click(screen.getByRole('button', { name: 'Add rule' }))

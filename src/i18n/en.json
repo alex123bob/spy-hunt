@@ -219,5 +219,19 @@
   "bots.color.5b8cff": "Blue",
   "bots.color.b07cff": "Purple",
   "lobby.fillHint": "At least {min} players are needed. {n} bot(s) will be added when you start.",
-  "lobby.needMore": "At least {min} players are needed to start."
+  "lobby.needMore": "At least {min} players are needed to start.",
+  "bots.remixedFrom": "Remixed from {name}",
+  "bots.remixes": "Remixed {n} times",
+  "bots.remix": "Remix",
+  "bots.listed": "Show on the top bots board",
+  "bots.remixNotAllowed": "This bot cannot be remixed.",
+  "top.title": "Top bots",
+  "top.card": "Top bots",
+  "top.winners": "Top winners",
+  "top.spies": "Best spies",
+  "top.hint": "Ranked games need 3+ people in the room.",
+  "top.empty": "No ranked bots yet. Play a room with 3 or more people to get on the board.",
+  "top.row": "{rate}% · {games} ranked games · remixed {n}×",
+  "top.open": "Open",
+  "top.error": "Could not load the board."
 }

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { Avatar as AvatarData, BotOutfit, BotRecord } from '../api/types'
 import { Avatar } from '../components/Avatar'
 import { t } from '../i18n'
@@ -7,6 +8,8 @@ export interface BotDraftPreview {
   avatar: AvatarData
   outfit: BotOutfit
   record?: BotRecord
+  remix_of?: { id: string; name: string } | null
+  remixes?: number
 }
 
 export function BotCardView({ bot }: { bot: BotDraftPreview }) {
@@ -18,6 +21,12 @@ export function BotCardView({ bot }: { bot: BotDraftPreview }) {
         <Avatar player={bot} />
         <strong className="wrap">{bot.name}</strong>
       </div>
+      {bot.remix_of && (
+        <p className="muted wrap">
+          <Link to={`/bot/${encodeURIComponent(bot.remix_of.id)}`}>{t('bots.remixedFrom', { name: bot.remix_of.name })}</Link>
+        </p>
+      )}
+      {(bot.remixes ?? 0) > 0 && <p className="muted">{t('bots.remixes', { n: bot.remixes ?? 0 })}</p>}
       {(['voice', 'style', 'quirk'] as const).map((slot) => (
         <p key={slot} className="wrap">
           {t('bots.line', { label: t(`bots.slot.${slot}`), value: t(`bots.${slot}.${bot.outfit[slot]}`) })}

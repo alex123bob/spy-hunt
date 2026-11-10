@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { BotCardView } from './BotCardView'
 import { setLang } from '../i18n'
 
@@ -24,4 +25,20 @@ test('Chinese rule line wraps', () => {
   setLang('zh-Hans')
   render(<BotCardView bot={{ ...base, outfit: { ...outfit, rules: [{ when: 'late_game', do: 'vote_leader' }] } }} />)
   expect(screen.getByText(/^当/).closest('.wrap')).not.toBeNull()
+})
+
+const plain = { ...base, outfit: { ...outfit, rules: [] } }
+
+test('shows remix credit link and count', () => {
+  setLang('en')
+  render(<MemoryRouter><BotCardView bot={{ ...plain, remix_of: { id: 'abc', name: 'Mochi' }, remixes: 3 }} /></MemoryRouter>)
+  expect(screen.getByRole('link', { name: 'Remixed from Mochi' }).getAttribute('href')).toBe('/bot/abc')
+  expect(screen.getByText('Remixed 3 times')).toBeTruthy()
+})
+
+test('shows no credit lines when not remixed', () => {
+  setLang('en')
+  render(<MemoryRouter><BotCardView bot={{ ...plain, remix_of: null, remixes: 0 }} /></MemoryRouter>)
+  render(<MemoryRouter><BotCardView bot={plain} /></MemoryRouter>)
+  expect(screen.queryByText(/Remixed/)).toBeNull()
 })

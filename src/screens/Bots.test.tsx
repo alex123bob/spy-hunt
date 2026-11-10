@@ -18,7 +18,7 @@ const catalog: BotCatalog = {
 const rec = { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }
 const mk = (id: string, name: string): BotCard => ({
   id, name, avatar: { emoji: '🐼', color: '#222222' },
-  outfit: { voice: 'dry', style: 'vague', quirk: 'agree', rules: [] }, record: rec,
+  outfit: { voice: 'dry', style: 'vague', quirk: 'agree', rules: [] }, record: rec, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false,
 })
 const a = mk('aaaaaaaa', 'Alpha')
 const b = mk('bbbbbbbb', 'Beta')

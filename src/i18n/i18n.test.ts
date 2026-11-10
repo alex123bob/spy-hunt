@@ -57,3 +57,11 @@ test('error codes, colour names and lobby hints exist in both languages', () => 
     expect(zh).toHaveProperty([k])
   }
 })
+
+test('remix and top copy exists in both languages', () => {
+  const keys = ['bots.remixedFrom', 'bots.remixes', 'bots.remix', 'bots.listed', 'bots.remixNotAllowed', 'top.title', 'top.card', 'top.winners', 'top.spies', 'top.hint', 'top.empty', 'top.row', 'top.open', 'top.error']
+  for (const k of keys) {
+    expect(en).toHaveProperty([k])
+    expect(zh).toHaveProperty([k])
+  }
+})

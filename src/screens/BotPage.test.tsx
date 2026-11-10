@@ -14,7 +14,7 @@ vi.mock('../daily/share', async (orig) => ({ ...(await orig<typeof import('../da
 const card = (over: Partial<BotCard> = {}): BotCard => ({
   id: 'abc12345', name: 'Captain Pip', avatar: { emoji: '🦊', color: '#f00' },
   outfit: { voice: 'pirate', style: 'metaphor', quirk: 'question', rules: [] },
-  record: { games: 12, wins: 7, spy_games: 5, spy_wins: 3 }, ...over,
+  record: { games: 12, wins: 7, spy_games: 5, spy_wins: 3 }, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false, ...over,
 })
 const tree = (
   <MemoryRouter initialEntries={['/bot/abc12345']}>
