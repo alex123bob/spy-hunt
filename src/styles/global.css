@@ -70,3 +70,7 @@ label { display: flex; flex-direction: column; gap: 6px; }
 .spy-panel { border: 1px solid var(--danger); }
 .panel.share { white-space: pre-wrap; margin: 0; font: inherit; }
 .vote-group { display: flex; flex-direction: column; gap: 2px; }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.picker .chip { min-width: 44px; min-height: 44px; padding: 10px; }
+.picker .swatch { width: 44px; padding: 0; border: 2px solid transparent; }
+.picker .swatch[aria-checked="true"] { border-color: var(--text); }

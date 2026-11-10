@@ -69,3 +69,9 @@ test('the daily card says done today once played', () => {
   expect(screen.getByText('Done today ✅')).toBeInTheDocument()
   expect(screen.queryByText("Play today's puzzle")).toBeNull()
 })
+
+test('My bots navigates to /bots', async () => {
+  renderLanding()
+  fireEvent.click(screen.getByRole('button', { name: /My bots/ }))
+  await waitFor(() => expect(screen.getByTestId('loc')).toHaveTextContent('/bots'))
+})

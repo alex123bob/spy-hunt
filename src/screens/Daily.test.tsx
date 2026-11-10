@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Daily } from './Daily'
 import { ApiError } from '../api/client'
 import type { DailyPuzzle, DailyResult, DailyState } from '../api/types'
@@ -174,3 +174,15 @@ test('a second wrong tap cannot repeat the first one', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Pip' }))
   expect(guessSpy).toHaveBeenCalledTimes(1)
 })
+
+test('the result offers to dress up a bot', async () => {
+  vi.mocked(getDaily).mockResolvedValue(state('done', 2))
+  render(
+    <MemoryRouter initialEntries={['/daily']}>
+      <Routes><Route path="/daily" element={<Daily />} /><Route path="*" element={<Loc />} /></Routes>
+    </MemoryRouter>,
+  )
+  fireEvent.click(await screen.findByRole('button', { name: 'Dress up a bot' }))
+  await waitFor(() => expect(screen.getByTestId('loc')).toHaveTextContent('/bots'))
+})
+function Loc() { return <div data-testid="loc">{useLocation().pathname}</div> }

@@ -160,5 +160,19 @@
   "bots.notFound": "找不到这个机器人",
   "bots.notFoundBody": "这个机器人不存在或已被删除。",
   "bots.error": "无法加载这个机器人。",
-  "bots.home": "首页"
+  "bots.home": "首页",
+  "bots.card": "我的机器人",
+  "daily.dressUp": "装扮机器人",
+  "bots.title": "我的机器人",
+  "bots.new": "新建机器人",
+  "bots.limit": "最多可以有 3 个机器人。",
+  "bots.delete": "删除",
+  "bots.confirmDelete": "确定删除？",
+  "bots.name": "名字",
+  "bots.emoji": "头像",
+  "bots.color": "颜色",
+  "bots.save": "保存",
+  "bots.cancel": "取消",
+  "bots.listError": "无法加载你的机器人。",
+  "bots.saveError": "无法保存这个机器人。"
 }

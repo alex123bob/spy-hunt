@@ -65,6 +65,9 @@ export function Landing() {
         <span className="muted">{played ? t('daily.doneToday') : t('daily.play')}</span>
         {streak >= 1 && <span>{t('daily.streak', { n: streak })}</span>}
       </button>
+      <button type="button" className="btn daily-card" onClick={() => nav('/bots')}>
+        <strong>{t('bots.card')}</strong>
+      </button>
       <label>
         <span className="muted">{t('landing.name')}</span>
         <input value={name} maxLength={16} onChange={(e) => setName(e.target.value)} autoComplete="nickname" />

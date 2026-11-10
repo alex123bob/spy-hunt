@@ -160,5 +160,19 @@
   "bots.notFound": "Bot not found",
   "bots.notFoundBody": "This bot does not exist or was deleted.",
   "bots.error": "Could not load this bot.",
-  "bots.home": "Home"
+  "bots.home": "Home",
+  "bots.card": "My bots",
+  "daily.dressUp": "Dress up a bot",
+  "bots.title": "My bots",
+  "bots.new": "New bot",
+  "bots.limit": "You can have up to 3 bots.",
+  "bots.delete": "Delete",
+  "bots.confirmDelete": "Really delete?",
+  "bots.name": "Name",
+  "bots.emoji": "Avatar",
+  "bots.color": "Colour",
+  "bots.save": "Save",
+  "bots.cancel": "Cancel",
+  "bots.listError": "Could not load your bots.",
+  "bots.saveError": "Could not save this bot."
 }

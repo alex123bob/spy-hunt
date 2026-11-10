@@ -41,6 +41,7 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
       <button type="button" className="btn primary" onClick={share}>{t('daily.share')}</button>
       {shareState && <p role="status" className="muted center">{shareState}</p>}
       <button type="button" className="btn" onClick={() => nav('/')}>{t('daily.playReal')}</button>
+      <button type="button" className="btn" onClick={() => nav('/bots')}>{t('daily.dressUp')}</button>
     </main>
   )
 }
