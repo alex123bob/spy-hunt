@@ -99,15 +99,12 @@ test('Add my bot is disabled once my bot is in the room, and room bots are not o
   expect(await screen.findByRole('button', { name: 'Add my bot' })).toBeDisabled()
 })
 
-test('a bot already in the room is not offered again', async () => {
+test('the picker offers each of my bots when none is in the room', async () => {
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex'), mine('b2', 'Sue')])
-  const s = withBots(false, [botP(3, 'b9', 'Other')])
-  render(<Lobby state={s} />)
+  render(<Lobby state={withBots(false, [botP(3, 'b9', 'Other')])} />)
   fireEvent.click(await screen.findByRole('button', { name: 'Add my bot' }))
+  expect(screen.getByRole('button', { name: /Rex/ })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: /Sue/ })).toBeInTheDocument()
-  cleanup()
-  render(<Lobby state={{ ...s, players: s.players.map((p) => p.seat === 3 ? { ...p, bot_id: 'b2' } : p) }} />)
-  expect(await screen.findByRole('button', { name: 'Add my bot' })).toBeDisabled()
 })
 
 test('only my bot chip has Remove, posting remove with the seat', async () => {
@@ -116,6 +113,15 @@ test('only my bot chip has Remove, posting remove with the seat', async () => {
   const rm = await screen.findAllByRole('button', { name: 'Remove' })
   expect(rm).toHaveLength(1)
   fireEvent.click(rm[0])
+  expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'remove', seat: 4 })
+})
+
+test('the host can remove any bot by seat, a non-host only their own', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([])
+  render(<Lobby state={withBots(true, [botP(4, 'b9', 'Other')])} />)
+  const rm = await screen.findAllByRole('button', { name: 'Remove' })
+  expect(rm).toHaveLength(2)
+  fireEvent.click(rm[1])
   expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'remove', seat: 4 })
 })
 

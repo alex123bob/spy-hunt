@@ -28,9 +28,7 @@ export function Lobby({ state }: { state: Snapshot }) {
   }, [])
 
   const myIds = new Set(myBots.map((b) => b.id))
-  const inRoom = new Set(state.players.map((p) => p.bot_id).filter(Boolean))
   const ownBotIn = state.players.some((p) => p.bot_id && myIds.has(p.bot_id))
-  const offered = myBots.filter((b) => !inRoom.has(b.id))
 
   const call = async (method: string, path: string, body?: unknown) => {
     try {
@@ -69,7 +67,7 @@ export function Lobby({ state }: { state: Snapshot }) {
         {state.players.map((p) => (
           <div key={p.seat} className="row between">
             <PlayerChip player={p} isMe={p.seat === state.me.seat} />
-            {p.bot_id && myIds.has(p.bot_id) && (
+            {p.is_bot && (isHost || (p.bot_id && myIds.has(p.bot_id))) && (
               <button type="button" className="btn" onClick={() => call('POST', '/bots', { action: 'remove', seat: p.seat })}>
                 {t('lobby.removeMine')}
               </button>
@@ -81,7 +79,7 @@ export function Lobby({ state }: { state: Snapshot }) {
             <button type="button" className="btn" disabled={full || ownBotIn} onClick={() => setPicking((v) => !v)}>
               {t('lobby.addMyBot')}
             </button>
-            {picking && !full && !ownBotIn && offered.map((b) => (
+            {picking && !full && !ownBotIn && myBots.map((b) => (
               <button key={b.id} type="button" className="btn" onClick={() => { setPicking(false); void call('POST', '/bots', { action: 'add', bot_id: b.id }) }}>
                 <Avatar player={b} /> {b.name}
               </button>
