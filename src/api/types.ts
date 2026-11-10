@@ -14,6 +14,8 @@ export interface Player {
   connected: boolean
   is_host: boolean
   role?: Role
+  avatar?: Avatar | null
+  bot_id?: string | null
 }
 
 export interface Message {
@@ -135,3 +137,10 @@ export interface DailyResult {
   answer: { spy_seat: number; spy_word: WordPair; civilian_word: WordPair }
   stats: { players: number; solved_pct: number }
 }
+
+export interface Avatar { emoji: string; color: string }
+export interface BotOutfit { voice: string; style: string; quirk: string }
+export interface BotRecord { games: number; wins: number; spy_games: number; spy_wins: number }
+export interface BotCard { id: string; name: string; avatar: Avatar; outfit: BotOutfit; record: BotRecord }
+export interface BotCatalog { voices: string[]; styles: string[]; quirks: string[]; emojis: string[]; colors: string[] }
+export interface BotDraft { name: string; avatar: Avatar; outfit: BotOutfit }

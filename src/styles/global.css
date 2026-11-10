@@ -30,7 +30,7 @@ input, select { font: inherit; width: 100%; padding: 14px; border-radius: 12px; 
 .chip-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .chip-row .name { flex: 1; min-width: 0; }
 .chip-row.out { opacity: .5; text-decoration: line-through; }
-.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; font-weight: 700; flex: none; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 18px; line-height: 1; flex: none; }
 .tag { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--panel-2); color: var(--muted); }
 .tag.ok { color: var(--ok); }
 .qr { width: 180px; height: 180px; background: #fff; border-radius: 12px; padding: 6px; margin: 0 auto; }
