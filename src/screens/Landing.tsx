@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { request } from '../api/client'
 import type { Lang, Snapshot } from '../api/types'
+import { getRecaps } from '../bots/api'
 import { LangPicker } from '../components/LangPicker'
 import { setLang, t, useLang } from '../i18n'
 import { currentStreak, playedToday, todayUtc } from '../daily/streak'
@@ -14,9 +15,19 @@ export function Landing() {
   const [code, setCode] = useState('')
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
+  const [unseen, setUnseen] = useState(0)
   const today = todayUtc()
   const played = playedToday(today)
   const streak = currentStreak(today)
+
+  useEffect(() => {
+    if (!getSession().playerId) return
+    let live = true
+    getRecaps().then((r) => live && setUnseen(r.unseen), () => {})
+    return () => {
+      live = false
+    }
+  }, [])
 
   const pickLang = (l: Lang) => {
     setLang(l)
@@ -67,6 +78,7 @@ export function Landing() {
       </button>
       <button type="button" className="btn daily-card" onClick={() => nav('/bots')}>
         <strong>{t('bots.card')}</strong>
+        {unseen > 0 && <span>{t('arena.new', { n: unseen })}</span>}
       </button>
       <button type="button" className="btn daily-card" onClick={() => nav('/top')}>
         <strong>{t('top.card')}</strong>

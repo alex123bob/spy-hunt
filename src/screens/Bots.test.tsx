@@ -3,11 +3,12 @@ import { MemoryRouter } from 'react-router-dom'
 import { Bots } from './Bots'
 import { ApiError } from '../api/client'
 import type { BotCard, BotCatalog } from '../api/types'
-import { createBot, deleteBot, getBotCard, getCatalog, listMyBots, updateBot } from '../bots/api'
+import { createBot, deleteBot, getBotCard, getCatalog, getRecaps, listMyBots, markRecapsSeen, updateBot } from '../bots/api'
 import { setLang } from '../i18n'
 
 vi.mock('../bots/api', () => ({
   getCatalog: vi.fn(), listMyBots: vi.fn(), createBot: vi.fn(), getBotCard: vi.fn(), updateBot: vi.fn(), deleteBot: vi.fn(),
+  getRecaps: vi.fn(), markRecapsSeen: vi.fn(),
 }))
 
 const catalog: BotCatalog = {
@@ -32,6 +33,35 @@ beforeEach(() => {
   vi.mocked(getBotCard).mockReset()
   vi.mocked(updateBot).mockReset()
   vi.mocked(deleteBot).mockReset().mockResolvedValue(undefined)
+  vi.mocked(getRecaps).mockReset().mockResolvedValue({ recaps: [], unseen: 0 })
+  vi.mocked(markRecapsSeen).mockReset().mockResolvedValue(undefined)
+})
+
+const recap = {
+  match_id: 'm1', bot_id: 'aaaaaaaa', bot_name: 'Alpha', avatar: { emoji: '🐼', color: '#222222' }, day: '2026-11-10', lang: 'en' as const,
+  role: 'spy' as const, won: true, accused: 0, out_round: null, quote: null, seen: false,
+}
+
+test('recaps show above the bots and are marked seen once', async () => {
+  vi.mocked(getRecaps).mockResolvedValue({ recaps: [recap], unseen: 1 })
+  render(tree)
+  expect(await screen.findByText('While you were away')).toBeInTheDocument()
+  await screen.findAllByTestId('bot-card')
+  await waitFor(() => expect(markRecapsSeen).toHaveBeenCalledTimes(1))
+})
+
+test('does not mark seen when nothing is unseen', async () => {
+  vi.mocked(getRecaps).mockResolvedValue({ recaps: [{ ...recap, seen: true }], unseen: 0 })
+  render(tree)
+  await screen.findByText('While you were away')
+  expect(markRecapsSeen).not.toHaveBeenCalled()
+})
+
+test('a recaps failure keeps the bots and shows a quiet message', async () => {
+  vi.mocked(getRecaps).mockRejectedValue(new Error('x'))
+  render(tree)
+  expect(await screen.findByText('Could not load your recaps.')).toBeInTheDocument()
+  expect(await screen.findAllByTestId('bot-card')).toHaveLength(2)
 })
 
 const preview = () => screen.getAllByTestId('bot-card').at(-1)!

@@ -2,6 +2,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Landing } from './Landing'
 import { setLang } from '../i18n'
+import { getRecaps } from '../bots/api'
+
+vi.mock('../bots/api', () => ({ getRecaps: vi.fn() }))
 
 vi.mock('../state/session', async () => {
   let name = ''
@@ -34,6 +37,26 @@ beforeEach(() => {
   setLang('en')
   daily.played = false
   daily.streak = 0
+  vi.mocked(getRecaps).mockReset().mockResolvedValue({ recaps: [], unseen: 0 })
+})
+
+test('shows the unseen recap count on the My bots card', async () => {
+  vi.mocked(getRecaps).mockResolvedValue({ recaps: [], unseen: 2 })
+  renderLanding()
+  expect(await screen.findByText('2 new')).toBeInTheDocument()
+})
+
+test('shows no badge when nothing is unseen', async () => {
+  renderLanding()
+  await waitFor(() => expect(getRecaps).toHaveBeenCalled())
+  expect(screen.queryByText(/new$/)).toBeNull()
+})
+
+test('a recaps failure is silent', async () => {
+  vi.mocked(getRecaps).mockRejectedValue(new Error('x'))
+  renderLanding()
+  await waitFor(() => expect(getRecaps).toHaveBeenCalled())
+  expect(screen.queryByRole('alert')).toBeNull()
 })
 
 test('join code is uppercased and trimmed', async () => {

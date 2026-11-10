@@ -2,10 +2,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { errorText } from '../api/errors'
-import type { BotCard, BotCatalog } from '../api/types'
-import { deleteBot, getBotCard, getCatalog, listMyBots } from '../bots/api'
+import type { BotCard, BotCatalog, Recap } from '../api/types'
+import { deleteBot, getBotCard, getCatalog, getRecaps, listMyBots, markRecapsSeen } from '../bots/api'
 import { BotCardView } from '../bots/BotCardView'
 import { BotForm } from '../bots/BotForm'
+import { RecapList } from '../bots/RecapList'
 import { t, useLang } from '../i18n'
 
 const MAX_BOTS = 3
@@ -22,6 +23,7 @@ export function Bots() {
   const [params, setParams] = useSearchParams()
   const remixId = params.get('remix') ?? ''
   const [remix, setRemix] = useState<Remix>({ kind: 'none' })
+  const [recaps, setRecaps] = useState<{ kind: 'loading' } | { kind: 'error' } | { kind: 'ok'; list: Recap[]; unseen: number }>({ kind: 'loading' })
   const count = load.kind === 'ok' ? load.bots.length : -1
   const canRemix = count >= 0 && count < MAX_BOTS
 
@@ -54,6 +56,22 @@ export function Bots() {
   }, [])
   useEffect(fetchAll, [fetchAll])
 
+  useEffect(() => {
+    let live = true
+    getRecaps().then(
+      (r) => live && setRecaps({ kind: 'ok', list: r.recaps, unseen: r.unseen }),
+      () => live && setRecaps({ kind: 'error' }),
+    )
+    return () => {
+      live = false
+    }
+  }, [])
+
+  const unseen = recaps.kind === 'ok' ? recaps.unseen : 0
+  useEffect(() => {
+    if (unseen > 0) markRecapsSeen().catch(() => {})
+  }, [unseen])
+
   const setBots = (f: (b: BotCard[]) => BotCard[]) =>
     setLoad((l) => (l.kind === 'ok' ? { ...l, bots: f(l.bots) } : l))
 
@@ -82,6 +100,8 @@ export function Bots() {
   return (
     <main className="screen">
       <h1>{t('bots.title')}</h1>
+      {recaps.kind === 'ok' && <RecapList recaps={recaps.list} />}
+      {recaps.kind === 'error' && <p className="muted">{t('arena.recapsError')}</p>}
       {load.kind === 'loading' && <p className="muted">{t('bots.loading')}</p>}
       {load.kind === 'error' && (
         <>
