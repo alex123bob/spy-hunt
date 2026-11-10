@@ -103,4 +103,6 @@ Not built now, because the project is still in development and has no host yet.
   2. a built-in safety net: when ready puzzles drop below a threshold (about 5), a background thread refills the queue, guarded by a lock so two requests cannot start it twice.
 - **Alerting** when the ready queue is short (for example fewer than 3).
 
-Other items deferred from the final review (see the branch history): reject a candidate when the round-1 solver call errors, the "all five equally ranked" gate, stricter mixed-language detection, server-side streaks and anti-replay (needed before any leaderboard).
+Done (polish pass): a round-1 solver error now rejects the candidate, the "all five equally ranked" gate (minimum score gap of 10), and stricter mixed-language detection.
+
+Still deferred from the final review (see the branch history): server-side streaks and anti-replay (needed before any leaderboard).
