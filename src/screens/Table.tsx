@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ApiError, request } from '../api/client'
 import type { Snapshot } from '../api/types'
+import { Avatar } from '../components/Avatar'
 import { Countdown } from '../components/Countdown'
 import { LangPicker } from '../components/LangPicker'
 import { StatementBubble } from '../components/StatementBubble'
@@ -62,7 +63,7 @@ export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot
       <section className="panel turnbar">
         {speaker ? (
           <div className="row between">
-            <span className="wrap">{myTurn ? t('table.yourTurn') : t('table.speaking', { name: speaker.name })}</span>
+            <span className="wrap">{myTurn ? t('table.yourTurn') : <><Avatar player={speaker} /> {t('table.speaking', { name: speaker.name })}</>}</span>
             <Countdown deadline={state.phase_deadline} offset={offset} />
           </div>
         ) : holdUntil != null ? (

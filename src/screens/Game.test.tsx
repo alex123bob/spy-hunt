@@ -47,7 +47,20 @@ test('a tied player sees no vote targets in the re-vote', () => {
 test('a re-vote only offers the tied players to a non-tied voter', () => {
   const s = snap({ phase: 'revote', tied: [1, 2], me: { seat: 0, is_host: true, my_word: 'river' } })
   render(<Vote state={s} />)
-  expect(screen.getAllByRole('button', { name: /^P\d/ }).map((b) => b.textContent)).toEqual(['P1', 'P2'])
+  expect(screen.getAllByRole('button', { name: /^P\d/ })).toHaveLength(2)
+  expect(screen.getByRole('button', { name: 'P1' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'P2' })).toBeInTheDocument()
+})
+
+test('a vote target and the speaking line show the avatar emoji', () => {
+  const s = snap({ phase: 'vote', me: { seat: 0, is_host: true, my_word: 'river' }, players: [player(0), player(1, { avatar: { emoji: '🐙', color: '#abc' } }), player(2)], current_speaker: 1 })
+  render(<Vote state={s} />)
+  expect(screen.getByRole('button', { name: 'P1' })).toHaveTextContent('🐙')
+})
+test('the speaking line shows the avatar emoji', () => {
+  const s = snap({ phase: 'describe', me: { seat: 0, is_host: true, my_word: 'river' }, players: [player(0), player(1, { avatar: { emoji: '🐙', color: '#abc' } })], current_speaker: 1 })
+  render(<Table state={s} />)
+  expect(screen.getByText(/speaking/i)).toHaveTextContent('🐙')
 })
 
 test('2000-character, emoji and RTL statements wrap inside the bubble', () => {

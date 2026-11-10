@@ -111,3 +111,11 @@ test('the words panel still shows both words, so a spy learns the civilian word'
   expect(within(panel).getByText((_, el) => el?.textContent === 'Civilian: piano / 钢琴')).toBeInTheDocument()
   expect(within(panel).getByText((_, el) => el?.textContent === 'Spy: organ / 风琴')).toBeInTheDocument()
 })
+
+test('the everyone list shows a bot avatar emoji', () => {
+  const s = finished()
+  s.players[0] = { ...s.players[0], avatar: { emoji: '🐙', color: '#abc' } }
+  view(s)
+  expect(screen.getByText('🐙')).toBeInTheDocument()
+  expect(screen.getAllByText('Ann').length).toBeGreaterThan(0)
+})

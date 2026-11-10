@@ -23,6 +23,8 @@
   "lobby.mainLang": "Room language",
   "lobby.addBot": "Add bot",
   "lobby.removeBot": "Remove bot",
+  "lobby.addMyBot": "Add my bot",
+  "lobby.removeMine": "Remove",
   "lobby.start": "Start game",
   "lobby.waitingHost": "Waiting for the host to start…",
   "lobby.yourLang": "Your language",

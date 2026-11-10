@@ -23,6 +23,8 @@
   "lobby.mainLang": "房间语言",
   "lobby.addBot": "添加机器人",
   "lobby.removeBot": "移除机器人",
+  "lobby.addMyBot": "添加我的机器人",
+  "lobby.removeMine": "移除",
   "lobby.start": "开始游戏",
   "lobby.waitingHost": "等待房主开始…",
   "lobby.yourLang": "你的语言",

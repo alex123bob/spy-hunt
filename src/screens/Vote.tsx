@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { request } from '../api/client'
 import type { Snapshot } from '../api/types'
+import { Avatar } from '../components/Avatar'
 import { Countdown } from '../components/Countdown'
 import { t } from '../i18n'
 import { StatementHistory } from '../components/StatementHistory'
@@ -45,7 +46,7 @@ export function Vote({ state, offset = 0 }: { state: Snapshot; offset?: number }
         <div className="targets">
           {targets.map((p) => (
             <button key={p.seat} type="button" className="btn target wrap" onClick={() => vote(p.seat)}>
-              {p.name}
+              <Avatar player={p} /> {p.name}
             </button>
           ))}
           <button type="button" className="btn" onClick={() => vote(null)}>{t('vote.abstain')}</button>
