@@ -74,3 +74,6 @@ label { display: flex; flex-direction: column; gap: 6px; }
 .picker .chip { min-width: 44px; min-height: 44px; padding: 10px; }
 .picker .swatch { width: 44px; padding: 0; border: 2px solid transparent; }
 .picker .swatch[aria-checked="true"] { border-color: var(--text); }
+
+.rule-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.rule-row select { min-height: 44px; }

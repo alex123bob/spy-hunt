@@ -13,11 +13,12 @@ vi.mock('../bots/api', () => ({
 const catalog: BotCatalog = {
   voices: ['cheerful', 'dry'], styles: ['concrete', 'vague'], quirks: ['question', 'agree'],
   emojis: ['🦊', '🐼', '🐸'], colors: ['#111111', '#222222'],
+  triggers: ['accused', 'late_game'], actions: ['counter_accuse', 'go_vague'], max_rules: 3,
 }
 const rec = { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }
 const mk = (id: string, name: string): BotCard => ({
   id, name, avatar: { emoji: '🐼', color: '#222222' },
-  outfit: { voice: 'dry', style: 'vague', quirk: 'agree' }, record: rec,
+  outfit: { voice: 'dry', style: 'vague', quirk: 'agree', rules: [] }, record: rec,
 })
 const a = mk('aaaaaaaa', 'Alpha')
 const b = mk('bbbbbbbb', 'Beta')
@@ -69,7 +70,7 @@ test('save creates the bot and shows it', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(createBot).toHaveBeenCalledWith({
     name: 'Zed', avatar: { emoji: '🐸', color: '#222222' },
-    outfit: { voice: 'cheerful', style: 'vague', quirk: 'question' },
+    outfit: { voice: 'cheerful', style: 'vague', quirk: 'question', rules: [] },
   }))
   expect(await screen.findByText('Zed')).toBeInTheDocument()
   expect(screen.queryByLabelText('Name')).toBeNull()

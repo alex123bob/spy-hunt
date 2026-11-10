@@ -139,8 +139,9 @@ export interface DailyResult {
 }
 
 export interface Avatar { emoji: string; color: string }
-export interface BotOutfit { voice: string; style: string; quirk: string }
+export interface BotRule { when: string; do: string }
+export interface BotOutfit { voice: string; style: string; quirk: string; rules: BotRule[] }
 export interface BotRecord { games: number; wins: number; spy_games: number; spy_wins: number }
 export interface BotCard { id: string; name: string; avatar: Avatar; outfit: BotOutfit; record: BotRecord }
-export interface BotCatalog { voices: string[]; styles: string[]; quirks: string[]; emojis: string[]; colors: string[] }
+export interface BotCatalog { voices: string[]; styles: string[]; quirks: string[]; emojis: string[]; colors: string[]; triggers: string[]; actions: string[]; max_rules: number }
 export interface BotDraft { name: string; avatar: Avatar; outfit: BotOutfit }

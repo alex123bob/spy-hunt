@@ -176,5 +176,22 @@
   "bots.save": "Save",
   "bots.cancel": "Cancel",
   "bots.listError": "Could not load your bots.",
-  "bots.saveError": "Could not save this bot."
+  "bots.saveError": "Could not save this bot.",
+  "bots.rules": "Rule cards",
+  "bots.rules.add": "Add rule",
+  "bots.rules.remove": "Remove rule",
+  "bots.rules.when": "When",
+  "bots.rules.then": "Then",
+  "bots.rules.limit": "Up to 3 rules.",
+  "bots.rules.line": "When {when} → {do}",
+  "bots.when.accused": "I am accused",
+  "bots.when.first_to_speak": "I speak first",
+  "bots.when.last_to_speak": "I speak last",
+  "bots.when.after_elimination": "someone is out",
+  "bots.when.late_game": "it is late in the game",
+  "bots.do.counter_accuse": "counter-accuse",
+  "bots.do.copy_previous": "copy the previous clue",
+  "bots.do.go_vague": "go vague",
+  "bots.do.vote_accuser": "vote for who voted for me",
+  "bots.do.vote_leader": "vote with the leader"
 }

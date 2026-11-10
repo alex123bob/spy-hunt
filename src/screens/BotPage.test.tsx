@@ -13,7 +13,7 @@ vi.mock('../daily/share', async (orig) => ({ ...(await orig<typeof import('../da
 
 const card = (over: Partial<BotCard> = {}): BotCard => ({
   id: 'abc12345', name: 'Captain Pip', avatar: { emoji: '🦊', color: '#f00' },
-  outfit: { voice: 'pirate', style: 'metaphor', quirk: 'question' },
+  outfit: { voice: 'pirate', style: 'metaphor', quirk: 'question', rules: [] },
   record: { games: 12, wins: 7, spy_games: 5, spy_wins: 3 }, ...over,
 })
 const tree = (
@@ -83,4 +83,10 @@ test('long wide name wraps; Chinese copy', async () => {
   expect(await screen.findByText(name)).toHaveClass('wrap')
   expect(screen.getByText('12 局 · 7 胜 · 骗过全桌 3 次')).toBeInTheDocument()
   expect(screen.getByText('声音：海盗')).toBeInTheDocument()
+})
+
+test('shows the rule lines', async () => {
+  vi.mocked(getBotCard).mockResolvedValue(card({ outfit: { voice: 'pirate', style: 'metaphor', quirk: 'question', rules: [{ when: 'accused', do: 'go_vague' }] } }))
+  render(tree)
+  expect(await screen.findByText('When I am accused → go vague')).toBeInTheDocument()
 })

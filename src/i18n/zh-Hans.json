@@ -176,5 +176,22 @@
   "bots.save": "保存",
   "bots.cancel": "取消",
   "bots.listError": "无法加载你的机器人。",
-  "bots.saveError": "无法保存这个机器人。"
+  "bots.saveError": "无法保存这个机器人。",
+  "bots.rules": "规则卡",
+  "bots.rules.add": "添加规则",
+  "bots.rules.remove": "删除规则",
+  "bots.rules.when": "当",
+  "bots.rules.then": "就",
+  "bots.rules.limit": "最多 3 条规则。",
+  "bots.rules.line": "当{when}，就{do}",
+  "bots.when.accused": "我被指认",
+  "bots.when.first_to_speak": "我第一个发言",
+  "bots.when.last_to_speak": "我最后一个发言",
+  "bots.when.after_elimination": "有人出局",
+  "bots.when.late_game": "游戏接近尾声",
+  "bots.do.counter_accuse": "反过来指认对方",
+  "bots.do.copy_previous": "模仿上一条线索",
+  "bots.do.go_vague": "说得含糊些",
+  "bots.do.vote_accuser": "投给投我的人",
+  "bots.do.vote_leader": "跟票数最多的人投"
 }

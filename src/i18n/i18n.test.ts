@@ -36,3 +36,12 @@ test('every bot option id has a label in both languages', () => {
     }
   }
 })
+
+test('every rule trigger and action has a label in both languages', () => {
+  const whens = ['accused', 'first_to_speak', 'last_to_speak', 'after_elimination', 'late_game']
+  const dos = ['counter_accuse', 'copy_previous', 'go_vague', 'vote_accuser', 'vote_leader']
+  for (const dict of [en, zh]) {
+    for (const id of whens) expect(dict).toHaveProperty([`bots.when.${id}`])
+    for (const id of dos) expect(dict).toHaveProperty([`bots.do.${id}`])
+  }
+})

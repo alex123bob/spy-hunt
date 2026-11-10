@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ApiError } from '../api/client'
-import type { BotCard, BotCatalog, BotDraft } from '../api/types'
+import type { BotCard, BotCatalog, BotDraft, BotRule } from '../api/types'
 import { t } from '../i18n'
 import { createBot, updateBot } from './api'
 import { BotCardView } from './BotCardView'
@@ -28,11 +28,11 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
   onCancel: () => void
 }) {
   const [draft, setDraft] = useState<BotDraft>(() => initial
-    ? { name: initial.name, avatar: { ...initial.avatar }, outfit: { ...initial.outfit } }
+    ? { name: initial.name, avatar: { ...initial.avatar }, outfit: { ...initial.outfit, rules: Array.isArray(initial.outfit.rules) ? initial.outfit.rules.map((r) => ({ ...r })) : [] } }
     : {
         name: '',
         avatar: { emoji: catalog.emojis[0] ?? '', color: catalog.colors[0] ?? '' },
-        outfit: { voice: catalog.voices[0] ?? '', style: catalog.styles[0] ?? '', quirk: catalog.quirks[0] ?? '' },
+        outfit: { voice: catalog.voices[0] ?? '', style: catalog.styles[0] ?? '', quirk: catalog.quirks[0] ?? '', rules: [] },
       })
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
@@ -45,6 +45,10 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
       {extra.text}
     </button>
   )
+
+  const rules = draft.outfit.rules
+  const setRules = (next: BotRule[]) => setDraft({ ...draft, outfit: { ...draft.outfit, rules: next } })
+  const setRule = (i: number, patch: Partial<BotRule>) => setRules(rules.map((r, j) => (j === i ? { ...r, ...patch } : r)))
 
   const save = async () => {
     const body = { ...draft, name: draft.name.trim() }
@@ -81,6 +85,27 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
               { text: t(`bots.${slot}.${id}`) }))}
         </Group>
       ))}
+      <div>
+        <span className="muted">{t('bots.rules')}</span>
+        {rules.map((r, i) => (
+          <div key={i} className="rule-row">
+            <select aria-label={t('bots.rules.when')} value={r.when} onChange={(e) => setRule(i, { when: e.target.value })}>
+              {catalog.triggers.map((id) => <option key={id} value={id}>{t(`bots.when.${id}`)}</option>)}
+            </select>
+            <select aria-label={t('bots.rules.then')} value={r.do} onChange={(e) => setRule(i, { do: e.target.value })}>
+              {catalog.actions.map((id) => <option key={id} value={id}>{t(`bots.do.${id}`)}</option>)}
+            </select>
+            <button type="button" className="btn" onClick={() => setRules(rules.filter((_, j) => j !== i))}>{t('bots.rules.remove')}</button>
+          </div>
+        ))}
+        <button
+          type="button" className="btn" disabled={rules.length >= catalog.max_rules}
+          onClick={() => setRules([...rules, { when: catalog.triggers[0] ?? '', do: catalog.actions[0] ?? '' }])}
+        >
+          {t('bots.rules.add')}
+        </button>
+        {rules.length >= catalog.max_rules && <p className="muted">{t('bots.rules.limit')}</p>}
+      </div>
       <BotCardView bot={{ ...draft, name: draft.name.trim() || ' ' }} />
       {err && <p role="alert" className="error wrap">{err}</p>}
       <div className="row">

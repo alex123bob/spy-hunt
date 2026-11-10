@@ -10,7 +10,7 @@ beforeEach(() => {
   vi.mocked(ensureGuest).mockClear()
 })
 
-const draft = { name: 'Bo', avatar: { emoji: '🤖', color: '#fff' }, outfit: { voice: 'robot', style: 'brief', quirk: 'emoji' } }
+const draft = { name: 'Bo', avatar: { emoji: '🤖', color: '#fff' }, outfit: { voice: 'robot', style: 'brief', quirk: 'emoji', rules: [] } }
 
 test('listMyBots gets /bots and unwraps the array', async () => {
   expect(await listMyBots()).toEqual([{ id: 'a' }])
