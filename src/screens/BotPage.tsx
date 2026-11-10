@@ -57,6 +57,7 @@ export function BotPage() {
       <button type="button" className="btn" onClick={share}>{t('bots.copyLink')}</button>
       {shareState && <p role="status" className="muted center">{shareState}</p>}
       {mine && <Link className="btn" to="/bots">{t('bots.edit')}</Link>}
+      <Link className="btn center" to="/top">{t('top.title')}</Link>
       <Link className="btn center" to="/">{t('bots.home')}</Link>
     </main>
   )

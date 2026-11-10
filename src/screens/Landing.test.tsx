@@ -75,3 +75,9 @@ test('My bots navigates to /bots', async () => {
   fireEvent.click(screen.getByRole('button', { name: /My bots/ }))
   await waitFor(() => expect(screen.getByTestId('loc')).toHaveTextContent('/bots'))
 })
+
+test('Top bots card navigates to /top', () => {
+  renderLanding()
+  fireEvent.click(screen.getByRole('button', { name: /Top bots/ }))
+  expect(screen.getByTestId('loc')).toHaveTextContent('/top')
+})

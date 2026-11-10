@@ -68,6 +68,9 @@ export function Landing() {
       <button type="button" className="btn daily-card" onClick={() => nav('/bots')}>
         <strong>{t('bots.card')}</strong>
       </button>
+      <button type="button" className="btn daily-card" onClick={() => nav('/top')}>
+        <strong>{t('top.card')}</strong>
+      </button>
       <label>
         <span className="muted">{t('landing.name')}</span>
         <input value={name} maxLength={16} onChange={(e) => setName(e.target.value)} autoComplete="nickname" />
