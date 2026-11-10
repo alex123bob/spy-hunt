@@ -64,6 +64,7 @@ The landing page has a "Daily Spy Hunter" card that shows your streak and whethe
 ## Bots
 
 Each guest can dress up to 3 bots at `/bots`: a name, an emoji avatar and colour, and three outfit slots (voice, clue style, quirk) that change how the bot plays.
+Up to 3 rule cards per bot ("When I am accused → vote for who voted for me") add situational behaviour on top of the outfit.
 Every bot has a public page at `/bot/:id` showing its outfit and record (games, wins, times it fooled the table), which you can share by link.
 In a lobby, "Add my bot" seats one of your bots; the room keeps its own copy, so later edits or deletion never affect a running game.
 Both routes are client-side, so the Nginx `try_files` fallback above already covers them.
