@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Landing } from './Landing'
 import { setLang } from '../i18n'
+import { getSession } from '../state/session'
 import { getRecaps } from '../bots/api'
 
 vi.mock('../bots/api', () => ({ getRecaps: vi.fn() }))
@@ -9,7 +10,7 @@ vi.mock('../bots/api', () => ({ getRecaps: vi.fn() }))
 vi.mock('../state/session', async () => {
   let name = ''
   return {
-    getSession: () => ({ playerId: 'p', token: 't', lang: 'en', name }),
+    getSession: vi.fn(() => ({ playerId: 'p', token: 't', lang: 'en', name })),
     setName: (n: string) => { name = n },
     setSessionLang: () => {},
     ensureGuest: vi.fn().mockResolvedValue({}),
@@ -37,6 +38,7 @@ beforeEach(() => {
   setLang('en')
   daily.played = false
   daily.streak = 0
+  vi.mocked(getSession).mockImplementation(() => ({ playerId: 'p', token: 't', lang: 'en', name: '' }))
   vi.mocked(getRecaps).mockReset().mockResolvedValue({ recaps: [], unseen: 0 })
 })
 
@@ -105,4 +107,13 @@ test('Top bots card navigates to /top', () => {
   renderLanding()
   fireEvent.click(screen.getByRole('button', { name: /Top bots/ }))
   expect(screen.getByTestId('loc')).toHaveTextContent('/top')
+})
+
+test('without a guest session it never asks for recaps and shows no badge', async () => {
+  vi.mocked(getSession).mockReturnValue({ playerId: '', token: '', lang: 'en', name: '' } as ReturnType<typeof getSession>)
+  vi.mocked(getRecaps).mockResolvedValue({ recaps: [], unseen: 5 })
+  renderLanding()
+  await act(async () => { await Promise.resolve() })
+  expect(getRecaps).not.toHaveBeenCalled()
+  expect(screen.queryByText(/new$/)).toBeNull()
 })

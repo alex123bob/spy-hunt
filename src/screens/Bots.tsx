@@ -69,7 +69,14 @@ export function Bots() {
 
   const unseen = recaps.kind === 'ok' ? recaps.unseen : 0
   useEffect(() => {
-    if (unseen > 0) markRecapsSeen().catch(() => {})
+    if (unseen <= 0) return
+    let live = true
+    Promise.resolve().then(() => {
+      if (live) markRecapsSeen().catch(() => {})
+    })
+    return () => {
+      live = false
+    }
   }, [unseen])
 
   const setBots = (f: (b: BotCard[]) => BotCard[]) =>

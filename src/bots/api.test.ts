@@ -62,6 +62,7 @@ test('getRecaps needs a guest, tolerates a missing recaps field', async () => {
 test('markRecapsSeen posts', async () => {
   await markRecapsSeen()
   expect(request).toHaveBeenCalledWith('POST', '/bots/recaps/seen')
+  expect(ensureGuest).toHaveBeenCalled()
 })
 
 test('getMatch encodes the id and needs no guest', async () => {

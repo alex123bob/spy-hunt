@@ -93,11 +93,15 @@ test('a bot plays the daily arena and its owner reads the recap', async ({ brows
   const res = await arena()
   expect(((await res.json()) as { played: number }).played).toBe(1)
 
+  await quiet.goto('/bots')
+  await expect(quiet.getByTestId('bot-card')).toBeVisible()
+  await expect(quiet.getByText('While you were away')).toHaveCount(0)
+
   await owner.goto('/')
   await expect(owner.getByText('1 new')).toBeVisible()
   await owner.goto('/bots')
   await expect(owner.getByText('While you were away')).toBeVisible()
-  await expect(owner.getByText(/^Mochi was/)).toBeVisible()
+  await expect(owner.getByText(/^Mochi( \d)? was/)).toBeVisible()
   await owner.getByRole('link', { name: 'See the match' }).click()
   await owner.waitForURL(/\/match\/.+/)
   await expect(owner.getByText('Arena match')).toBeVisible()
@@ -111,5 +115,6 @@ test('a bot plays the daily arena and its owner reads the recap', async ({ brows
 
   await arena()
   await quiet.goto('/bots')
+  await expect(quiet.getByTestId('bot-card')).toBeVisible()
   await expect(quiet.getByText('While you were away')).toHaveCount(0)
 })

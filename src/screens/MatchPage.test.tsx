@@ -55,6 +55,14 @@ test('renders rounds in order and the reveal last', async () => {
   expect([...idx].sort((a, b) => a - b)).toEqual(idx)
   const reveal = text.indexOf('Reveal')
   expect(text.slice(0, reveal)).not.toMatch(/Spy|Civilian/i)
+  const revealHeading = screen.getByRole('heading', { name: 'Reveal' })
+  const before = [...container.querySelectorAll('[aria-label],[title],[alt]')]
+    .filter((el) => revealHeading.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING)
+  for (const el of before) {
+    for (const attr of ['aria-label', 'title', 'alt']) {
+      expect(el.getAttribute(attr) ?? '').not.toMatch(/Spy|Civilian/i)
+    }
+  }
   expect(text.slice(reveal)).toMatch(/Bob.*Spy/)
   expect(text.slice(reveal)).toContain('Civilians: tea · Spy: coffee')
   expect(text.slice(reveal)).toContain('The civilians won.')
@@ -100,5 +108,34 @@ test('zh-Hans labels', async () => {
   expect(await screen.findByRole('heading', { name: '竞技场对局' })).toBeInTheDocument()
   expect(screen.getByText('第 1 轮')).toBeInTheDocument()
   expect(screen.getByText('揭晓')).toBeInTheDocument()
-  expect(screen.getByText('卧底获胜。'.replace('卧底', '平民'))).toBeInTheDocument()
+  expect(screen.getByText('平民获胜。')).toBeInTheDocument()
+})
+
+test('a tiebreak with several stage-1 statements shows the label once', async () => {
+  const m = match()
+  m.rounds = [{
+    round: 1,
+    statements: [{ seat: 0, stage: 0, text: 'a1' }, { seat: 0, stage: 1, text: 't0' }, { seat: 1, stage: 1, text: 't1' }, { seat: 2, stage: 1, text: 't2' }],
+    votes: [{ voter: 2, target: 0, stage: 0 }, { voter: 2, target: 1, stage: 1 }],
+    eliminated: 1,
+  }]
+  vi.mocked(getMatch).mockResolvedValue(m)
+  render(tree)
+  expect(await screen.findAllByText('Tiebreak')).toHaveLength(1)
+  expect(screen.getByText('Bob: t1')).toBeInTheDocument()
+})
+
+test('a tiebreak that ends with nobody out says so', async () => {
+  const m = match()
+  m.rounds = [{
+    round: 1,
+    statements: [{ seat: 0, stage: 0, text: 'a1' }, { seat: 1, stage: 1, text: 't1' }],
+    votes: [{ voter: 2, target: 0, stage: 0 }, { voter: 2, target: 1, stage: 1 }],
+    eliminated: null,
+  }]
+  vi.mocked(getMatch).mockResolvedValue(m)
+  render(tree)
+  expect(await screen.findByText('Tiebreak')).toBeInTheDocument()
+  expect(screen.getByText('Nobody was voted out.')).toBeInTheDocument()
+  expect(screen.queryByText(/was voted out\.$/, { selector: 'p' })).toHaveTextContent('Nobody')
 })

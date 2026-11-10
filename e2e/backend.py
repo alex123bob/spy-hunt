@@ -15,7 +15,7 @@ from flask import Flask, jsonify  # noqa: E402
 
 from ai_svc.spy_hunt import spy_hunt_bp  # noqa: E402
 
-from ai_svc.spy_hunt import db, puzzles  # noqa: E402
+from ai_svc.spy_hunt import arena, db, fake_llm, puzzles  # noqa: E402
 from ai_svc.spy_hunt.tests.puzzle_fixtures import sample_puzzle  # noqa: E402
 
 db.init_db()
@@ -32,12 +32,13 @@ def _fake_bot(prompt):
     return {"statement": "hm, interesting"}
 
 
+fake_llm.register("bot", _fake_bot)
+
+
 @app.post("/e2e/arena-night")
 def arena_night():
-    from ai_svc.spy_hunt import arena, fake_llm
-    fake_llm.register("bot", _fake_bot)
     res = arena.run_night(matches=1, rng=random.Random(1), log=lambda *a: None,
-                          today=datetime.date.today().isoformat())
+                          today=datetime.datetime.now(datetime.timezone.utc).date().isoformat())
     return jsonify(res)
 
 if __name__ == "__main__":

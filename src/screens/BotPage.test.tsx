@@ -42,6 +42,12 @@ test('renders the card and record', async () => {
   expect(screen.getByText('12 games · 7 wins · fooled the table 3 times')).toBeInTheDocument()
 })
 
+test('links to the top bots board', async () => {
+  render(tree)
+  await screen.findByText('Captain Pip')
+  expect(screen.getByRole('link', { name: 'Top bots' })).toHaveAttribute('href', '/top')
+})
+
 test('zero games renders zeros', async () => {
   vi.mocked(getBotCard).mockResolvedValue(card({ record: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 } }))
   render(tree)

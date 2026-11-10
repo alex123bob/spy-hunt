@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { StrictMode } from 'react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { Bots } from './Bots'
 import { ApiError } from '../api/client'
 import type { BotCard, BotCatalog } from '../api/types'
@@ -48,12 +49,40 @@ test('recaps show above the bots and are marked seen once', async () => {
   expect(await screen.findByText('While you were away')).toBeInTheDocument()
   await screen.findAllByTestId('bot-card')
   await waitFor(() => expect(markRecapsSeen).toHaveBeenCalledTimes(1))
+  await act(async () => { await new Promise((r) => setTimeout(r, 20)) })
+  expect(markRecapsSeen).toHaveBeenCalledTimes(1)
+})
+
+test('marks seen only after the recaps are on screen, once even in StrictMode', async () => {
+  let resolve!: (v: { recaps: typeof recap[]; unseen: number }) => void
+  vi.mocked(getRecaps).mockReturnValue(new Promise((r) => { resolve = r }))
+  render(<StrictMode>{tree}</StrictMode>)
+  await screen.findAllByTestId('bot-card')
+  expect(markRecapsSeen).not.toHaveBeenCalled()
+  resolve({ recaps: [recap], unseen: 1 })
+  expect(await screen.findByText('While you were away')).toBeInTheDocument()
+  await act(async () => { await new Promise((r) => setTimeout(r, 20)) })
+  expect(markRecapsSeen).toHaveBeenCalledTimes(1)
+})
+
+test('does not mark seen after unmount', async () => {
+  vi.mocked(getRecaps).mockResolvedValue({ recaps: [recap], unseen: 1 })
+  const { unmount } = render(tree)
+  await act(async () => {
+    await Promise.resolve()
+    await Promise.resolve()
+    unmount()
+  })
+  await act(async () => { await new Promise((r) => setTimeout(r, 20)) })
+  expect(markRecapsSeen).not.toHaveBeenCalled()
 })
 
 test('does not mark seen when nothing is unseen', async () => {
   vi.mocked(getRecaps).mockResolvedValue({ recaps: [{ ...recap, seen: true }], unseen: 0 })
   render(tree)
   await screen.findByText('While you were away')
+  await screen.findAllByTestId('bot-card')
+  await act(async () => { await new Promise((r) => setTimeout(r, 20)) })
   expect(markRecapsSeen).not.toHaveBeenCalled()
 })
 
@@ -218,5 +247,33 @@ test('?remix with a network or server failure says the bot could not be loaded, 
   render(remixTree)
   expect(await screen.findByText('Could not load this bot.')).toBeInTheDocument()
   expect(screen.queryByText('This bot cannot be remixed.')).toBeNull()
+  expect(screen.queryByLabelText('Name')).toBeNull()
+})
+
+function Probe() {
+  const l = useLocation()
+  return <p data-testid="probe">{l.pathname}{l.search}</p>
+}
+const probedTree = <MemoryRouter initialEntries={['/bots?remix=abc12345']}><Bots /><Probe /></MemoryRouter>
+
+test('?remix is cleared after a successful save', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([a])
+  vi.mocked(getBotCard).mockResolvedValue(src)
+  vi.mocked(createBot).mockResolvedValue(mk('cccccccc', 'Zed'))
+  render(probedTree)
+  expect(screen.getByTestId('probe')).toHaveTextContent('/bots?remix=abc12345')
+  fireEvent.change(await screen.findByLabelText('Name'), { target: { value: 'Zed' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(screen.getByTestId('probe')).toHaveTextContent(/^\/bots$/))
+  expect(createBot).toHaveBeenCalled()
+})
+
+test('?remix is cleared after cancel', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([a])
+  vi.mocked(getBotCard).mockResolvedValue(src)
+  render(probedTree)
+  await screen.findByLabelText('Name')
+  fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+  await waitFor(() => expect(screen.getByTestId('probe')).toHaveTextContent(/^\/bots$/))
   expect(screen.queryByLabelText('Name')).toBeNull()
 })
