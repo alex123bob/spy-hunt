@@ -60,3 +60,10 @@ The landing page has a "Daily Spy Hunter" card that shows your streak and whethe
 - **Scoring and timing** are done on the server; the answer is never sent before you finish.
 - **Puzzles** come from a queue on the backend. To refill it, run `python -m ai_svc.spy_hunt.scripts.build_puzzles --count 14` in the backend repo (uses the real model). `--review` lists the ready puzzles with answers and `--veto ID` drops one. With no puzzle ready, `/daily` shows "come back soon".
 - The e2e backend (`e2e/backend.py`) seeds one fixed puzzle (spy Pip, word "organ") so `e2e/daily.spec.ts` can run with the fake model.
+
+## Bots
+
+Each guest can dress up to 3 bots at `/bots`: a name, an emoji avatar and colour, and three outfit slots (voice, clue style, quirk) that change how the bot plays.
+Every bot has a public page at `/bot/:id` showing its outfit and record (games, wins, times it fooled the table), which you can share by link.
+In a lobby, "Add my bot" seats one of your bots; the room keeps its own copy, so later edits or deletion never affect a running game.
+Both routes are client-side, so the Nginx `try_files` fallback above already covers them.
