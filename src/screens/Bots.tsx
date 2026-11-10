@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { ApiError } from '../api/client'
 import { errorText } from '../api/errors'
 import type { BotCard, BotCatalog } from '../api/types'
 import { deleteBot, getBotCard, getCatalog, listMyBots } from '../bots/api'
@@ -9,7 +10,7 @@ import { t, useLang } from '../i18n'
 
 const MAX_BOTS = 3
 
-type Remix = { kind: 'none' } | { kind: 'loading' } | { kind: 'denied' } | { kind: 'ok'; card: BotCard }
+type Remix = { kind: 'none' } | { kind: 'loading' } | { kind: 'denied' } | { kind: 'error' } | { kind: 'ok'; card: BotCard }
 type Load = { kind: 'loading' } | { kind: 'error' } | { kind: 'ok'; bots: BotCard[]; catalog: BotCatalog }
 
 export function Bots() {
@@ -33,7 +34,7 @@ export function Bots() {
     setRemix({ kind: 'loading' })
     getBotCard(remixId).then(
       (card) => live && setRemix(card.remixable ? { kind: 'ok', card } : { kind: 'denied' }),
-      () => live && setRemix({ kind: 'denied' }),
+      (e) => live && setRemix({ kind: e instanceof ApiError && e.status === 404 ? 'denied' : 'error' }),
     )
     return () => {
       live = false
@@ -107,6 +108,7 @@ export function Bots() {
           </button>
           {load.bots.length >= MAX_BOTS && <p className="muted">{t('bots.limit')}</p>}
           {remixId && remix.kind === 'denied' && <p role="alert" className="error">{t('bots.remixNotAllowed')}</p>}
+          {remixId && remix.kind === 'error' && <p role="alert" className="error">{t('bots.error')}</p>}
           {form ? (
             <BotForm key={form.bot?.id ?? 'new'} initial={form.bot} catalog={load.catalog} onSaved={saved} onCancel={() => { setForm(null); endRemix() }} />
           ) : remixId && remix.kind === 'ok' && (

@@ -16,6 +16,7 @@ export function BotPage() {
   const [load, setLoad] = useState<Load>({ kind: 'loading' })
   const [mine, setMine] = useState(false)
   const [count, setCount] = useState(0)
+  const [known, setKnown] = useState(false)
   const navigate = useNavigate()
   const [shareState, setShareState] = useState('')
 
@@ -24,6 +25,7 @@ export function BotPage() {
     setLoad({ kind: 'loading' })
     setMine(false)
     setCount(0)
+    setKnown(!getSession().playerId)
     getBotCard(id).then(
       (bot) => live && setLoad({ kind: 'ok', bot }),
       (e) => live && setLoad({ kind: e instanceof ApiError && e.status === 404 ? 'notFound' : 'error' }),
@@ -34,8 +36,9 @@ export function BotPage() {
           if (!live) return
           setMine(bots.some((b) => b.id === id))
           setCount(bots.length)
+          setKnown(true)
         },
-        () => {},
+        () => live && setKnown(true),
       )
     }
     return () => {
@@ -63,7 +66,7 @@ export function BotPage() {
       <BotCardView bot={load.bot} />
       <button type="button" className="btn" onClick={share}>{t('bots.copyLink')}</button>
       {shareState && <p role="status" className="muted center">{shareState}</p>}
-      {!mine && load.bot.remixable && (count >= 3
+      {known && !mine && load.bot.remixable && (count >= 3
         ? <p className="muted center">{t('bots.limit')}</p>
         : <button type="button" className="btn primary" onClick={() => navigate(`/bots?remix=${load.bot.id}`)}>{t('bots.remix')}</button>)}
       {mine && <Link className="btn" to="/bots">{t('bots.edit')}</Link>}

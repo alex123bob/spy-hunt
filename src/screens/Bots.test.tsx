@@ -181,3 +181,12 @@ test('?remix works for a visitor with no bots', async () => {
   render(remixTree)
   expect(await screen.findByLabelText('Name')).toBeInTheDocument()
 })
+
+test('?remix with a network or server failure says the bot could not be loaded, not that it cannot be remixed', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([a])
+  vi.mocked(getBotCard).mockRejectedValue(new ApiError(0, 'network'))
+  render(remixTree)
+  expect(await screen.findByText('Could not load this bot.')).toBeInTheDocument()
+  expect(screen.queryByText('This bot cannot be remixed.')).toBeNull()
+  expect(screen.queryByLabelText('Name')).toBeNull()
+})

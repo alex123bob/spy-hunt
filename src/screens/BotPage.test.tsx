@@ -120,3 +120,19 @@ test('with 3 bots the limit text replaces Remix', async () => {
   expect(await screen.findByText('You can have up to 3 bots.')).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Remix' })).toBeNull()
 })
+
+test('Remix waits until we know whether the bot is yours', async () => {
+  let done!: (b: BotCard[]) => void
+  vi.mocked(listMyBots).mockReturnValue(new Promise<BotCard[]>((r) => { done = r }))
+  render(tree)
+  await screen.findByText('Captain Pip')
+  expect(screen.queryByRole('button', { name: 'Remix' })).toBeNull()
+  done([])
+  expect(await screen.findByRole('button', { name: 'Remix' })).toBeInTheDocument()
+})
+
+test('Remix still shows if your bots cannot be loaded', async () => {
+  vi.mocked(listMyBots).mockRejectedValue(new Error('x'))
+  render(tree)
+  expect(await screen.findByRole('button', { name: 'Remix' })).toBeInTheDocument()
+})

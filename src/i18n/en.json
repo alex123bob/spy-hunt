@@ -221,7 +221,7 @@
   "lobby.fillHint": "At least {min} players are needed. {n} bot(s) will be added when you start.",
   "lobby.needMore": "At least {min} players are needed to start.",
   "bots.remixedFrom": "Remixed from {name}",
-  "bots.remixes": "Remixed {n} times",
+  "bots.remixes": "Remixes: {n}",
   "bots.remix": "Remix",
   "bots.listed": "Show on the top bots board",
   "bots.remixNotAllowed": "This bot cannot be remixed.",

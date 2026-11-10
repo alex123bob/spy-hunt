@@ -61,7 +61,7 @@ test('a visitor remixes a bot and the top bots board starts empty', async ({ bro
   await expect(visitor.getByTestId('bot-card')).toContainText('Remixed from Mochi')
 
   await owner.goto(`/bot/${id}`)
-  await expect(owner.getByText('Remixed 1 times')).toBeVisible()
+  await expect(owner.getByText('Remixes: 1')).toBeVisible()
 
   await visitor.goto('/top')
   const empty = 'No ranked bots yet. Play a room with 3 or more people to get on the board.'

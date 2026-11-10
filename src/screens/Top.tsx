@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { TopBot, TopKind } from '../api/types'
 import { getTopBots } from '../bots/api'
@@ -12,16 +12,20 @@ export function Top() {
   const [tab, setTab] = useState<TopKind>('winners')
   const [load, setLoad] = useState<Load>({ kind: 'loading' })
 
+  const latest = useRef(0)
+
   const fetchTop = useCallback(() => {
-    let live = true
+    const mine = ++latest.current
     setLoad({ kind: 'loading' })
     getTopBots(tab).then(
-      (bots) => live && setLoad({ kind: 'ok', bots }),
-      () => live && setLoad({ kind: 'error' }),
+      (bots) => latest.current === mine && setLoad({ kind: 'ok', bots }),
+      () => latest.current === mine && setLoad({ kind: 'error' }),
     )
-    return () => { live = false }
   }, [tab])
-  useEffect(() => fetchTop(), [fetchTop])
+  useEffect(() => {
+    fetchTop()
+    return () => { latest.current++ }
+  }, [fetchTop])
 
   return (
     <main className="screen">

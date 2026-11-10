@@ -59,3 +59,18 @@ test('zh-Hans labels', async () => {
   await waitFor(() => expect(screen.getByRole('tab', { name: '最强赢家' })).toBeInTheDocument())
   expect(screen.getByRole('tab', { name: '最佳卧底' })).toBeInTheDocument()
 })
+
+test('a slow retry does not overwrite the tab you switched to', async () => {
+  let slow!: (b: TopBot[]) => void
+  vi.mocked(getTopBots).mockReset().mockRejectedValueOnce(new Error('x'))
+    .mockImplementationOnce(() => new Promise<TopBot[]>((r) => { slow = r }))
+    .mockResolvedValue([mk(1, 'cccccccc', 'Gamma', 80)])
+  render(tree)
+  fireEvent.click(await screen.findByRole('button', { name: 'Try again' }))
+  fireEvent.click(screen.getByRole('tab', { name: 'Best spies' }))
+  expect(await screen.findByText('Gamma')).toBeInTheDocument()
+  slow([mk(1, 'aaaaaaaa', 'Alpha', 75)])
+  await new Promise((r) => setTimeout(r, 0))
+  expect(screen.queryByText('Alpha')).toBeNull()
+  expect(screen.getByText('Gamma')).toBeInTheDocument()
+})

@@ -33,7 +33,7 @@ test('shows remix credit link and count', () => {
   setLang('en')
   render(<MemoryRouter><BotCardView bot={{ ...plain, remix_of: { id: 'abc', name: 'Mochi' }, remixes: 3 }} /></MemoryRouter>)
   expect(screen.getByRole('link', { name: 'Remixed from Mochi' }).getAttribute('href')).toBe('/bot/abc')
-  expect(screen.getByText('Remixed 3 times')).toBeTruthy()
+  expect(screen.getByText('Remixes: 3')).toBeTruthy()
 })
 
 test('shows no credit lines when not remixed', () => {
