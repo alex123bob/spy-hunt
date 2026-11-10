@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { errorText } from '../api/errors'
 import type { BotCard, BotCatalog } from '../api/types'
 import { deleteBot, getCatalog, listMyBots } from '../bots/api'
 import { BotCardView } from '../bots/BotCardView'
@@ -40,8 +41,8 @@ export function Bots() {
       await deleteBot(id)
       setBots((bs) => bs.filter((b) => b.id !== id))
       setForm((f) => (f?.bot?.id === id ? null : f))
-    } catch {
-      setErr(t('error.generic'))
+    } catch (e) {
+      setErr(errorText(e))
     }
   }
 

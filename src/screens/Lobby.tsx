@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { request } from '../api/client'
+import { errorText } from '../api/errors'
 import type { BotCard, Lang, Snapshot } from '../api/types'
 import { listMyBots } from '../bots/api'
 import { Avatar } from '../components/Avatar'
@@ -19,6 +20,7 @@ export function Lobby({ state }: { state: Snapshot }) {
   const link = `${window.location.origin}/r/${code}`
   const isHost = state.me.is_host
   const bots = state.players.filter((p) => p.is_bot).length
+  const short = state.players.length < state.config.min_players
   const full = state.players.length >= state.config.max_players
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function Lobby({ state }: { state: Snapshot }) {
       setErr('')
       await request(method, `/rooms/${code}${path}`, body)
     } catch (e) {
-      setErr((e as Error).message || t('error.generic'))
+      setErr(errorText(e))
     }
   }
 
@@ -74,6 +76,13 @@ export function Lobby({ state }: { state: Snapshot }) {
             )}
           </div>
         ))}
+        {short && (
+          <p className="muted">
+            {state.config.bot_fill
+              ? t('lobby.fillHint', { min: state.config.min_players, n: state.config.min_players - state.players.length })
+              : t('lobby.needMore', { min: state.config.min_players })}
+          </p>
+        )}
         {myBots.length > 0 && (
           <>
             <button type="button" className="btn" disabled={full || ownBotIn} onClick={() => setPicking((v) => !v)}>

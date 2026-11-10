@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ApiError } from '../api/client'
+import { errorText } from '../api/errors'
 import type { BotCard, BotCatalog, BotDraft, BotRule } from '../api/types'
 import { t } from '../i18n'
 import { createBot, updateBot } from './api'
@@ -11,6 +12,11 @@ const GROUPS: { slot: Slot; key: 'voices' | 'styles' | 'quirks' }[] = [
   { slot: 'style', key: 'styles' },
   { slot: 'quirk', key: 'quirks' },
 ]
+
+function colorName(c: string): string {
+  const key = `bots.color.${c.replace('#', '').toLowerCase()}`
+  return t(key) !== key ? t(key) : c
+}
 
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -64,8 +70,7 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
     try {
       onSaved(initial ? await updateBot(initial.id, body) : await createBot(body))
     } catch (e) {
-      const code = e instanceof ApiError ? e.code : ''
-      setErr(code === 'bot_limit' ? t('bots.limit') : code === 'bad_outfit' ? t('bots.rules.invalid') : e instanceof ApiError && e.message && code !== 'network' ? e.message : t('bots.saveError'))
+      setErr(e instanceof ApiError ? errorText(e) : t('bots.saveError'))
       setBusy(false)
     }
   }
@@ -82,7 +87,7 @@ export function BotForm({ initial, catalog, onSaved, onCancel }: {
       </Group>
       <Group label={t('bots.color')}>
         {catalog.colors.map((c) =>
-          radio(draft.avatar.color === c, c, () => setDraft({ ...draft, avatar: { ...draft.avatar, color: c } }),
+          radio(draft.avatar.color === c, colorName(c), () => setDraft({ ...draft, avatar: { ...draft.avatar, color: c } }),
             { className: 'swatch', style: { background: c } }))}
       </Group>
       {GROUPS.map(({ slot, key }) => (

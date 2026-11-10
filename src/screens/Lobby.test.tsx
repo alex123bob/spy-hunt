@@ -2,6 +2,7 @@ import { render, screen, fireEvent, within, waitFor, cleanup } from '@testing-li
 import { Lobby } from './Lobby'
 import { setLang, getLang } from '../i18n'
 import type { Snapshot } from '../api/types'
+import { ApiError } from '../api/client'
 
 vi.mock('../api/client', async (orig) => {
   const m = await orig<typeof import('../api/client')>()
@@ -128,4 +129,31 @@ test('the host can remove any bot by seat, a non-host only their own', async () 
 test('a bot player shows its avatar emoji', () => {
   render(<Lobby state={withBots(false, [botP(4, 'b9', 'Other')])} />)
   expect(screen.getByText('🐙')).toBeInTheDocument()
+})
+
+const sized = (n: number, bot_fill: boolean): Snapshot => {
+  const s = snap(true)
+  const players = Array.from({ length: n }, (_, i) => ({ ...s.players[0], seat: i, is_host: i === 0, name: `P${i}` }))
+  return { ...s, players, config: { ...s.config, bot_fill, min_players: 4 } }
+}
+
+test('fill hint shows when bots will be added, needMore without bot fill, nothing when enough', () => {
+  const { unmount } = render(<Lobby state={sized(3, true)} />)
+  expect(screen.getByText('At least 4 players are needed. 1 bot(s) will be added when you start.')).toBeInTheDocument()
+  unmount()
+  const u2 = render(<Lobby state={sized(3, false)} />)
+  expect(screen.getByText('At least 4 players are needed to start.')).toBeInTheDocument()
+  u2.unmount()
+  render(<Lobby state={sized(4, true)} />)
+  expect(screen.queryByText(/At least 4 players/)).toBeNull()
+})
+
+test('a failing call shows mapped text, not the server text', async () => {
+  vi.mocked(request).mockRejectedValueOnce(new ApiError(409, 'bot_in_room', 'English server text'))
+  render(<Lobby state={snap(true)} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Add bot' }))
+  const alert = await screen.findByRole('alert')
+  expect(alert).toHaveTextContent('You already have a bot in this room.')
+  expect(alert).not.toHaveTextContent('English server text')
+  expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add' })
 })

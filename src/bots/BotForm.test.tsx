@@ -8,11 +8,11 @@ import { setLang } from '../i18n'
 vi.mock('./api', () => ({ createBot: vi.fn(), updateBot: vi.fn() }))
 
 const catalog: BotCatalog = {
-  voices: ['cheerful'], styles: ['concrete'], quirks: ['question'], emojis: ['🦊'], colors: ['#111111'],
+  voices: ['cheerful'], styles: ['concrete'], quirks: ['question'], emojis: ['🦊'], colors: ['#ff6b6b', '#5b8cff', '#111111'],
   triggers: ['accused', 'late_game', 'after_elimination'], actions: ['counter_accuse', 'go_vague', 'vote_leader'], max_rules: 3,
 }
 const rec = { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }
-const bot = (outfit: object): BotCard => ({ id: 'abcdefgh', name: 'Bo', avatar: { emoji: '🦊', color: '#111111' }, outfit, record: rec } as BotCard)
+const bot = (outfit: object): BotCard => ({ id: 'abcdefgh', name: 'Bo', avatar: { emoji: '🦊', color: '#ff6b6b' }, outfit, record: rec } as BotCard)
 const base = { voice: 'cheerful', style: 'concrete', quirk: 'question' }
 const ui = (initial?: BotCard) => render(<BotForm initial={initial} catalog={catalog} onSaved={() => {}} onCancel={() => {}} />)
 const add = () => fireEvent.click(screen.getByRole('button', { name: 'Add rule' }))
@@ -85,7 +85,7 @@ test('bad_outfit error is shown', async () => {
   ui()
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Zed' } })
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-  expect(await screen.findByRole('alert')).toHaveTextContent('Those rules are not valid.')
+  expect(await screen.findByRole('alert')).toHaveTextContent('That outfit is not valid.')
 })
 
 const pairs = () => screen.getAllByLabelText(/^When, rule/).map((w, i) =>
@@ -116,6 +116,24 @@ test('bad_outfit shows a translated message in zh-Hans', async () => {
   fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Zed' } })
   fireEvent.click(screen.getByRole('button', { name: '保存' }))
   const alert = await screen.findByRole('alert')
-  expect(alert).toHaveTextContent('这些规则无效。')
+  expect(alert).toHaveTextContent('这套装扮无效。')
   expect(alert).not.toHaveTextContent('bad rule')
+})
+
+test('colour swatches are named, with the hex as fallback', () => {
+  ui()
+  expect(screen.getByRole('radio', { name: 'Red' })).toBeInTheDocument()
+  expect(screen.getByRole('radio', { name: 'Blue' })).toBeInTheDocument()
+  expect(screen.getByRole('radio', { name: '#111111' })).toBeInTheDocument()
+})
+
+test('a rejected save shows mapped text, a network failure the network text', async () => {
+  vi.mocked(createBot).mockRejectedValueOnce(new ApiError(400, 'bad_name', 'raw'))
+  ui()
+  fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Zed' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent('That name is not valid.')
+  vi.mocked(createBot).mockRejectedValueOnce(new ApiError(0, 'network', 'Network error'))
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Cannot reach the server. Check your connection.'))
 })
