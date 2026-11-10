@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import type { Avatar as AvatarData, BotOutfit, BotRecord } from '../api/types'
+import type { Avatar as AvatarData, BotOutfit, BotRanked, BotRecord } from '../api/types'
 import { Avatar } from '../components/Avatar'
 import { t } from '../i18n'
 
@@ -8,6 +8,7 @@ export interface BotDraftPreview {
   avatar: AvatarData
   outfit: BotOutfit
   record?: BotRecord
+  arena_record?: BotRanked
   remix_of?: { id: string; name: string } | null
   remixes?: number
 }
@@ -48,6 +49,9 @@ export function BotCardView({ bot }: { bot: BotDraftPreview }) {
         <p className="muted">
           {t('bots.record', { games: record.games, wins: record.wins })} · {t('bots.fooled', { n: record.spy_wins })}
         </p>
+      )}
+      {bot.arena_record && bot.arena_record.games > 0 && (
+        <p className="muted">{t('arena.record', { games: bot.arena_record.games, wins: bot.arena_record.wins })}</p>
       )}
     </section>
   )

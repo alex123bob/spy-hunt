@@ -12,7 +12,7 @@ const catalog: BotCatalog = {
   triggers: ['accused', 'late_game', 'after_elimination'], actions: ['counter_accuse', 'go_vague', 'vote_leader'], max_rules: 3,
 }
 const rec = { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }
-const bot = (outfit: object): BotCard => ({ id: 'abcdefgh', name: 'Bo', avatar: { emoji: '🦊', color: '#ff6b6b' }, outfit, record: rec, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false } as BotCard)
+const bot = (outfit: object): BotCard => ({ id: 'abcdefgh', name: 'Bo', avatar: { emoji: '🦊', color: '#ff6b6b' }, outfit, record: rec, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false, arena: false, arena_record: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 } } as BotCard)
 const base = { voice: 'cheerful', style: 'concrete', quirk: 'question' }
 const ui = (initial?: BotCard, remix?: BotCard) => render(<BotForm initial={initial} remix={remix} catalog={catalog} onSaved={() => {}} onCancel={() => {}} />)
 const add = () => fireEvent.click(screen.getByRole('button', { name: 'Add rule' }))
@@ -171,4 +171,20 @@ test('listed checkbox defaults checked and unchecking sends false', async () => 
 test('editing a bot with listed false shows it unchecked', () => {
   ui(bot({ ...base, rules: [] }))
   expect(screen.getByRole('checkbox', { name: 'Show on the top bots board' })).not.toBeChecked()
+})
+
+test('arena checkbox defaults checked and unchecking sends false', async () => {
+  ui()
+  const box = screen.getByRole('checkbox', { name: 'Let my bot play in the daily arena' })
+  expect(box).toBeChecked()
+  fireEvent.click(box)
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Zed' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(createBot).toHaveBeenCalled())
+  expect(vi.mocked(createBot).mock.calls[0]![0]!.arena).toBe(false)
+})
+
+test('editing a bot with arena false shows it unchecked', () => {
+  ui(bot({ ...base, rules: [] }))
+  expect(screen.getByRole('checkbox', { name: 'Let my bot play in the daily arena' })).not.toBeChecked()
 })

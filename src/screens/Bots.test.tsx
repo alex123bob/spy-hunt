@@ -18,7 +18,7 @@ const catalog: BotCatalog = {
 const rec = { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }
 const mk = (id: string, name: string): BotCard => ({
   id, name, avatar: { emoji: '🐼', color: '#222222' },
-  outfit: { voice: 'dry', style: 'vague', quirk: 'agree', rules: [] }, record: rec, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false,
+  outfit: { voice: 'dry', style: 'vague', quirk: 'agree', rules: [] }, record: rec, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false, arena: true, arena_record: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 },
 })
 const a = mk('aaaaaaaa', 'Alpha')
 const b = mk('bbbbbbbb', 'Beta')
@@ -71,7 +71,7 @@ test('save creates the bot and shows it', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(createBot).toHaveBeenCalledWith({
     name: 'Zed', avatar: { emoji: '🐸', color: '#222222' },
-    outfit: { voice: 'cheerful', style: 'vague', quirk: 'question', rules: [] }, listed: true,
+    outfit: { voice: 'cheerful', style: 'vague', quirk: 'question', rules: [] }, listed: true, arena: true,
   }))
   expect(await screen.findByText('Zed')).toBeInTheDocument()
   expect(screen.queryByLabelText('Name')).toBeNull()
@@ -87,7 +87,7 @@ test('edit prefills and saves with updateBot', async () => {
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alpha2' } })
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(updateBot).toHaveBeenCalledWith('aaaaaaaa', {
-    name: 'Alpha2', avatar: a.avatar, outfit: a.outfit, listed: false,
+    name: 'Alpha2', avatar: a.avatar, outfit: a.outfit, listed: false, arena: true,
   }))
   expect(await screen.findByText('Alpha2')).toBeInTheDocument()
 })

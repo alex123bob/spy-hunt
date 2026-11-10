@@ -65,3 +65,140 @@ test('remix and top copy exists in both languages', () => {
     expect(zh).toHaveProperty([k])
   }
 })
+
+test('arena copy exists in both languages', () => {
+  const expected: Record<string, [string, string]> = {
+  "arena.opt": [
+    "Let my bot play in the daily arena",
+    "让我的机器人参加每日竞技场"
+  ],
+  "arena.record": [
+    "Arena: {games} games · {wins} wins",
+    "竞技场：{games} 局 · {wins} 胜"
+  ],
+  "arena.title": [
+    "While you were away",
+    "你不在的时候"
+  ],
+  "arena.new": [
+    "{n} new",
+    "{n} 条新战报"
+  ],
+  "arena.see": [
+    "See the match",
+    "查看对局"
+  ],
+  "arena.role.spy": [
+    "Spy",
+    "卧底"
+  ],
+  "arena.role.civilian": [
+    "Civilian",
+    "平民"
+  ],
+  "arena.recap.spy": [
+    "{name} was the spy in a 5-bot match",
+    "{name} 在一场 5 机器人对局中是卧底"
+  ],
+  "arena.recap.civilian": [
+    "{name} was a civilian in a 5-bot match",
+    "{name} 在一场 5 机器人对局中是平民"
+  ],
+  "arena.recap.accused": [
+    "accused {n} times",
+    "被投票指认 {n} 次"
+  ],
+  "arena.recap.survived": [
+    "survived",
+    "活到了最后"
+  ],
+  "arena.recap.out": [
+    "voted out in round {n}",
+    "第 {n} 轮被投出"
+  ],
+  "arena.recap.fooled": [
+    "fooled the table",
+    "骗过了全桌"
+  ],
+  "arena.recap.won": [
+    "won",
+    "获胜"
+  ],
+  "arena.recap.lost": [
+    "lost",
+    "失败"
+  ],
+  "arena.sep": [
+    ", ",
+    "，"
+  ],
+  "arena.end": [
+    ".",
+    "。"
+  ],
+  "arena.match.title": [
+    "Arena match",
+    "竞技场对局"
+  ],
+  "arena.match.round": [
+    "Round {n}",
+    "第 {n} 轮"
+  ],
+  "arena.match.tiebreak": [
+    "Tiebreak",
+    "加赛"
+  ],
+  "arena.match.vote": [
+    "{voter} voted for {target}",
+    "{voter} 投给了 {target}"
+  ],
+  "arena.match.abstain": [
+    "{voter} did not vote",
+    "{voter} 弃票"
+  ],
+  "arena.match.out": [
+    "{name} was voted out.",
+    "{name} 被投出。"
+  ],
+  "arena.match.nobody": [
+    "Nobody was voted out.",
+    "没有人被投出。"
+  ],
+  "arena.match.reveal": [
+    "Reveal",
+    "揭晓"
+  ],
+  "arena.match.words": [
+    "Civilians: {civilian} · Spy: {spy}",
+    "平民词：{civilian} · 卧底词：{spy}"
+  ],
+  "arena.match.winner.spies": [
+    "The spies won.",
+    "卧底获胜。"
+  ],
+  "arena.match.winner.civilians": [
+    "The civilians won.",
+    "平民获胜。"
+  ],
+  "arena.match.notFound": [
+    "Match not found",
+    "找不到这场对局"
+  ],
+  "arena.match.notFoundBody": [
+    "It may have been cleared after 14 days.",
+    "它可能在 14 天后已被清理。"
+  ],
+  "arena.match.error": [
+    "Could not load this match.",
+    "无法加载这场对局。"
+  ],
+  "arena.recapsError": [
+    "Could not load your recaps.",
+    "无法加载你的战报。"
+  ]
+}
+  for (const [k, [e, z]] of Object.entries(expected)) {
+    expect(en).toHaveProperty([k], e)
+    expect(zh).toHaveProperty([k], z)
+  }
+})

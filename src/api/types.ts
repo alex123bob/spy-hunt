@@ -150,8 +150,26 @@ export interface BotCard {
   remixable: boolean
   ranked: BotRanked
   listed: boolean
+  arena: boolean
+  arena_record: BotRanked
 }
 export interface BotCatalog { voices: string[]; styles: string[]; quirks: string[]; emojis: string[]; colors: string[]; triggers: string[]; actions: string[]; max_rules: number }
-export interface BotDraft { name: string; avatar: Avatar; outfit: BotOutfit; listed?: boolean; remix_of?: string }
+export interface BotDraft { name: string; avatar: Avatar; outfit: BotOutfit; listed?: boolean; arena?: boolean; remix_of?: string }
 export type TopKind = 'winners' | 'spies'
 export interface TopBot { rank: number; id: string; name: string; avatar: Avatar; rate: number; games: number; remixes: number }
+
+export interface Recap {
+  match_id: string; bot_id: string; bot_name: string; avatar: Avatar; day: string; lang: Lang
+  role: 'spy' | 'civilian'; won: boolean; accused: number; out_round: number | null; quote: string | null; seen: boolean
+}
+export interface MatchPlayer { seat: number; name: string; avatar: Avatar | null; bot_id: string | null; role: 'spy' | 'civilian'; is_custom: boolean }
+export interface MatchRound {
+  round: number
+  statements: { seat: number; stage: number; text: string }[]
+  votes: { voter: number; target: number | null; stage: number }[]
+  eliminated: number | null
+}
+export interface MatchView {
+  id: string; day: string; lang: Lang; players: MatchPlayer[]; rounds: MatchRound[]
+  words: { civilian: string; spy: string }; winner: 'spies' | 'civilians'
+}

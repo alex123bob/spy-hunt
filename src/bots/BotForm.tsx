@@ -42,6 +42,7 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
         avatar: { ...src.avatar },
         outfit: { ...src.outfit, rules: Array.isArray(src.outfit.rules) ? src.outfit.rules.map((r) => ({ ...r })) : [] },
         listed: initial ? initial.listed : true,
+        arena: initial ? initial.arena : true,
       }
     }
     return {
@@ -49,6 +50,7 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
       avatar: { emoji: catalog.emojis[0] ?? '', color: catalog.colors[0] ?? '' },
       outfit: { voice: catalog.voices[0] ?? '', style: catalog.styles[0] ?? '', quirk: catalog.quirks[0] ?? '', rules: [] },
       listed: true,
+      arena: true,
     }
   })
   const [busy, setBusy] = useState(false)
@@ -133,6 +135,10 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
       <label className="row">
         <input type="checkbox" checked={draft.listed ?? true} onChange={(e) => setDraft({ ...draft, listed: e.target.checked })} />
         <span>{t('bots.listed')}</span>
+      </label>
+      <label className="row">
+        <input type="checkbox" checked={draft.arena ?? true} onChange={(e) => setDraft({ ...draft, arena: e.target.checked })} />
+        <span>{t('arena.opt')}</span>
       </label>
       <BotCardView bot={{ name: draft.name.trim() || ' ', avatar: draft.avatar, outfit: draft.outfit }} />
       {err && <p role="alert" className="error wrap">{err}</p>}

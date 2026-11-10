@@ -42,3 +42,11 @@ test('shows no credit lines when not remixed', () => {
   render(<MemoryRouter><BotCardView bot={plain} /></MemoryRouter>)
   expect(screen.queryByText(/Remixed/)).toBeNull()
 })
+
+test('arena line shows only with arena games', () => {
+  setLang('en')
+  const { rerender } = render(<BotCardView bot={{ ...plain, arena_record: { games: 3, wins: 2, spy_games: 1, spy_wins: 0 } }} />)
+  expect(screen.getByText('Arena: 3 games · 2 wins')).toBeInTheDocument()
+  rerender(<BotCardView bot={{ ...plain, arena_record: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 } }} />)
+  expect(screen.queryByText(/^Arena:/)).toBeNull()
+})

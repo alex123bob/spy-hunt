@@ -1,5 +1,5 @@
 import { request } from '../api/client'
-import type { BotCard, BotCatalog, BotDraft, TopBot, TopKind } from '../api/types'
+import type { BotCard, BotCatalog, BotDraft, MatchView, Recap, TopBot, TopKind } from '../api/types'
 import { ensureGuest } from '../state/session'
 
 export async function getCatalog(): Promise<BotCatalog> {
@@ -35,4 +35,19 @@ export async function getBotCard(id: string): Promise<BotCard> {
 export async function getTopBots(kind: TopKind): Promise<TopBot[]> {
   const r = await request<{ bots?: TopBot[] }>('GET', `/bots/top?kind=${kind}`)
   return Array.isArray(r?.bots) ? r.bots : []
+}
+
+export async function getRecaps(): Promise<{ recaps: Recap[]; unseen: number }> {
+  await ensureGuest()
+  const r = await request<{ recaps?: Recap[]; unseen?: number }>('GET', '/bots/recaps')
+  return { recaps: Array.isArray(r?.recaps) ? r.recaps : [], unseen: typeof r?.unseen === 'number' ? r.unseen : 0 }
+}
+
+export async function markRecapsSeen(): Promise<void> {
+  await ensureGuest()
+  await request('POST', '/bots/recaps/seen')
+}
+
+export async function getMatch(id: string): Promise<MatchView> {
+  return request<MatchView>('GET', `/arena/matches/${encodeURIComponent(id)}`)
 }
