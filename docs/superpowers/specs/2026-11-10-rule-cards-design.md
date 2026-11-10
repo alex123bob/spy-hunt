@@ -37,7 +37,7 @@ Anti-goals (a failure even if it technically works)
 
 | id | holds when |
 |---|---|
-| `accused` | the latest reveal in this game shows at least one vote against this bot |
+| `accused` | at least one vote against this bot in the latest voted round, including its re-vote |
 | `first_to_speak` | describe phase only: no one has spoken yet in the current describe stage |
 | `last_to_speak` | describe phase only, regular stage only (not a tiebreak): every other alive player has spoken in this stage |
 | `after_elimination` | someone has already been eliminated in this game |
