@@ -58,7 +58,7 @@ test('a visitor remixes a bot and the top bots board starts empty', async ({ bro
   await expect(visitor.getByRole('radio', { name: 'Pirate' })).toBeChecked()
   await visitor.getByLabel('Name', { exact: true }).fill('Mochi Jr')
   await visitor.getByRole('button', { name: 'Save' }).click()
-  await expect(visitor.getByTestId('bot-card')).toContainText('Remixed from Mochi')
+  await expect(visitor.locator('.bot-item').getByTestId('bot-card')).toContainText('Remixed from Mochi')
 
   await owner.goto(`/bot/${id}`)
   await expect(owner.getByText('Remixes: 1')).toBeVisible()
