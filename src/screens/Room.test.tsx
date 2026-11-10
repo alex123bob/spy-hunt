@@ -77,9 +77,14 @@ describe('a failed stream reloads with a growing delay', () => {
   const gets = () => vi.mocked(request).mock.calls.filter((c) => c[0] === 'GET').length
   const statusOf = (n: number) => vi.mocked(openRoomStream).mock.calls[n][2]
   const advance = (ms: number) => act(async () => { await vi.advanceTimersByTimeAsync(ms) })
+  // The fake clock never follows real time here, so 999 ms really means 999 ms; waitFor would need it to.
+  const streams = async (n: number) => {
+    for (let i = 0; i < 20 && vi.mocked(openRoomStream).mock.calls.length < n; i++) await advance(0)
+    expect(openRoomStream).toHaveBeenCalledTimes(n)
+  }
 
   beforeEach(() => {
-    vi.useFakeTimers({ shouldAdvanceTime: true })
+    vi.useFakeTimers()
     vi.mocked(request).mockResolvedValue(playing())
     vi.mocked(openRoomStream).mockClear()
   })
@@ -87,37 +92,37 @@ describe('a failed stream reloads with a growing delay', () => {
 
   test('not immediately, then after 1 s, then after 2 s', async () => {
     go()
-    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(1))
+    await streams(1)
     expect(gets()).toBe(1)
     act(() => statusOf(0)('failed'))
     expect(gets()).toBe(1)
     await advance(999)
     expect(gets()).toBe(1)
-    await advance(2)
-    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(2))
+    await advance(1)
+    await streams(2)
     expect(gets()).toBe(2)
     act(() => statusOf(1)('failed'))
     await advance(1999)
     expect(gets()).toBe(2)
-    await advance(2)
-    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(3))
+    await advance(1)
+    await streams(3)
   })
 
   test('an open stream resets the delay to 1 s', async () => {
     go()
-    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(1))
+    await streams(1)
     act(() => statusOf(0)('failed'))
-    await advance(1001)
-    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(2))
+    await advance(1000)
+    await streams(2)
     act(() => statusOf(1)('open'))
     act(() => statusOf(1)('failed'))
-    await advance(1001)
-    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(3))
+    await advance(1000)
+    await streams(3)
   })
 
   test('leaving the page cancels a pending reload', async () => {
     const { unmount } = go()
-    await waitFor(() => expect(openRoomStream).toHaveBeenCalledTimes(1))
+    await streams(1)
     act(() => statusOf(0)('failed'))
     unmount()
     await advance(5000)
