@@ -94,3 +94,12 @@ test('a visit is counted once per page load, however often Landing mounts', () =
   recordPageLoadVisit()
   expect(pendingNudge()).toBe('return') // the third page load
 })
+
+test('a win is armed once per game, even if the result screen remounts', () => {
+  recordWin('ABCD:1')
+  dismiss('win')
+  recordWin('ABCD:1') // reload or reopen of the same finished game
+  expect(pendingNudge()).toBeNull()
+  recordWin('ABCD:2') // a rematch and a new win
+  expect(pendingNudge()).toBe('win')
+})

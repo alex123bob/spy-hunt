@@ -5,7 +5,7 @@ import type { Snapshot } from '../api/types'
 import { getRecaps } from '../bots/api'
 import { t, useLang } from '../i18n'
 import { getDailyStreak } from '../daily/api'
-import { recordPageLoadVisit } from '../state/nudges'
+import { recordPageLoadVisit, recordStreakMilestone } from '../state/nudges'
 import { ensureGuest, getSession, setName as saveName } from '../state/session'
 
 export function Landing() {
@@ -16,8 +16,12 @@ export function Landing() {
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const [unseen, setUnseen] = useState(0)
-  const [daily, setDaily] = useState({ streak: 0, played: false })
-  const { streak, played } = daily
+  // null until the server answers, so the card never flashes a status it hasn't confirmed
+  const [daily, setDaily] = useState<{ streak: number; played: boolean } | null>(null)
+  const hasSession = !!getSession().playerId
+  const streak = daily?.streak ?? 0
+  const played = daily?.played ?? false
+  const statusKnown = daily !== null || !hasSession
 
   useEffect(() => recordPageLoadVisit(), [])
 
@@ -25,7 +29,11 @@ export function Landing() {
     if (!getSession().playerId) return
     let live = true
     getRecaps().then((r) => live && setUnseen(r.unseen), () => {})
-    getDailyStreak().then((d) => live && setDaily({ streak: d.streak, played: d.played_today }), () => {})
+    getDailyStreak().then((d) => {
+      if (!live) return
+      setDaily({ streak: d.streak, played: d.played_today })
+      recordStreakMilestone(d.streak)
+    }, () => live && setDaily({ streak: 0, played: false }))
     return () => {
       live = false
     }
@@ -69,7 +77,7 @@ export function Landing() {
       <p className="muted">{t('landing.tagline')}</p>
       <button type="button" className="btn daily-card" onClick={() => nav('/daily')}>
         <strong>{t('daily.card')}</strong>
-        <span className="muted">{played ? t('daily.doneToday') : t('daily.play')}</span>
+        <span className="muted">{!statusKnown ? '\u00a0' : played ? t('daily.doneToday') : t('daily.play')}</span>
         {streak >= 1 && <span>{t('daily.streak', { n: streak })}</span>}
       </button>
       <button type="button" className="btn daily-card" onClick={() => nav('/bots')}>

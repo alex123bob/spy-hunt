@@ -18,7 +18,7 @@ export function Result({ state }: { state: Snapshot }) {
   const roles: Role[] = ['civilian', 'spy']
   const info = resultInfo(state, lang)
   useEffect(() => {
-    if (info.outcome === 'won') recordWin()
+    if (info.outcome === 'won') recordWin(`${state.code}:${state.game_no}`)
   }, [])
   const card = info.outcome === 'ended' ? null : resultShareText(state, info, `${window.location.origin}/`)
 

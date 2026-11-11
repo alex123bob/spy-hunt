@@ -5,7 +5,7 @@ import { setLang } from '../i18n'
 import { getSession } from '../state/session'
 import { getRecaps } from '../bots/api'
 import { getDailyStreak } from '../daily/api'
-import { recordPageLoadVisit } from '../state/nudges'
+import { recordPageLoadVisit, recordStreakMilestone } from '../state/nudges'
 
 vi.mock('../bots/api', () => ({ getRecaps: vi.fn() }))
 
@@ -19,7 +19,7 @@ vi.mock('../state/session', async () => {
   }
 })
 
-vi.mock('../state/nudges', () => ({ recordPageLoadVisit: vi.fn() }))
+vi.mock('../state/nudges', () => ({ recordPageLoadVisit: vi.fn(), recordStreakMilestone: vi.fn() }))
 vi.mock('../daily/api', () => ({ getDailyStreak: vi.fn() }))
 
 function Where() { return <div data-testid="loc">{useLocation().pathname}</div> }
@@ -90,6 +90,30 @@ test('the daily card shows the streak', async () => {
   vi.mocked(getDailyStreak).mockResolvedValue({ streak: 4, best: 4, played_today: false })
   renderLanding()
   expect(await screen.findByText('Streak 4 🔥')).toBeInTheDocument()
+})
+
+test('Landing reports the streak so the milestone nudge can fire without opening the result screen', async () => {
+  vi.mocked(recordStreakMilestone).mockClear()
+  vi.mocked(getDailyStreak).mockResolvedValue({ streak: 3, best: 3, played_today: true })
+  renderLanding()
+  await screen.findByText('Streak 3 🔥')
+  expect(recordStreakMilestone).toHaveBeenCalledWith(3)
+})
+
+test('the daily card does not claim a status until the streak has loaded', async () => {
+  let resolve!: (v: { streak: number; best: number; played_today: boolean }) => void
+  vi.mocked(getDailyStreak).mockReturnValue(new Promise((r) => { resolve = r }))
+  renderLanding()
+  expect(screen.queryByText("Play today's puzzle")).toBeNull()
+  expect(screen.queryByText('Done today ✅')).toBeNull()
+  await act(async () => { resolve({ streak: 1, best: 1, played_today: true }) })
+  expect(screen.getByText('Done today ✅')).toBeInTheDocument()
+})
+
+test('with no session the daily card still offers the puzzle at once', () => {
+  vi.mocked(getSession).mockImplementation(() => ({ playerId: '', token: '', lang: 'en', name: '' }))
+  renderLanding()
+  expect(screen.getByText("Play today's puzzle")).toBeInTheDocument()
 })
 
 test('a streak failure shows no badge and no error', async () => {

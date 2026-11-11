@@ -128,6 +128,7 @@ test('a win records the win nudge once, even across a re-render', () => {
   const { rerender } = view(s)
   rerender(<MemoryRouter><Result state={s} /></MemoryRouter>)
   expect(recordWin).toHaveBeenCalledTimes(1)
+  expect(recordWin).toHaveBeenCalledWith('ABCD:1') // keyed to room code and game number
 })
 
 test('a loss or an ended game does not record the win nudge', () => {

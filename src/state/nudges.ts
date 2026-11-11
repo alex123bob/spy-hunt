@@ -6,6 +6,7 @@ export const RETURN_VISIT_AT = 3
 interface NudgeState {
   visits: number
   lastStreak?: number
+  lastWinKey?: string
   pending: { streak?: number; win?: true; return?: true }
 }
 
@@ -73,9 +74,12 @@ export function recordStreakMilestone(streak: number): void {
   save({ ...s, lastStreak: streak, pending: crossed ? { ...s.pending, streak } : s.pending })
 }
 
-export function recordWin(): void {
+// `gameKey` (room code + game number) makes a win count once: remounting the same finished game
+// must not bring a dismissed banner back.
+export function recordWin(gameKey?: string): void {
   const s = load()
-  save({ ...s, pending: { ...s.pending, win: true } })
+  if (gameKey !== undefined && s.lastWinKey === gameKey) return
+  save({ ...s, lastWinKey: gameKey ?? s.lastWinKey, pending: { ...s.pending, win: true } })
 }
 
 export function recordVisit(): void {
