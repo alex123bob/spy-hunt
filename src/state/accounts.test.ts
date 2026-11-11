@@ -75,3 +75,13 @@ test('useAccount resolves the account when a session exists', async () => {
   expect(result.current).toEqual({ email: null })
   await waitFor(() => expect(result.current).toEqual({ email: 'a@b.com' }))
 })
+
+test('concurrent getAccount calls share one request', async () => {
+  const f = vi.spyOn(globalThis, 'fetch')
+    .mockResolvedValueOnce(reply({ player_id: 'p1', token: 't1' }))
+    .mockResolvedValueOnce(reply({ email: 'a@b.com' }))
+  const [a, b] = await Promise.all([getAccount(), getAccount()])
+  expect(a).toEqual({ email: 'a@b.com' })
+  expect(b).toEqual(a)
+  expect(f.mock.calls.filter((c) => String(c[0]).endsWith('/me'))).toHaveLength(1)
+})

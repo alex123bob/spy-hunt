@@ -61,6 +61,16 @@ The landing page has a "Daily Spy Hunter" card that shows your streak and whethe
 - **Puzzles** come from a queue on the backend. To refill it, run `python -m ai_svc.spy_hunt.scripts.build_puzzles --count 14` in the backend repo (uses the real model). `--review` lists the ready puzzles with answers and `--veto ID` drops one. With no puzzle ready, `/daily` shows "come back soon".
 - The e2e backend (`e2e/backend.py`) seeds one fixed puzzle (spy Pip, word "organ") so `e2e/daily.spec.ts` can run with the fake model.
 
+## Accounts
+
+Guest play needs no signup. The corner link ("Register / log in") opens a small modal:
+
+- **Register** attaches an email and password to the guest you already are, so your name, bots, streak and history all stay. The nudge banners (a 3-day streak, a win, a third visit) are gentle, dismissible reminders; nothing ever blocks play.
+- **Log in** on another device picks up the same bots, streak and history. It does not sign out your other devices.
+- **Log out** signs out only the device you press it on.
+
+The daily streak is computed by the server from your finished puzzles, so it follows you across devices. There is no email verification and no password reset in this version.
+
 ## Bots
 
 Each guest can dress up to 3 bots at `/bots`: a name, an emoji avatar and colour, and three outfit slots (voice, clue style, quirk) that change how the bot plays.

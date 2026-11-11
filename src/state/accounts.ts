@@ -22,14 +22,24 @@ export async function logout(): Promise<void> {
   forgetGuest()
 }
 
-export async function getAccount(): Promise<Account> {
-  try {
-    await ensureGuest()
-    const r = await request<Account>('GET', '/me')
-    return { email: typeof r?.email === 'string' ? r.email : null }
-  } catch {
-    return { email: null }
+let inflight: Promise<Account> | null = null
+
+// TopBar and NudgeBanner both mount at once; share one request instead of sending two
+export function getAccount(): Promise<Account> {
+  if (!inflight) {
+    inflight = (async () => {
+      try {
+        await ensureGuest()
+        const r = await request<Account>('GET', '/me')
+        return { email: typeof r?.email === 'string' ? r.email : null }
+      } catch {
+        return { email: null }
+      }
+    })().finally(() => {
+      inflight = null
+    })
   }
+  return inflight
 }
 
 export function useAccount(): Account {
