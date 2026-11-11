@@ -21,3 +21,15 @@ test('long names keep wrap', () => {
   render(<PlayerChip player={p({ name })} />)
   expect(screen.getByText(name)).toHaveClass('wrap')
 })
+
+test('a clan member shows the clan badge with the clan name as its label', () => {
+  render(<PlayerChip player={p({ is_bot: false, clan: { name: 'Foxes', emoji: '🦊', color: '#ff6b6b' } })} />)
+  const badge = screen.getByRole('img', { name: 'Clan: Foxes' })
+  expect(badge).toHaveTextContent('🦊')
+  expect(badge).toHaveAttribute('title', 'Foxes')
+})
+
+test('no clan, no badge', () => {
+  render(<PlayerChip player={p({ is_bot: false, clan: null })} />)
+  expect(screen.queryByRole('img', { name: /Clan/ })).toBeNull()
+})

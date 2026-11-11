@@ -71,6 +71,12 @@ Guest play needs no signup. The corner link ("Register / log in") opens a small 
 
 The daily streak is computed by the server from your finished puzzles, so it follows you across devices. There is no email verification and no password reset in this version.
 
+## Clans
+
+Signed-in players see a **Clan** link in the top bar (`/clan`). You can start a clan (a name and a badge), join one with its 6-character invite code, or pick one from the list of open clans. One clan per account, and up to 30 members.
+
+Every finished game with at least 2 people gives each person 10 points, plus 10 for the winning side. Finishing the daily puzzle gives 10, plus 10 if you found the spy. Each player can earn at most 100 points a day. Weeks run Monday to Sunday (UTC). Clans with 3 or more members that scored last week are paired with a rival of similar size, and an odd one out faces a practice rival. The clan page shows this week's score against the rival, time left, the win streak, each member's points, and the last 8 weeks. Your clan's badge appears next to your name in rooms and on the result screen.
+
 ## Bots
 
 Each guest can dress up to 3 bots at `/bots`: a name, an emoji avatar and colour, and three outfit slots (voice, clue style, quirk) that change how the bot plays.

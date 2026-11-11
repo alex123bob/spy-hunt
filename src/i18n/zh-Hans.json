@@ -326,5 +326,6 @@
   "error.code.already_in_clan": "请先退出当前战队。",
   "error.code.no_clan": "没有使用该邀请码的战队。",
   "error.code.not_in_clan": "你不在任何战队中。",
-  "error.code.bad_badge": "请选择一个徽章。"
+  "error.code.bad_badge": "请选择一个徽章。",
+  "clan.badgeLabel": "战队：{name}"
 }

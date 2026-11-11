@@ -19,6 +19,12 @@ from ai_svc.spy_hunt import arena, db, fake_llm, puzzles  # noqa: E402
 from ai_svc.spy_hunt.tests.puzzle_fixtures import sample_puzzle  # noqa: E402
 
 db.init_db()
+
+# Every spec reaches this backend from 127.0.0.1, so parallel specs share one per-IP
+# `flood` budget and starve each other. Raise it in place (routes hold a reference to
+# the limiter object); per-guest limits stay as in production.
+from ai_svc.spy_hunt import ratelimits  # noqa: E402
+ratelimits._LIMITERS["flood"].max_requests = 100_000
 puzzles.insert_ready(*sample_puzzle(), 2, "p-e2e")  # spy is seat 2 (Pip), spy word "organ" (option 0)
 
 app = Flask(__name__)

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { request } from '../api/client'
 import { LANGS, type Role } from '../api/types'
 import { Avatar } from '../components/Avatar'
+import { ClanTag } from '../components/ClanTag'
 import { shareResult } from '../daily/share'
 import { resultInfo, resultShareText } from '../game/result'
 import { t, useLang } from '../i18n'
@@ -63,7 +64,7 @@ export function Result({ state }: { state: Snapshot }) {
         <p className="muted">{t('result.everyone')}</p>
         {state.players.map((p) => (
           <div key={p.seat} className="row between">
-            <span className="wrap"><Avatar player={p} /> {p.name}</span>
+            <span className="wrap"><Avatar player={p} /> {p.name} <ClanTag clan={p.clan} /></span>
             <span className={`role ${p.role ?? ''}`}>{p.role ? t(`role.${p.role}`) : ''}</span>
           </div>
         ))}

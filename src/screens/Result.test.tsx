@@ -136,3 +136,10 @@ test('a loss or an ended game does not record the win nudge', () => {
   view(finished({ winner: null }))
   expect(recordWin).not.toHaveBeenCalled()
 })
+
+test('the everyone list shows a clan badge', () => {
+  const s = finished()
+  s.players[1] = { ...s.players[1], clan: { name: 'Foxes', emoji: '🦊', color: '#ff6b6b' } }
+  view(s)
+  expect(screen.getByRole('img', { name: 'Clan: Foxes' })).toBeInTheDocument()
+})
