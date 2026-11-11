@@ -23,8 +23,22 @@ export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot
   const endRef = useRef<HTMLDivElement>(null)
   const nameOf = (seat: number | null) => state.players.find((p) => p.seat === seat)?.name ?? ''
 
+  // The turn bar is sticky over the bottom of the page, so "in view" is not enough: leave room for it,
+  // or the newest statement stays hidden behind the bar whenever the page itself is scrolling.
+  // The bar's height changes with the turn banner and error line, so follow it as well.
   useEffect(() => {
-    endRef.current?.scrollIntoView?.({ block: 'end' })
+    const end = endRef.current
+    const bar = end?.closest('.table')?.querySelector('.turnbar')
+    if (!end || !bar) return
+    const settle = () => {
+      end.style.scrollMarginBottom = `${bar.getBoundingClientRect().height + 8}px`
+      end.scrollIntoView?.({ block: 'end' })
+    }
+    settle()
+    if (typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(settle)
+    ro.observe(bar)
+    return () => ro.disconnect()
   }, [state.messages.length])
 
   const pickLang = (l: typeof lang) => {
