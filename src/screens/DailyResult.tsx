@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { DailyPuzzle, DailyResult as Result } from '../api/types'
 import { shareResult, shareText } from '../daily/share'
 import { t, useLang } from '../i18n'
+import { recordStreakMilestone } from '../state/nudges'
 
 function clock(ms: number): string {
   const s = Math.round(ms / 1000)
@@ -13,6 +14,7 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
   const nav = useNavigate()
   const lang = useLang()
   const [shareState, setShareState] = useState('')
+  useEffect(() => recordStreakMilestone(result.streak), [])
   const spy = puzzle.players.find((p) => p.seat === result.answer.spy_seat)?.name ?? ''
   const text = shareText({
     number: puzzle.number, tries: result.tries, solved: result.solved, elapsedMs: result.elapsed_ms,

@@ -5,6 +5,7 @@ import type { Snapshot } from '../api/types'
 import { getRecaps } from '../bots/api'
 import { t, useLang } from '../i18n'
 import { getDailyStreak } from '../daily/api'
+import { recordVisit } from '../state/nudges'
 import { ensureGuest, getSession, setName as saveName } from '../state/session'
 
 export function Landing() {
@@ -17,6 +18,8 @@ export function Landing() {
   const [unseen, setUnseen] = useState(0)
   const [daily, setDaily] = useState({ streak: 0, played: false })
   const { streak, played } = daily
+
+  useEffect(() => recordVisit(), [])
 
   useEffect(() => {
     if (!getSession().playerId) return

@@ -281,5 +281,9 @@
   "auth.passwordTooShort": "密码至少需要 8 个字符。",
   "auth.badEmail": "请输入有效的邮箱。",
   "auth.loginFailed": "邮箱或密码不正确。",
-  "auth.close": "关闭"
+  "auth.close": "关闭",
+  "nudge.streak": "🔥 连续 {n} 天 — 注册后可在任意设备上保留",
+  "nudge.win": "🎉 赢得漂亮！注册后不会因清除浏览器而丢失",
+  "nudge.return": "👋 欢迎回来 — 注册以保护你的机器人",
+  "nudge.dismiss": "关闭"
 }

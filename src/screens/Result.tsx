@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { request } from '../api/client'
 import { LANGS, type Role } from '../api/types'
@@ -6,6 +6,7 @@ import { Avatar } from '../components/Avatar'
 import { shareResult } from '../daily/share'
 import { resultInfo, resultShareText } from '../game/result'
 import { t, useLang } from '../i18n'
+import { recordWin } from '../state/nudges'
 import type { Snapshot } from '../api/types'
 
 export function Result({ state }: { state: Snapshot }) {
@@ -16,6 +17,9 @@ export function Result({ state }: { state: Snapshot }) {
   const leave = () => void request('POST', `/rooms/${state.code}/leave`).catch(() => {})
   const roles: Role[] = ['civilian', 'spy']
   const info = resultInfo(state, lang)
+  useEffect(() => {
+    if (info.outcome === 'won') recordWin()
+  }, [])
   const card = info.outcome === 'ended' ? null : resultShareText(state, info, `${window.location.origin}/`)
 
   const share = async () => {

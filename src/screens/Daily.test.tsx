@@ -6,9 +6,11 @@ import type { DailyPuzzle, DailyResult, DailyState } from '../api/types'
 import { getDaily, getResult, guessSpy, guessWord } from '../daily/api'
 import { shareResult } from '../daily/share'
 import { setLang } from '../i18n'
+import { recordStreakMilestone } from '../state/nudges'
 import { msg } from '../test/fixtures'
 
 vi.mock('../daily/api', () => ({ getDaily: vi.fn(), guessSpy: vi.fn(), guessWord: vi.fn(), getResult: vi.fn() }))
+vi.mock('../state/nudges', () => ({ recordStreakMilestone: vi.fn() }))
 vi.mock('../daily/share', async (orig) => ({ ...(await orig<typeof import('../daily/share')>()), shareResult: vi.fn() }))
 
 const NAMES = ['Milo', 'Juno', 'Pip', 'Nova', 'Remy']
@@ -42,6 +44,7 @@ beforeEach(() => {
   vi.mocked(guessWord).mockReset()
   vi.mocked(getResult).mockReset().mockResolvedValue(result)
   vi.mocked(shareResult).mockReset()
+  vi.mocked(recordStreakMilestone).mockClear()
 })
 
 test('shows the civilian word and statements in the viewer language', async () => {
@@ -180,3 +183,12 @@ test('the result offers to dress up a bot', async () => {
   await waitFor(() => expect(screen.getByTestId('loc')).toHaveTextContent('/bots'))
 })
 function Loc() { return <div data-testid="loc">{useLocation().pathname}</div> }
+
+test('a finished daily records the streak milestone once, even across a re-render', async () => {
+  vi.mocked(getDaily).mockResolvedValue(state('done', 2))
+  const { rerender } = render(tree)
+  expect(await screen.findByText('You found the spy!')).toBeInTheDocument()
+  rerender(tree)
+  expect(recordStreakMilestone).toHaveBeenCalledTimes(1)
+  expect(recordStreakMilestone).toHaveBeenCalledWith(3)
+})

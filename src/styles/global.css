@@ -84,3 +84,4 @@ label { display: flex; flex-direction: column; gap: 6px; }
 .topbar-email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); display: flex; align-items: center; justify-content: center; padding: var(--gutter); z-index: 10; }
 .modal { width: 100%; max-width: 420px; max-height: 100dvh; overflow-y: auto; }
+.nudge { max-width: 520px; margin: 8px auto 0; padding: 10px 14px; background: var(--panel); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; width: calc(100% - 2 * var(--gutter)); }

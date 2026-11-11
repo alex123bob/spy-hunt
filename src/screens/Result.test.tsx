@@ -4,9 +4,11 @@ import { Result } from './Result'
 import type { Role, Snapshot } from '../api/types'
 import { shareResult } from '../daily/share'
 import { setLang } from '../i18n'
+import { recordWin } from '../state/nudges'
 import { player, snap } from '../test/fixtures'
 
 vi.mock('../daily/share', () => ({ shareResult: vi.fn() }))
+vi.mock('../state/nudges', () => ({ recordWin: vi.fn() }))
 
 const WORDS = { civilian: { en: 'piano', 'zh-Hans': '钢琴' }, spy: { en: 'organ', 'zh-Hans': '风琴' } }
 
@@ -31,6 +33,7 @@ const view = (s: Snapshot) => render(<MemoryRouter><Result state={s} /></MemoryR
 beforeEach(() => {
   setLang('en')
   vi.mocked(shareResult).mockReset()
+  vi.mocked(recordWin).mockClear()
 })
 
 test('shows You won for the winning viewer and You lost for the losing one', () => {
@@ -118,4 +121,17 @@ test('the everyone list shows a bot avatar emoji', () => {
   view(s)
   expect(screen.getByText('🐙')).toBeInTheDocument()
   expect(screen.getAllByText('Ann').length).toBeGreaterThan(0)
+})
+
+test('a win records the win nudge once, even across a re-render', () => {
+  const s = finished()
+  const { rerender } = view(s)
+  rerender(<MemoryRouter><Result state={s} /></MemoryRouter>)
+  expect(recordWin).toHaveBeenCalledTimes(1)
+})
+
+test('a loss or an ended game does not record the win nudge', () => {
+  view(finished({ winner: 'spies' }))
+  view(finished({ winner: null }))
+  expect(recordWin).not.toHaveBeenCalled()
 })

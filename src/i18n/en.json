@@ -281,5 +281,9 @@
   "auth.passwordTooShort": "Password must be at least 8 characters.",
   "auth.badEmail": "Enter a valid email.",
   "auth.loginFailed": "Email or password is incorrect.",
-  "auth.close": "Close"
+  "auth.close": "Close",
+  "nudge.streak": "🔥 {n}-day streak — register to keep it on any device",
+  "nudge.win": "🎉 Nice win! Register so it's never lost to a cleared browser",
+  "nudge.return": "👋 Welcome back — register to keep your bots safe",
+  "nudge.dismiss": "Dismiss"
 }
