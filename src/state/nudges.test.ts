@@ -66,3 +66,19 @@ test('every function is a safe no-op when storage throws', () => {
     recordStreakMilestone(5); recordWin(); recordVisit(); dismiss('win'); pendingNudge()
   }).not.toThrow()
 })
+
+test('seeing the same streak again does not re-arm a dismissed streak nudge', () => {
+  recordStreakMilestone(5)
+  dismiss('streak')
+  recordStreakMilestone(5) // reopening the result screen
+  recordStreakMilestone(6) // the next day
+  expect(pendingNudge()).toBeNull()
+})
+
+test('a streak that drops and climbs back to the milestone arms the nudge again', () => {
+  recordStreakMilestone(3)
+  dismiss('streak')
+  recordStreakMilestone(0)
+  recordStreakMilestone(3)
+  expect(pendingNudge()).toBe('streak')
+})

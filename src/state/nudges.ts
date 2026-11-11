@@ -5,6 +5,7 @@ export const RETURN_VISIT_AT = 3
 
 interface NudgeState {
   visits: number
+  lastStreak?: number
   pending: { streak?: number; win?: true; return?: true }
 }
 
@@ -66,9 +67,10 @@ function save(s: NudgeState): void {
 }
 
 export function recordStreakMilestone(streak: number): void {
-  if (streak < STREAK_MILESTONE) return
   const s = load()
-  save({ ...s, pending: { ...s.pending, streak } })
+  // arm only on crossing the milestone, so reopening the result screen can't resurrect a dismissed banner
+  const crossed = streak >= STREAK_MILESTONE && (s.lastStreak ?? 0) < STREAK_MILESTONE
+  save({ ...s, lastStreak: streak, pending: crossed ? { ...s.pending, streak } : s.pending })
 }
 
 export function recordWin(): void {
