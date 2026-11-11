@@ -91,8 +91,7 @@ export function ensureGuest(): Promise<Session> {
     setCredentials(null)
     inflight = request<Guest>('POST', '/guests')
       .then((g) => {
-        save({ playerId: g.player_id, token: g.token })
-        setCredentials({ playerId: g.player_id, token: g.token })
+        setAccountSession({ playerId: g.player_id, token: g.token })
         return getSession()
       })
       .finally(() => {
@@ -100,6 +99,11 @@ export function ensureGuest(): Promise<Session> {
       })
   }
   return inflight
+}
+
+export function setAccountSession({ playerId, token }: { playerId: string; token: string }): void {
+  save({ playerId, token })
+  setCredentials({ playerId, token })
 }
 
 export function forgetGuest(): void {

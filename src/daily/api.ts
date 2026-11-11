@@ -17,6 +17,11 @@ export async function guessWord(option: number | null, day: string): Promise<Wor
   return request<WordResult>('POST', '/daily/word', { option, day })
 }
 
+export async function getDailyStreak(): Promise<{ streak: number; best: number; played_today: boolean }> {
+  await ensureGuest()
+  return request<{ streak: number; best: number; played_today: boolean }>('GET', '/daily/streak')
+}
+
 export async function getResult(day: string): Promise<DailyResult> {
   await ensureGuest()
   return request<DailyResult>('GET', `/daily/result?day=${day}`)

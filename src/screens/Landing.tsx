@@ -5,7 +5,7 @@ import type { Lang, Snapshot } from '../api/types'
 import { getRecaps } from '../bots/api'
 import { LangPicker } from '../components/LangPicker'
 import { setLang, t, useLang } from '../i18n'
-import { currentStreak, playedToday, todayUtc } from '../daily/streak'
+import { getDailyStreak } from '../daily/api'
 import { ensureGuest, getSession, setName as saveName, setSessionLang } from '../state/session'
 
 export function Landing() {
@@ -16,14 +16,14 @@ export function Landing() {
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const [unseen, setUnseen] = useState(0)
-  const today = todayUtc()
-  const played = playedToday(today)
-  const streak = currentStreak(today)
+  const [daily, setDaily] = useState({ streak: 0, played: false })
+  const { streak, played } = daily
 
   useEffect(() => {
     if (!getSession().playerId) return
     let live = true
     getRecaps().then((r) => live && setUnseen(r.unseen), () => {})
+    getDailyStreak().then((d) => live && setDaily({ streak: d.streak, played: d.played_today }), () => {})
     return () => {
       live = false
     }

@@ -4,15 +4,11 @@ import { Daily } from './Daily'
 import { ApiError } from '../api/client'
 import type { DailyPuzzle, DailyResult, DailyState } from '../api/types'
 import { getDaily, getResult, guessSpy, guessWord } from '../daily/api'
-import { recordResult } from '../daily/streak'
 import { shareResult } from '../daily/share'
 import { setLang } from '../i18n'
 import { msg } from '../test/fixtures'
 
 vi.mock('../daily/api', () => ({ getDaily: vi.fn(), guessSpy: vi.fn(), guessWord: vi.fn(), getResult: vi.fn() }))
-vi.mock('../daily/streak', () => ({
-  recordResult: vi.fn(() => ({ streak: 3, best: 3, lastDay: '2026-11-10', lastSolvedDay: '2026-11-10', history: {} })),
-}))
 vi.mock('../daily/share', async (orig) => ({ ...(await orig<typeof import('../daily/share')>()), shareResult: vi.fn() }))
 
 const NAMES = ['Milo', 'Juno', 'Pip', 'Nova', 'Remy']
@@ -29,11 +25,13 @@ const puzzle: DailyPuzzle = {
 }
 const state = (stage: 'spy' | 'word' | 'done', tries = 0, wrong: number[] = []): DailyState => ({
   puzzle, me: { stage, tries, tries_left: stage === 'spy' ? 2 - tries : 0, wrong },
+  streak: 3, best: 3, played_today: stage === 'done',
 })
 const result: DailyResult = {
   solved: true, tries: 2, word_correct: true, elapsed_ms: 72000, score: 120,
   answer: { spy_seat: 2, spy_word: { en: 'organ', 'zh-Hans': '风琴' }, civilian_word: puzzle.civilian_word },
   stats: { players: 40, solved_pct: 62 },
+  streak: 3, best: 3, played_today: true,
 }
 const tree = <MemoryRouter><Daily /></MemoryRouter>
 
@@ -43,7 +41,6 @@ beforeEach(() => {
   vi.mocked(guessSpy).mockReset()
   vi.mocked(guessWord).mockReset()
   vi.mocked(getResult).mockReset().mockResolvedValue(result)
-  vi.mocked(recordResult).mockClear()
   vi.mocked(shareResult).mockReset()
 })
 
@@ -113,18 +110,15 @@ test('picking an option sends its index', async () => {
   expect(guessWord).toHaveBeenCalledWith(2, '2026-11-10')
 })
 
-test('the result shows score, stats, streak and the share preview, recording the streak once', async () => {
+test('the result shows score, stats, streak and the share preview', async () => {
   vi.mocked(getDaily).mockResolvedValue(state('done', 2))
-  const { rerender } = render(tree)
+  render(tree)
   expect(await screen.findByText('You found the spy!')).toBeInTheDocument()
   expect(screen.getByText(/The spy was Pip/)).toBeInTheDocument()
   expect(screen.getByText('120')).toBeInTheDocument()
   expect(screen.getByText('62% of 40 players found the spy')).toBeInTheDocument()
   expect(screen.getByText('Streak 3 🔥')).toBeInTheDocument()
   expect(screen.getByTestId('share-preview')).toHaveTextContent('Spy Hunter #12')
-  rerender(tree)
-  expect(recordResult).toHaveBeenCalledTimes(1)
-  expect(recordResult).toHaveBeenCalledWith('2026-11-10', true, 120)
 })
 
 test('the share button reports copied', async () => {

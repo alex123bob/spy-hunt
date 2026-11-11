@@ -1,4 +1,4 @@
-import { getDaily, getResult, guessSpy, guessWord } from './api'
+import { getDaily, getDailyStreak, getResult, guessSpy, guessWord } from './api'
 import { request } from '../api/client'
 import { ensureGuest } from '../state/session'
 
@@ -31,4 +31,10 @@ test('guessWord posts the option, null to skip', async () => {
 test('getResult asks for the puzzle day', async () => {
   await getResult('2026-11-10')
   expect(request).toHaveBeenCalledWith('GET', '/daily/result?day=2026-11-10')
+})
+
+test('getDailyStreak gets /daily/streak', async () => {
+  await getDailyStreak()
+  expect(ensureGuest).toHaveBeenCalled()
+  expect(request).toHaveBeenCalledWith('GET', '/daily/streak')
 })

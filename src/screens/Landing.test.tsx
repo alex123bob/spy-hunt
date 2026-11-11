@@ -4,6 +4,7 @@ import { Landing } from './Landing'
 import { setLang } from '../i18n'
 import { getSession } from '../state/session'
 import { getRecaps } from '../bots/api'
+import { getDailyStreak } from '../daily/api'
 
 vi.mock('../bots/api', () => ({ getRecaps: vi.fn() }))
 
@@ -17,12 +18,7 @@ vi.mock('../state/session', async () => {
   }
 })
 
-const daily = vi.hoisted(() => ({ played: false, streak: 0 }))
-vi.mock('../daily/streak', () => ({
-  todayUtc: () => '2026-11-10',
-  playedToday: () => daily.played,
-  currentStreak: () => daily.streak,
-}))
+vi.mock('../daily/api', () => ({ getDailyStreak: vi.fn() }))
 
 function Where() { return <div data-testid="loc">{useLocation().pathname}</div> }
 
@@ -36,8 +32,7 @@ function renderLanding() {
 
 beforeEach(() => {
   setLang('en')
-  daily.played = false
-  daily.streak = 0
+  vi.mocked(getDailyStreak).mockReset().mockResolvedValue({ streak: 0, best: 0, played_today: false })
   vi.mocked(getSession).mockImplementation(() => ({ playerId: 'p', token: 't', lang: 'en', name: '' }))
   vi.mocked(getRecaps).mockReset().mockResolvedValue({ recaps: [], unseen: 0 })
 })
@@ -84,16 +79,25 @@ test('the daily card links to the daily puzzle', async () => {
   expect(screen.queryByText(/Streak/)).toBeNull()
 })
 
-test('the daily card shows the streak', () => {
-  daily.streak = 4
+test('the daily card shows the streak', async () => {
+  vi.mocked(getDailyStreak).mockResolvedValue({ streak: 4, best: 4, played_today: false })
   renderLanding()
-  expect(screen.getByText('Streak 4 🔥')).toBeInTheDocument()
+  expect(await screen.findByText('Streak 4 🔥')).toBeInTheDocument()
 })
 
-test('the daily card says done today once played', () => {
-  daily.played = true
+test('a streak failure shows no badge and no error', async () => {
+  vi.mocked(getDailyStreak).mockRejectedValue(new Error('x'))
   renderLanding()
-  expect(screen.getByText('Done today ✅')).toBeInTheDocument()
+  await waitFor(() => expect(getDailyStreak).toHaveBeenCalled())
+  await act(async () => { await Promise.resolve() })
+  expect(screen.queryByText(/Streak/)).toBeNull()
+  expect(screen.queryByRole('alert')).toBeNull()
+})
+
+test('the daily card says done today once played', async () => {
+  vi.mocked(getDailyStreak).mockResolvedValue({ streak: 1, best: 1, played_today: true })
+  renderLanding()
+  expect(await screen.findByText('Done today ✅')).toBeInTheDocument()
   expect(screen.queryByText("Play today's puzzle")).toBeNull()
 })
 

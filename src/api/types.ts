@@ -114,6 +114,9 @@ export interface DailyMe {
 export interface DailyState {
   puzzle: DailyPuzzle
   me: DailyMe
+  streak: number
+  best: number
+  played_today: boolean
 }
 
 export interface GuessResult {
@@ -136,7 +139,12 @@ export interface DailyResult {
   score: number
   answer: { spy_seat: number; spy_word: WordPair; civilian_word: WordPair }
   stats: { players: number; solved_pct: number }
+  streak: number
+  best: number
+  played_today: boolean
 }
+
+export interface Account { email: string | null }
 
 export interface Avatar { emoji: string; color: string }
 export interface BotRule { when: string; do: string }
