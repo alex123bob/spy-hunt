@@ -19,9 +19,20 @@ test('the newest statement is never hidden behind the turn bar', async ({ browse
     return { n: bubbles.length, gap: Math.round(bar.getBoundingClientRect().top - last.getBoundingClientRect().bottom) }
   })
 
+  // The host is the only human, so the table waits out the turn timer on the host's turn; speak when
+  // it is our turn, otherwise the number of messages depends on how slow the machine is.
+  const speakIfMyTurn = async () => {
+    const input = page.getByPlaceholder('Describe your word…')
+    if ((await input.count()) > 0 && (await input.isEnabled())) {
+      await input.fill('something vague')
+      await page.getByRole('button', { name: 'Send' }).click({ timeout: 2000 }).catch(() => {})
+    }
+  }
+
   const checked = new Set<number>()
-  const end = Date.now() + 120_000
+  const end = Date.now() + 150_000
   while (Date.now() < end && checked.size < 6) {
+    await speakIfMyTurn()
     const s = await state()
     if (s && !checked.has(s.n)) {
       await page.waitForTimeout(250) // let the scroll effect settle
