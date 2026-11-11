@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { authHeaders, setCredentials } from '../api/client'
 import { getAccount, login, logout, register, useAccount } from './accounts'
-import { getSession, resetSessionForTests } from './session'
+import { getCachedEmail, getSession, resetSessionForTests } from './session'
 
 function reply(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
@@ -56,6 +56,8 @@ test('getAccount returns the server body, or {email:null} on failure', async () 
     .mockResolvedValueOnce(reply({ player_id: 'p1', token: 't1' }))
     .mockResolvedValueOnce(reply({ email: 'a@b.com' }))
   expect(await getAccount()).toEqual({ email: 'a@b.com' })
+  localStorage.clear()
+  resetSessionForTests()
   vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('x'))
   expect(await getAccount()).toEqual({ email: null })
 })
@@ -84,4 +86,40 @@ test('concurrent getAccount calls share one request', async () => {
   expect(a).toEqual({ email: 'a@b.com' })
   expect(b).toEqual(a)
   expect(f.mock.calls.filter((c) => String(c[0]).endsWith('/me'))).toHaveLength(1)
+})
+
+test('useAccount shows the cached email at once, with no signed-out flash', async () => {
+  setCredentials({ playerId: 'p1', token: 't1' })
+  localStorage.setItem('spy-hunt.session', JSON.stringify({ playerId: 'p1', token: 't1', email: 'a@b.com' }))
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply({ email: 'a@b.com' }))
+  const { result } = renderHook(() => useAccount())
+  expect(result.current).toEqual({ email: 'a@b.com' })
+  await waitFor(() => expect(globalThis.fetch).toHaveBeenCalled())
+})
+
+test('useAccount keeps the cached email when /me fails transiently', async () => {
+  setCredentials({ playerId: 'p1', token: 't1' })
+  localStorage.setItem('spy-hunt.session', JSON.stringify({ playerId: 'p1', token: 't1', email: 'a@b.com' }))
+  const f = vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply({ error: 'x' }, 500))
+  const { result } = renderHook(() => useAccount())
+  await waitFor(() => expect(f).toHaveBeenCalled())
+  await new Promise((r) => setTimeout(r, 20))
+  expect(result.current).toEqual({ email: 'a@b.com' })
+})
+
+test('a 401 from /me clears the cached email', async () => {
+  setCredentials({ playerId: 'p1', token: 't1' })
+  localStorage.setItem('spy-hunt.session', JSON.stringify({ playerId: 'p1', token: 't1', email: 'a@b.com' }))
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply({ error: 'unauthorized' }, 401))
+  const { result } = renderHook(() => useAccount())
+  await waitFor(() => expect(result.current).toEqual({ email: null }))
+})
+
+test('login and register remember the email; logout forgets it', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply({ player_id: 'p9', token: 'tok9', email: 'z@y.com' }))
+  await login('z@y.com', 'longenough')
+  expect(getCachedEmail()).toBe('z@y.com')
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply({ ok: true }))
+  await logout()
+  expect(getCachedEmail()).toBeNull()
 })

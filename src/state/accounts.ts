@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react'
-import { request } from '../api/client'
+import { ApiError, request } from '../api/client'
 import type { Account } from '../api/types'
-import { ensureGuest, forgetGuest, getSession, setAccountSession } from './session'
+import { ensureGuest, forgetGuest, getCachedEmail, getSession, setAccountSession, setCachedEmail } from './session'
 
 export async function register(email: string, password: string): Promise<Account> {
   await ensureGuest()
-  return request<Account>('POST', '/register', { email, password })
+  const acct = await request<Account>('POST', '/register', { email, password })
+  setCachedEmail(acct.email)
+  return acct
 }
 
 export async function login(email: string, password: string): Promise<void> {
-  const r = await request<{ player_id: string; token: string }>('POST', '/login', { email, password })
+  const r = await request<{ player_id: string; token: string; email?: string }>('POST', '/login', { email, password })
   setAccountSession({ playerId: r.player_id, token: r.token })
+  setCachedEmail(r.email ?? null)
 }
 
 export async function logout(): Promise<void> {
@@ -31,9 +34,16 @@ export function getAccount(): Promise<Account> {
       try {
         await ensureGuest()
         const r = await request<Account>('GET', '/me')
-        return { email: typeof r?.email === 'string' ? r.email : null }
-      } catch {
-        return { email: null }
+        const email = typeof r?.email === 'string' ? r.email : null
+        setCachedEmail(email)
+        return { email }
+      } catch (e) {
+        // a transient failure keeps what we last knew; only a rejected token means signed out
+        if (e instanceof ApiError && e.status === 401) {
+          setCachedEmail(null)
+          return { email: null }
+        }
+        return { email: getCachedEmail() }
       }
     })().finally(() => {
       inflight = null
@@ -43,7 +53,7 @@ export function getAccount(): Promise<Account> {
 }
 
 export function useAccount(): Account {
-  const [account, setAccount] = useState<Account>({ email: null })
+  const [account, setAccount] = useState<Account>(() => ({ email: getCachedEmail() }))
   useEffect(() => {
     if (!getSession().playerId) return
     let live = true

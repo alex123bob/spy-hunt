@@ -85,6 +85,15 @@ export function recordVisit(): void {
   save({ visits, pending: visits === RETURN_VISIT_AT ? { ...s.pending, return: true } : s.pending })
 }
 
+let countedThisLoad = false
+
+// Landing remounts on every in-app trip home; only the first mount of a page load is a visit.
+export function recordPageLoadVisit(): void {
+  if (countedThisLoad) return
+  countedThisLoad = true
+  recordVisit()
+}
+
 export function pendingNudge(): NudgeTrigger | null {
   const p = load().pending
   return ORDER.find((k) => p[k] !== undefined) ?? null
@@ -103,6 +112,7 @@ export function dismiss(trigger: NudgeTrigger): void {
 
 export function resetNudgesForTests(clearStorage = true): void {
   memory = null
+  countedThisLoad = false
   if (!clearStorage) return
   for (const st of stores()) {
     try {

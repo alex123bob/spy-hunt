@@ -7,6 +7,7 @@ export interface Session {
   token: string
   lang: Lang
   name: string
+  email?: string
 }
 
 const KEY = 'spy-hunt.session'
@@ -74,6 +75,14 @@ export function getSession(): Session {
   }
 }
 
+export function getCachedEmail(): string | null {
+  return load().email ?? null
+}
+
+export function setCachedEmail(email: string | null): void {
+  save({ email: email ?? undefined })
+}
+
 export function setName(name: string): void {
   save({ name })
 }
@@ -107,7 +116,7 @@ export function setAccountSession({ playerId, token }: { playerId: string; token
 }
 
 export function forgetGuest(): void {
-  memory = { ...load(), playerId: undefined, token: undefined }
+  memory = { ...load(), playerId: undefined, token: undefined, email: undefined }
   setCredentials(null)
   writeStore({ lang: memory.lang, name: memory.name })
 }

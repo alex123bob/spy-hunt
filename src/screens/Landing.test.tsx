@@ -5,7 +5,7 @@ import { setLang } from '../i18n'
 import { getSession } from '../state/session'
 import { getRecaps } from '../bots/api'
 import { getDailyStreak } from '../daily/api'
-import { recordVisit } from '../state/nudges'
+import { recordPageLoadVisit } from '../state/nudges'
 
 vi.mock('../bots/api', () => ({ getRecaps: vi.fn() }))
 
@@ -19,7 +19,7 @@ vi.mock('../state/session', async () => {
   }
 })
 
-vi.mock('../state/nudges', () => ({ recordVisit: vi.fn() }))
+vi.mock('../state/nudges', () => ({ recordPageLoadVisit: vi.fn() }))
 vi.mock('../daily/api', () => ({ getDailyStreak: vi.fn() }))
 
 function Where() { return <div data-testid="loc">{useLocation().pathname}</div> }
@@ -39,11 +39,10 @@ beforeEach(() => {
   vi.mocked(getRecaps).mockReset().mockResolvedValue({ recaps: [], unseen: 0 })
 })
 
-test('each Landing mount records one visit', () => {
-  vi.mocked(recordVisit).mockClear()
-  const { rerender } = renderLanding()
-  rerender(<MemoryRouter initialEntries={['/']}><Routes><Route path="/" element={<Landing />} /></Routes></MemoryRouter>)
-  expect(recordVisit).toHaveBeenCalledTimes(1)
+test('Landing records a page-load visit on mount', () => {
+  vi.mocked(recordPageLoadVisit).mockClear()
+  renderLanding()
+  expect(recordPageLoadVisit).toHaveBeenCalledTimes(1)
 })
 
 test('shows the unseen recap count on the My bots card', async () => {

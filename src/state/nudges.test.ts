@@ -1,5 +1,5 @@
 import {
-  dismiss, pendingNudge, recordStreakMilestone, recordVisit, recordWin, resetNudgesForTests,
+  dismiss, pendingNudge, recordPageLoadVisit, recordStreakMilestone, recordVisit, recordWin, resetNudgesForTests,
 } from './nudges'
 
 beforeEach(() => {
@@ -81,4 +81,16 @@ test('a streak that drops and climbs back to the milestone arms the nudge again'
   recordStreakMilestone(0)
   recordStreakMilestone(3)
   expect(pendingNudge()).toBe('streak')
+})
+
+test('a visit is counted once per page load, however often Landing mounts', () => {
+  recordPageLoadVisit()
+  recordPageLoadVisit()
+  recordPageLoadVisit()
+  expect(pendingNudge()).toBeNull() // three mounts, still one visit
+  resetNudgesForTests(false) // a fresh page load, storage kept
+  recordPageLoadVisit()
+  resetNudgesForTests(false)
+  recordPageLoadVisit()
+  expect(pendingNudge()).toBe('return') // the third page load
 })
