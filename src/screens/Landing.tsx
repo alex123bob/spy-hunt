@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { request } from '../api/client'
-import type { Lang, Snapshot } from '../api/types'
+import type { Snapshot } from '../api/types'
 import { getRecaps } from '../bots/api'
-import { LangPicker } from '../components/LangPicker'
-import { setLang, t, useLang } from '../i18n'
+import { t, useLang } from '../i18n'
 import { getDailyStreak } from '../daily/api'
-import { ensureGuest, getSession, setName as saveName, setSessionLang } from '../state/session'
+import { ensureGuest, getSession, setName as saveName } from '../state/session'
 
 export function Landing() {
   const nav = useNavigate()
@@ -28,11 +27,6 @@ export function Landing() {
       live = false
     }
   }, [])
-
-  const pickLang = (l: Lang) => {
-    setLang(l)
-    setSessionLang(l)
-  }
 
   const needName = () => {
     const n = name.trim()
@@ -68,7 +62,6 @@ export function Landing() {
 
   return (
     <main className="screen">
-      <LangPicker value={lang} onChange={pickLang} />
       <h1>{t('app.title')}</h1>
       <p className="muted">{t('landing.tagline')}</p>
       <button type="button" className="btn daily-card" onClick={() => nav('/daily')}>

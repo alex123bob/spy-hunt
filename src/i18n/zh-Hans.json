@@ -265,5 +265,21 @@
   "arena.match.notFound": "找不到这场对局",
   "arena.match.notFoundBody": "它可能在 14 天后已被清理。",
   "arena.match.error": "无法加载这场对局。",
-  "arena.recapsError": "无法加载你的战报。"
+  "arena.recapsError": "无法加载你的战报。",
+  "auth.corner": "注册 / 登录",
+  "auth.logout": "登出",
+  "auth.registerTab": "注册",
+  "auth.loginTab": "登录",
+  "auth.email": "邮箱",
+  "auth.password": "密码",
+  "auth.registerPitch": "让你的机器人、连胜和历史记录跨设备保留。",
+  "auth.registerNote": "你当前的名字、机器人和连胜会一并保留。",
+  "auth.submitRegister": "创建账户",
+  "auth.submitLogin": "登录",
+  "auth.signedIn": "已登录",
+  "auth.emailTaken": "该邮箱已被注册。",
+  "auth.passwordTooShort": "密码至少需要 8 个字符。",
+  "auth.badEmail": "请输入有效的邮箱。",
+  "auth.loginFailed": "邮箱或密码不正确。",
+  "auth.close": "关闭"
 }

@@ -66,10 +66,9 @@ test('join code is uppercased and trimmed', async () => {
   await waitFor(() => expect(screen.getByTestId('loc')).toHaveTextContent('/r/ABCD'))
 })
 
-test('name input is limited to 16 characters and language picker is visible', () => {
+test('name input is limited to 16 characters', () => {
   renderLanding()
   expect(screen.getByLabelText('Your name')).toHaveAttribute('maxLength', '16')
-  expect(screen.getByRole('radio', { name: 'English' })).toBeInTheDocument()
 })
 
 test('the daily card links to the daily puzzle', async () => {

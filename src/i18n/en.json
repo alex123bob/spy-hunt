@@ -265,5 +265,21 @@
   "arena.match.notFound": "Match not found",
   "arena.match.notFoundBody": "It may have been cleared after 14 days.",
   "arena.match.error": "Could not load this match.",
-  "arena.recapsError": "Could not load your recaps."
+  "arena.recapsError": "Could not load your recaps.",
+  "auth.corner": "Register / log in",
+  "auth.logout": "Log out",
+  "auth.registerTab": "Register",
+  "auth.loginTab": "Log in",
+  "auth.email": "Email",
+  "auth.password": "Password",
+  "auth.registerPitch": "Keep your bots, streak and history on any device.",
+  "auth.registerNote": "Your current name, bots and streak move with you.",
+  "auth.submitRegister": "Create account",
+  "auth.submitLogin": "Log in",
+  "auth.signedIn": "Signed in",
+  "auth.emailTaken": "That email is already registered.",
+  "auth.passwordTooShort": "Password must be at least 8 characters.",
+  "auth.badEmail": "Enter a valid email.",
+  "auth.loginFailed": "Email or password is incorrect.",
+  "auth.close": "Close"
 }
