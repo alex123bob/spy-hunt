@@ -85,3 +85,15 @@ label { display: flex; flex-direction: column; gap: 6px; }
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); display: flex; align-items: center; justify-content: center; padding: var(--gutter); z-index: 10; }
 .modal { width: 100%; max-width: 420px; max-height: 100dvh; overflow-y: auto; }
 .nudge { max-width: 520px; margin: 8px auto 0; padding: 10px 14px; background: var(--panel); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; width: calc(100% - 2 * var(--gutter)); }
+
+.clan-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; font-size: 16px; flex: none !important; }
+.clan-badge.tiny { width: 20px; height: 20px; border-radius: 6px; font-size: 12px; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.clan-pick { padding: 6px; min-height: 44px; }
+.clan-title { align-items: center; }
+.clan-title > * { flex: none; }
+.clan-score { font-size: 28px; align-items: baseline; }
+.clan-score .muted { font-size: 14px; }
+.row > .grow { flex: 1; min-width: 0; }
+.row.between > :not(.grow) { flex: none; }
+.code { letter-spacing: 2px; }

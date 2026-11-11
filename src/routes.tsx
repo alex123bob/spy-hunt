@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { BotPage } from './screens/BotPage'
+import { Clan } from './screens/Clan'
 import { Bots } from './screens/Bots'
 import { Daily } from './screens/Daily'
 import { Landing } from './screens/Landing'
@@ -16,6 +17,7 @@ export function AppRoutes() {
       <Route path="/bots" element={<Bots />} />
       <Route path="/bot/:id" element={<BotPage />} />
       <Route path="/top" element={<Top />} />
+      <Route path="/clan" element={<Clan />} />
       <Route path="/match/:id" element={<MatchPage />} />
       <Route path="*" element={<Landing />} />
     </Routes>

@@ -16,6 +16,7 @@ export interface Player {
   role?: Role
   avatar?: Avatar | null
   bot_id?: string | null
+  clan?: PlayerClan | null
 }
 
 export interface Message {
@@ -181,3 +182,16 @@ export interface MatchView {
   id: string; day: string; lang: Lang; players: MatchPlayer[]; rounds: MatchRound[]
   words: { civilian: string; spy: string }; winner: 'spies' | 'civilians'
 }
+
+export interface ClanBadge { emoji: string; color: string }
+export interface PlayerClan { name: string; emoji: string; color: string }
+export interface ClanInfo { id: string; name: string; badge: ClanBadge; code: string; members: number; is_leader?: boolean }
+export interface SeasonRival { name: string | null; badge: ClanBadge | null; score: number }
+export interface SeasonWeek { week: string; result: 'won' | 'lost' | 'draw'; own: number; rival_score: number; rival_name: string | null; ghost: boolean }
+export interface Season {
+  this_week: { week: string; own: number; rival: SeasonRival | null; ghost: boolean; ends_at: number }
+  streak: number
+  history: SeasonWeek[]
+  members: { name: string; points: number; is_leader: boolean }[]
+}
+export interface MyClan { clan: ClanInfo | null; season?: Season | null }

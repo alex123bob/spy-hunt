@@ -1,5 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { TopBar } from './TopBar'
+import { MemoryRouter } from 'react-router-dom'
+import { TopBar as Bar } from './TopBar'
+
+const TopBar = () => <MemoryRouter><Bar /></MemoryRouter>
 import { setLang } from '../i18n'
 import { logout, useAccount } from '../state/accounts'
 
@@ -37,4 +40,13 @@ test('the register link opens the modal', () => {
   render(<TopBar />)
   fireEvent.click(screen.getByRole('button', { name: 'Register / log in' }))
   expect(screen.getByRole('tab', { name: 'Register' })).toBeInTheDocument()
+})
+
+test('the clan link shows only when signed in', () => {
+  const { unmount } = render(<TopBar />)
+  expect(screen.queryByRole('link', { name: 'Clan' })).toBeNull()
+  unmount()
+  vi.mocked(useAccount).mockReturnValue({ email: 'a@b.com' })
+  render(<TopBar />)
+  expect(screen.getByRole('link', { name: 'Clan' })).toHaveAttribute('href', '/clan')
 })

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { Lang } from '../api/types'
 import { LangPicker } from './LangPicker'
 import { AuthModal } from './AuthModal'
@@ -25,6 +26,7 @@ export function TopBar() {
       <LangPicker value={lang} onChange={pickLang} />
       {account.email ? (
         <div className="topbar-account">
+          <Link className="btn chip" to="/clan">{t('clan.topbar')}</Link>
           <span className="topbar-email">{account.email}</span>
           <button type="button" className="btn chip" onClick={signOut}>{t('auth.logout')}</button>
         </div>
