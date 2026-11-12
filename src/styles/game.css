@@ -102,7 +102,7 @@ button.flip-scene { cursor: pointer; }
 .empty-state .actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; margin-top: 8px; }
 
 /* lobby */
-.lobby.has-dock { padding-bottom: 16px; }
+.lobby.has-dock { padding-bottom: 0; }
 .lobby-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .lobby-head .pill { min-height: 44px; cursor: pointer; }
 .lobby-code { font: 700 44px/1 Fredoka, system-ui, sans-serif; letter-spacing: 4px; margin: 0; }
@@ -113,4 +113,7 @@ button.flip-scene { cursor: pointer; }
 .seat.empty { border: 2.5px dashed var(--muted); border-radius: 14px; color: var(--muted); padding: 12px; text-align: center; font-weight: 700; }
 .bot-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
 .bot-card { align-items: center; text-align: center; cursor: pointer; font: inherit; color: inherit; min-height: 44px; padding: 8px; }
-.host-dock { position: sticky; bottom: 0; z-index: 5; gap: 8px; padding: 10px 14px; }
+.start-bar { position: sticky; bottom: 0; z-index: 5; margin: 0 calc(-1 * var(--gutter)); padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom)); background: var(--paper); border-top: 2.5px solid var(--ink); }
+.start-bar .btn { width: 100%; min-height: 52px; }
+.bot-btns .btn { white-space: nowrap; }
+@media (max-width: 400px) { .bot-btns { flex-direction: column; } }

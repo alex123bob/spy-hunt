@@ -117,16 +117,11 @@ export function Lobby({ state }: { state: Snapshot }) {
           </>
         )}
       </section>
-      <section className="card center">
-        <p className="muted">{t('lobby.invite')}</p>
-        <QrCode text={link} />
-        <p data-testid="invite-link" className="wrap link">{link}</p>
-      </section>
-      {isHost ? (
-        <section className="card host-dock">
+      {isHost && (
+        <section className="card room-controls">
           <p className="muted">{t('lobby.mainLang')}</p>
-          <LangPicker compact label={t('lobby.mainLang')} value={state.main_lang} onChange={(l) => call('PATCH', '/settings', { main_lang: l })} />
-          <div className="row">
+          <LangPicker label={t('lobby.mainLang')} value={state.main_lang} onChange={(l) => call('PATCH', '/settings', { main_lang: l })} />
+          <div className="row bot-btns">
             <button type="button" className="btn" disabled={full} onClick={() => call('POST', '/bots', { action: 'add' })}>
               {t('lobby.addBot')}
             </button>
@@ -134,12 +129,21 @@ export function Lobby({ state }: { state: Snapshot }) {
               {t('lobby.removeBot')}
             </button>
           </div>
-          <button type="button" className="btn primary" onClick={() => call('POST', '/start')}>{t('lobby.start')}</button>
         </section>
+      )}
+      <section className="card center">
+        <p className="muted">{t('lobby.invite')}</p>
+        <QrCode text={link} />
+        <p data-testid="invite-link" className="wrap link">{link}</p>
+      </section>
+      {err && <p role="alert" className="error">{err}</p>}
+      {isHost ? (
+        <div className="start-bar">
+          <button type="button" className="btn primary" onClick={() => call('POST', '/start')}>{t('lobby.start')}</button>
+        </div>
       ) : (
         <Loader label={t('lobby.waitingHost')} />
       )}
-      {err && <p role="alert" className="error">{err}</p>}
     </main>
   )
 }
