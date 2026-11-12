@@ -1,0 +1,51 @@
+@import '@fontsource/fredoka/500.css';
+@import '@fontsource/fredoka/600.css';
+@import '@fontsource/fredoka/700.css';
+@import '@fontsource/nunito/500.css';
+@import '@fontsource/nunito/700.css';
+@import '@fontsource/nunito/800.css';
+
+:root {
+  color-scheme: light;
+  --cream: #f6ecd9;
+  --paper: #fffaf0;
+  --ink: #1d3b33;
+  --green: #1f4a3f;
+  --tomato: #e5533d;
+  --sun: #f6c445;
+  --sky: #8fd3e8;
+  --pink: #f7a8b8;
+  --mint: #9fe0b5;
+  --lilac: #d9c4f2;
+  --line: var(--ink);
+  --shadow: 6px 6px 0 var(--ink);
+  --shadow-btn: 0 5px 0 var(--ink);
+  --radius-card: 20px;
+  --radius-pill: 999px;
+  --gutter: 16px;
+  --ease-spring: cubic-bezier(.34, 1.45, .5, 1);
+  --font-display: 'Fredoka', 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-body: 'Nunito', 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; min-height: 100%; }
+body {
+  background-color: var(--cream);
+  background-image: radial-gradient(rgba(29, 59, 51, .08) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
+  color: var(--ink);
+  font: 500 18px/1.4 var(--font-body);
+  overflow-x: hidden;
+}
+h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 700; }
+
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}

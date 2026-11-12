@@ -1,0 +1,43 @@
+/* Room flow styles (lobby, table, vote, reveal, result). Interim ports of the old stylesheet; later tasks restyle them. */
+
+.langpicker { display: flex; gap: 8px; }
+.langpicker .chip { flex: 1; padding: 10px; min-height: 44px; }
+.chip-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.chip-row .name { flex: 1; min-width: 0; }
+.chip-row.out { opacity: .5; text-decoration: line-through; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--sky); border: 2px solid var(--ink); display: grid; place-items: center; font-weight: 700; font-size: 18px; line-height: 1; flex: none; }
+.qr { width: 180px; height: 180px; background: #fff; border: 2.5px solid var(--ink); border-radius: 12px; padding: 6px; margin: 0 auto; }
+.qr svg { width: 100%; height: 100%; }
+.link { font-size: 14px; opacity: .65; }
+.wordcard { background: var(--green); border: 3px solid var(--ink); box-shadow: var(--shadow); border-radius: 20px; color: var(--paper); padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit; cursor: pointer; }
+.wordcard .word { font: 700 30px/1.2 var(--font-display); }
+.table .feed { flex: 1; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; min-height: 120px; }
+.bubble { background: var(--paper); border: 2px solid var(--ink); border-radius: 16px 16px 16px 4px; padding: 10px 12px; max-width: 100%; min-width: 0; box-shadow: 2px 3px 0 var(--ink); }
+.bubble.mine { background: var(--mint); }
+.bubble.host { border-style: dashed; }
+.bubble .who { font-size: 12px; font-weight: 800; }
+.bubble .tr { border-top: 2px solid var(--ink); margin-top: 6px; padding-top: 6px; font-size: 16px; }
+.bubble.skipped { background: transparent; box-shadow: none; border-style: dashed; font-size: 14px; }
+.turnbar { position: sticky; bottom: 0; }
+.countdown { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 22px; }
+.countdown.urgent { color: var(--tomato); }
+.targets { display: flex; flex-direction: column; gap: 10px; }
+.btn.target { min-height: 64px; font-size: 20px; text-align: left; }
+.role.spy { color: var(--tomato); font-weight: 800; }
+.role.civilian { color: #1c6b43; font-weight: 800; }
+.history { max-height: 45vh; overflow-y: auto; }
+.history .round { display: flex; flex-direction: column; gap: 6px; }
+.history .round + .round { border-top: 2px dashed var(--ink); padding-top: 8px; }
+.spy-panel { border-color: var(--tomato); }
+.vote-group { display: flex; flex-direction: column; gap: 2px; }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.picker .chip { min-width: 44px; min-height: 44px; padding: 10px; }
+.picker .swatch { width: 44px; padding: 0; border: 2px solid transparent; }
+.picker .swatch[aria-checked="true"] { border-color: var(--ink); }
+.rule-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.rule-row select { min-height: 44px; }
+.code { letter-spacing: 2px; }
+.banner { position: sticky; top: 0; background: var(--tomato); color: #fff; text-align: center; padding: 6px; font-size: 14px; font-weight: 700; z-index: 5; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(29, 59, 51, .6); display: flex; align-items: center; justify-content: center; padding: var(--gutter); z-index: 10; }
+.modal { width: 100%; max-width: 420px; max-height: 100dvh; overflow-y: auto; }
+.panel.share { white-space: pre-wrap; margin: 0; font: inherit; }
