@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { remainingMs } from '../state/roomStore'
 
-export function Countdown({ deadline, offset = 0, vibrate = true }: { deadline: number | null; offset?: number; vibrate?: boolean }) {
+export function Countdown({ deadline, offset = 0, vibrate = true, total }: { deadline: number | null; offset?: number; vibrate?: boolean; total?: number }) {
   const [ms, setMs] = useState(() => remainingMs(deadline, offset, Date.now()))
   useEffect(() => {
     let lastSec = -1
@@ -26,9 +26,13 @@ export function Countdown({ deadline, offset = 0, vibrate = true }: { deadline: 
     return () => clearInterval(id)
   }, [deadline, offset, vibrate])
   const secs = Math.ceil(ms / 1000)
+  const p = total && total > 0 ? Math.min(1, Math.max(0, secs / total)) : 1
+  const urgent = secs <= 5 && secs > 0
   return (
-    <span className={`countdown ${secs <= 5 && secs > 0 ? 'urgent' : ''}`} role="timer" aria-live="off">
-      {secs}
-    </span>
+    <div className="countdown-ring" style={{ '--p': String(p) } as CSSProperties}>
+      <span className={`countdown ${urgent ? 'urgent pulse' : ''}`} role="timer" aria-live="off">
+        {secs}
+      </span>
+    </div>
   )
 }

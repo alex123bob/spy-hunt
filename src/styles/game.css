@@ -1,26 +1,12 @@
 /* Room flow styles (lobby, table, vote, reveal, result). Interim ports of the old stylesheet; later tasks restyle them. */
 
-.langpicker { display: flex; gap: 8px; }
-.langpicker .chip { flex: 1; padding: 10px; min-height: 44px; }
-.chip-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.chip-row .name { flex: 1; min-width: 0; }
-.chip-row.out { opacity: .5; text-decoration: line-through; }
-.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--sky); border: 2px solid var(--ink); display: grid; place-items: center; font-weight: 700; font-size: 18px; line-height: 1; flex: none; }
 .qr { width: 180px; height: 180px; background: #fff; border: 2.5px solid var(--ink); border-radius: 12px; padding: 6px; margin: 0 auto; }
 .qr svg { width: 100%; height: 100%; }
 .link { font-size: 14px; color: var(--muted); }
 .wordcard { background: var(--green); border: 3px solid var(--ink); box-shadow: var(--shadow); border-radius: 20px; color: var(--paper); padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit; cursor: pointer; }
 .wordcard .word { font: 700 30px/1.2 var(--font-display); }
 .table .feed { flex: 1; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; min-height: 120px; }
-.bubble { background: var(--paper); border: 2px solid var(--ink); border-radius: 16px 16px 16px 4px; padding: 10px 12px; max-width: 100%; min-width: 0; box-shadow: 2px 3px 0 var(--ink); }
-.bubble.mine { background: var(--mint); }
-.bubble.host { border-style: dashed; }
-.bubble .who { font-size: 12px; font-weight: 800; }
-.bubble .tr { border-top: 2px solid var(--ink); margin-top: 6px; padding-top: 6px; font-size: 16px; }
-.bubble.skipped { background: transparent; box-shadow: none; border-style: dashed; font-size: 14px; }
 .turnbar { position: sticky; bottom: 0; }
-.countdown { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 22px; }
-.countdown.urgent { color: var(--tomato-deep); }
 .targets { display: flex; flex-direction: column; gap: 10px; }
 .btn.target { min-height: 64px; font-size: 20px; text-align: left; }
 .role.spy { color: var(--tomato-deep); font-weight: 800; }
@@ -38,8 +24,6 @@
 .rule-row select { min-height: 44px; }
 .code { letter-spacing: 2px; }
 .banner { position: sticky; top: 0; background: var(--tomato-deep); color: #fff; text-align: center; padding: 6px; font-size: 14px; font-weight: 700; z-index: 5; }
-.modal-backdrop { position: fixed; inset: 0; background: rgba(29, 59, 51, .6); display: flex; align-items: center; justify-content: center; padding: var(--gutter); z-index: 10; }
-.modal { width: 100%; max-width: 420px; max-height: 100dvh; overflow-y: auto; }
 .panel.share { white-space: pre-wrap; margin: 0; font: inherit; }
 
 /* flip card */
@@ -71,3 +55,50 @@ button.flip-scene { cursor: pointer; }
 .confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 5; }
 .confetti i { position: absolute; top: -12px; width: 8px; height: 12px; border: 1.5px solid var(--ink); animation: fall 2.4s linear both; }
 @keyframes fall { to { transform: translateY(680px) rotate(540deg); } }
+
+/* shared components */
+.segmented.langpicker { display: flex; }
+.segmented.langpicker .chip { flex: 1; min-height: 44px; padding: 8px 10px; }
+.chip-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.chip-row .name { flex: 1; min-width: 0; font-weight: 700; }
+.chip-row.out .name { opacity: .55; text-decoration: line-through; }
+.avatar { position: relative; border-radius: 50%; background: var(--sky); border: 2.5px solid var(--ink); display: grid; place-items: center; font-weight: 700; line-height: 1; flex: none; }
+.avatar-s { width: 28px; height: 28px; font-size: 15px; }
+.avatar-m { width: 36px; height: 36px; font-size: 20px; }
+.avatar-l { width: 96px; height: 96px; font-size: 52px; border-width: 3px; box-shadow: 0 5px 0 var(--ink); }
+.avatar.is-out { filter: grayscale(1); opacity: .6; }
+.avatar.is-out::after { content: "✕"; position: absolute; right: -6px; bottom: -6px; width: 18px; height: 18px; border-radius: 50%; background: var(--tomato-deep); color: #fff; border: 2px solid var(--ink); font-size: 11px; display: grid; place-items: center; filter: none; }
+.bubble-row { display: flex; align-items: flex-end; gap: 8px; min-width: 0; }
+.bubble-row .bubble { flex: 1; }
+.bubble { background: var(--paper); border: 2.5px solid var(--ink); border-radius: 18px 18px 18px 4px; padding: 10px 12px; max-width: 100%; min-width: 0; box-shadow: 0 3px 0 var(--ink); animation: pop .35s var(--ease-spring) both; }
+.bubble.mine { background: var(--mint); }
+.bubble.host { background: var(--sun); border-style: dashed; }
+.bubble .who { font-size: 12px; font-weight: 800; }
+.bubble .tr { border-top: 2px dashed var(--ink); margin-top: 6px; padding-top: 6px; font-size: 16px; }
+.bubble.skipped { background: transparent; box-shadow: none; border-style: dashed; opacity: .7; font-style: italic; font-size: 14px; animation: none; }
+.countdown-ring { --p: 1; width: 56px; height: 56px; border-radius: 50%; border: 2.5px solid var(--ink); background: conic-gradient(var(--tomato) calc(var(--p) * 360deg), var(--paper) 0); display: grid; place-items: center; position: relative; flex: none; }
+.countdown-ring::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--cream); border: 2px solid var(--ink); }
+.countdown { position: relative; font: 700 20px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.countdown.urgent { color: var(--tomato-deep); animation: pulse .6s ease-in-out infinite; }
+.sheet-backdrop { position: fixed; inset: 0; background: rgba(29, 59, 51, .6); display: flex; align-items: flex-end; justify-content: center; z-index: 10; }
+.sheet { width: 100%; max-height: 90dvh; overflow-y: auto; background: var(--paper); border: 3px solid var(--ink); border-bottom: 0; border-radius: 24px 24px 0 0; padding: 20px var(--gutter) calc(20px + env(safe-area-inset-bottom)); animation: rise .35s var(--ease-spring) both; }
+@media (min-width: 560px) {
+  .sheet-backdrop { align-items: center; padding: var(--gutter); }
+  .sheet { max-width: 440px; border: 3px solid var(--ink); border-radius: 24px; box-shadow: 0 6px 0 var(--ink); animation: pop .35s var(--ease-spring) both; }
+}
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0; max-width: calc(100% - 2 * var(--gutter)); background: var(--ink); color: var(--paper); border-radius: 999px; padding: 10px 18px; font-weight: 700; z-index: 20; animation: pop .35s var(--ease-spring) both; }
+.loader { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 32px 0; }
+.loader .eye { width: 34px; height: 34px; border-radius: 50%; background: var(--green); border: 2px solid var(--ink); box-shadow: 2px 3px 0 var(--tomato); display: grid; place-items: center; position: relative; overflow: hidden; }
+.loader .eye::before { content: ""; width: 16px; height: 16px; border-radius: 50%; background: var(--paper); }
+.loader .eye::after { content: ""; position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--ink); animation: look 4s ease-in-out infinite; }
+.dots { display: inline-flex; gap: 6px; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); animation: dot 1s ease-in-out infinite; }
+.dots i:nth-child(2) { animation-delay: .15s; }
+.dots i:nth-child(3) { animation-delay: .3s; }
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 32px var(--gutter); }
+.empty-state h2 { margin: 0; }
+.empty-state p { margin: 0; }
+.empty-state .spot { width: 84px; height: 84px; border-radius: 50%; background: var(--sun); border: 3px solid var(--ink); box-shadow: 0 5px 0 var(--ink); display: grid; place-items: center; font-size: 42px; }
+.empty-state .actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; margin-top: 8px; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(29, 59, 51, .6); display: flex; align-items: center; justify-content: center; padding: var(--gutter); z-index: 10; }
+.modal { width: 100%; max-width: 420px; max-height: 100dvh; overflow-y: auto; }
