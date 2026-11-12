@@ -37,24 +37,34 @@ export function Vote({ state, offset = 0 }: { state: Snapshot; offset?: number }
     <main className="screen">
       <header className="row between">
         <h2>{t('vote.title')}</h2>
-        <Countdown deadline={state.phase_deadline} offset={offset} />
+        <Countdown deadline={state.phase_deadline} offset={offset} total={state.config.vote_seconds} />
       </header>
-      <WordCard word={state.me.my_word} />
+      <WordCard word={state.me.my_word} compact />
       <StatementHistory state={state} />
-      {out && <p className="muted">{t('vote.out')}</p>}
-      {iAmTied && <p className="muted">{t('vote.waitingTied')}</p>}
-      {canVote && (
-        <div className="targets">
+      {out && <p className="note">{t('vote.out')}</p>}
+      {iAmTied && <p className="note">{t('vote.waitingTied')}</p>}
+      {(canVote || (locked && !out)) && (
+        <div className={`targets${locked ? ' is-locked' : ''}`}>
           {targets.map((p) => (
-            <button key={p.seat} type="button" className="btn target wrap" onClick={() => vote(p.seat)}>
-              <Avatar player={p} /> {p.name}
+            <button
+              key={p.seat}
+              type="button"
+              className={`btn target${picked === p.seat ? ' stamped' : ''}`}
+              aria-disabled={!canVote || undefined}
+              onClick={() => canVote && vote(p.seat)}
+            >
+              <Avatar player={p} size="m" />
+              <span className="wrap">{p.name}</span>
+              {picked === p.seat && <span className="sticker" aria-hidden>✓</span>}
             </button>
           ))}
-          <button type="button" className="btn" onClick={() => vote(null)}>{t('vote.abstain')}</button>
+          {canVote && (
+            <button type="button" className="btn ghost abstain" onClick={() => vote(null)}>{t('vote.abstain')}</button>
+          )}
         </div>
       )}
       {locked && !out && (
-        <p className="ok center" role="status">{t('vote.locked')} · {t('vote.waiting')}</p>
+        <p className="note ok center" role="status">{t('vote.locked')} · {t('vote.waiting')}</p>
       )}
       {err && <p role="alert" className="error">{err}</p>}
     </main>

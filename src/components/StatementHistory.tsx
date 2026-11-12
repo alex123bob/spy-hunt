@@ -11,7 +11,8 @@ export function StatementHistory({ state }: { state: Snapshot }) {
   if (rounds.length === 0) return null
   return (
     <section className="panel history" aria-label={t('vote.statements')}>
-      <p className="muted">{t('vote.statements')}</p>
+      <details open>
+      <summary className="muted">{t('vote.statements')}</summary>
       {rounds.map((r) => (
         <div key={r} className="round" data-testid={`round-${r}`}>
           <p className="muted small">{t('table.round', { n: r })}</p>
@@ -22,6 +23,7 @@ export function StatementHistory({ state }: { state: Snapshot }) {
             ))}
         </div>
       ))}
+      </details>
     </section>
   )
 }
