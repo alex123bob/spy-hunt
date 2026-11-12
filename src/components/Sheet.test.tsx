@@ -24,4 +24,16 @@ describe('Sheet', () => {
     render(<Sheet label="x" onClose={() => {}}><button>first</button><button>second</button></Sheet>)
     expect(screen.getByText('first')).toHaveFocus()
   })
+  it('Tab from the last control wraps to the first', () => {
+    render(<Sheet label="x" onClose={() => {}}><button>first</button><button>second</button></Sheet>)
+    screen.getByText('second').focus()
+    fireEvent.keyDown(document, { key: 'Tab' })
+    expect(screen.getByText('first')).toHaveFocus()
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
+    expect(screen.getByText('second')).toHaveFocus()
+  })
+  it('focuses the dialog when it has no controls', () => {
+    render(<Sheet label="x" onClose={() => {}}><p>hi</p></Sheet>)
+    expect(screen.getByRole('dialog')).toHaveFocus()
+  })
 })

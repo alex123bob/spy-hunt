@@ -8,20 +8,40 @@ export function Sheet({ label, onClose, children, dismissible = true }: { label:
   closeRef.current = onClose
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null
-    ref.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus()
+    const first = ref.current?.querySelector<HTMLElement>(FOCUSABLE)
+    ;(first ?? ref.current)?.focus()
     return () => prev?.focus?.()
   }, [])
   useEffect(() => {
-    if (!dismissible) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeRef.current()
+      if (e.key === 'Escape') {
+        if (dismissible) closeRef.current()
+        return
+      }
+      if (e.key !== 'Tab' || !ref.current) return
+      const items = [...ref.current.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => !el.hasAttribute('disabled'))
+      if (items.length === 0) {
+        e.preventDefault()
+        ref.current.focus()
+        return
+      }
+      const first = items[0]
+      const last = items[items.length - 1]
+      const active = document.activeElement
+      if (e.shiftKey && (active === first || active === ref.current || !ref.current.contains(active))) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && (active === last || !ref.current.contains(active))) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [dismissible])
   return (
     <div className="sheet-backdrop" onClick={(e) => { if (dismissible && e.target === e.currentTarget) onClose() }}>
-      <div ref={ref} role="dialog" aria-modal="true" aria-label={label} className="sheet">
+      <div ref={ref} role="dialog" aria-modal="true" aria-label={label} className="sheet" tabIndex={-1}>
         {children}
       </div>
     </div>
