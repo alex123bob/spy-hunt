@@ -196,3 +196,38 @@ test('time left counts down while the page is open', async () => {
   expect(screen.getByText(/4d 9h left/)).toBeInTheDocument()
   spy.mockRestore()
 })
+
+test('signed-out page opens the auth sheet', () => {
+  vi.mocked(useAccount).mockReturnValue({ email: null })
+  render(tree)
+  fireEvent.click(screen.getByRole('button', { name: 'Register / log in' }))
+  expect(screen.getByRole('dialog')).toBeInTheDocument()
+})
+
+test('tug bar splits by score', async () => {
+  vi.mocked(getMyClan).mockResolvedValue(memberOf(season({
+    this_week: { week: '2026-11-09', own: 30, ghost: false, ends_at: Date.UTC(2026, 10, 16),
+      rival: { name: 'Wolves', badge: BADGES[1], score: 10 } },
+  })))
+  render(tree)
+  expect(await screen.findByTestId('tug-own')).toHaveStyle({ width: '75%' })
+})
+
+test('tug bar is even at 0-0', async () => {
+  vi.mocked(getMyClan).mockResolvedValue(memberOf(season({
+    this_week: { week: '2026-11-09', own: 0, ghost: false, ends_at: Date.UTC(2026, 10, 16),
+      rival: { name: 'Wolves', badge: BADGES[1], score: 0 } },
+  })))
+  render(tree)
+  expect(await screen.findByTestId('tug-own')).toHaveStyle({ width: '50%' })
+})
+
+test('copy code shows copied', async () => {
+  const writeText = vi.fn().mockResolvedValue(undefined)
+  Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+  vi.mocked(getMyClan).mockResolvedValue(memberOf(season()))
+  render(tree)
+  fireEvent.click(await screen.findByRole('button', { name: 'Copy code' }))
+  expect(await screen.findAllByText('Copied!')).not.toHaveLength(0)
+  expect(writeText).toHaveBeenCalledWith('ABC123')
+})

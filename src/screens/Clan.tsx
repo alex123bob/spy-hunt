@@ -4,6 +4,10 @@ import type { ClanBadge, ClanInfo, MyClan, Season } from '../api/types'
 import { ApiError } from '../api/client'
 import { errorText } from '../api/errors'
 import { t, useLang } from '../i18n'
+import { AuthModal } from '../components/AuthModal'
+import { EmptyState } from '../components/EmptyState'
+import { Loader } from '../components/Loader'
+import { Toast } from '../components/Toast'
 import { useAccount } from '../state/accounts'
 import { createClan, getBadges, getMyClan, joinClan, leaveClan, listOpenClans } from '../state/clans'
 
@@ -16,10 +20,10 @@ const FALLBACK_BADGES: ClanBadge[] = [
 
 type Load = { kind: 'loading' } | { kind: 'error' } | { kind: 'ok'; data: MyClan }
 
-function Badge({ badge, label }: { badge: ClanBadge | null | undefined; label?: string }) {
+function Badge({ badge, label, big }: { badge: ClanBadge | null | undefined; label?: string; big?: boolean }) {
   if (!badge) return null
   return (
-    <span className="clan-badge" style={{ background: badge.color }} aria-label={label} role={label ? 'img' : undefined}>
+    <span className={`clan-badge${big ? ' big' : ''}`} style={{ background: badge.color }} aria-label={label} role={label ? 'img' : undefined}>
       {badge.emoji}
     </span>
   )
@@ -70,14 +74,14 @@ function NoClan({ onDone }: { onDone: () => void }) {
     <>
       <p className="muted">{t('clan.pitch')}</p>
       {error && <p role="alert" className="error">{error}</p>}
-      <form className="panel" onSubmit={(e) => { e.preventDefault(); run(() => createClan(name.trim(), badge)) }}>
+      <form className="card clan-card" onSubmit={(e) => { e.preventDefault(); run(() => createClan(name.trim(), badge)) }}>
         <h2>{t('clan.createTitle')}</h2>
         <label>
           <span>{t('clan.name')}</span>
           <input value={name} maxLength={20} aria-describedby="clan-name-hint" onChange={(e) => setName(e.target.value)} />
         </label>
         <span id="clan-name-hint" className="muted small">{t('clan.nameHint')}</span>
-        <div role="radiogroup" aria-label={t('clan.badge')} className="badges">
+        <div role="radiogroup" aria-label={t('clan.badge')} className="picker badges">
           {badges.map((b, i) => (
             <button key={i} type="button" role="radio" aria-checked={badge === i} aria-label={b.emoji}
               className={`btn chip clan-pick${badge === i ? ' primary' : ''}`} onClick={() => setBadge(i)}>
@@ -87,29 +91,31 @@ function NoClan({ onDone }: { onDone: () => void }) {
         </div>
         <button type="submit" className="btn primary" disabled={busy || name.trim().length < 3}>{t('clan.create')}</button>
       </form>
-      <form className="panel" onSubmit={(e) => { e.preventDefault(); run(() => joinClan(code)) }}>
+      <form className="card clan-card" onSubmit={(e) => { e.preventDefault(); run(() => joinClan(code)) }}>
         <h2>{t('clan.joinTitle')}</h2>
         <label>
           <span>{t('clan.code')}</span>
-          <input value={code} maxLength={6} autoCapitalize="characters" onChange={(e) => setCode(e.target.value)} />
+          <input className="ticket clan-code-input" value={code} maxLength={6} autoCapitalize="characters" onChange={(e) => setCode(e.target.value)} />
         </label>
-        <button type="submit" className="btn" disabled={busy || code.trim().length === 0}>{t('clan.join')}</button>
+        <button type="submit" className="btn secondary" disabled={busy || code.trim().length === 0}>{t('clan.join')}</button>
       </form>
-      <section className="panel">
+      <section className="card clan-card">
         <h2>{t('clan.openTitle')}</h2>
-        {open === null && <p className="muted">{t('bots.loading')}</p>}
+        {open === null && <Loader label={t('bots.loading')} />}
         {open?.length === 0 && <p className="muted">{t('clan.openEmpty')}</p>}
-        {open?.map((c) => (
-          <div key={c.id} className="row between">
-            <Badge badge={c.badge} />
-            <div className="grow">
-              <strong>{c.name}</strong>
-              <div className="muted">{t('clan.memberCount', { n: c.members, max: MAX_MEMBERS })}</div>
+        <div className="stagger clan-open">
+          {open?.map((c, i) => (
+            <div key={c.id} className="row between clan-open-row" style={{ '--i': i } as React.CSSProperties}>
+              <Badge badge={c.badge} />
+              <div className="grow">
+                <strong>{c.name}</strong>
+                <div className="muted">{t('clan.memberCount', { n: c.members, max: MAX_MEMBERS })}</div>
+              </div>
+              <button type="button" className="btn secondary" disabled={busy} aria-label={t('clan.joinNamed', { name: c.name })}
+                onClick={() => run(() => joinClan(c.code))}>{t('clan.join')}</button>
             </div>
-            <button type="button" className="btn" disabled={busy} aria-label={t('clan.joinNamed', { name: c.name })}
-              onClick={() => run(() => joinClan(c.code))}>{t('clan.join')}</button>
-          </div>
-        ))}
+          ))}
+        </div>
       </section>
     </>
   )
@@ -118,6 +124,7 @@ function NoClan({ onDone }: { onDone: () => void }) {
 function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | null | undefined; onLeft: () => void }) {
   const [confirming, setConfirming] = useState(false)
   const [leaving, setLeaving] = useState(false)
+  const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
   useTick()
   const wk = season?.this_week
@@ -135,12 +142,35 @@ function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | nul
     }
   }
 
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(clan.code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // clipboard blocked: the code is selectable text
+    }
+  }
+  const rivalScore = wk?.rival?.score ?? 0
+  const share = wk && wk.own + rivalScore > 0 ? wk.own / (wk.own + rivalScore) : 0.5
+
   return (
     <>
-      <h1 className="row clan-title"><Badge badge={clan.badge} /> {clan.name}</h1>
-      <p className="muted">{t('clan.inviteCode')} <strong className="code">{clan.code}</strong> · {t('clan.memberCount', { n: clan.members, max: MAX_MEMBERS })}</p>
+      <header className="clan-crest">
+        <Badge badge={clan.badge} big />
+        <h1 className="clan-title">{clan.name}</h1>
+      </header>
+      <div className="ticket clan-invite">
+        <div>
+          <p className="muted">{t('clan.inviteCode')}</p>
+          <strong className="code">{clan.code}</strong>
+          <p className="muted">{t('clan.memberCount', { n: clan.members, max: MAX_MEMBERS })}</p>
+        </div>
+        <button type="button" className="pill clan-copy" onClick={copy}>{copied ? t('clan.copied') : t('clan.copy')}</button>
+      </div>
+      <Toast text={copied ? t('clan.copied') : ''} />
       {wk && (
-        <section className="panel">
+        <section className="card clan-card">
           <h2>{t('clan.thisWeek')}</h2>
           {wk.rival ? (
             <>
@@ -148,6 +178,9 @@ function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | nul
                 <strong className="grow">{wk.own}</strong>
                 <span className="muted">{t('clan.vs', { name: rivalName(wk.rival.name, wk.ghost) })}</span>
                 <strong>{wk.rival.score}</strong>
+              </div>
+              <div className="tug" aria-hidden>
+                <div className="tug-own" data-testid="tug-own" style={{ width: `${share * 100}%` }} />
               </div>
             </>
           ) : (
@@ -159,21 +192,21 @@ function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | nul
           <p className="muted">{timeLeft(wk.ends_at)} · {t('clan.streak', { n: season!.streak })}</p>
         </section>
       )}
-      <section className="panel">
+      <section className="card clan-card">
         <h2>{t('clan.members')}</h2>
         {season?.members.map((m, i) => (
-          <div key={i} className="row between" data-testid="clan-member">
-            <span className="grow">{m.name}{m.is_leader && <span className="tag">{t('clan.leader')}</span>}</span>
+          <div key={i} className="row between clan-member" data-testid="clan-member">
+            <span className="grow">{m.name}{m.is_leader && <span className="tag clan-leader">👑 {t('clan.leader')}</span>}</span>
             <strong>{m.points}</strong>
           </div>
         ))}
       </section>
-      <section className="panel">
+      <section className="card clan-card">
         <h2>{t('clan.history')}</h2>
         {season && season.history.length === 0 && <p className="muted">{t('clan.historyEmpty')}</p>}
         {season?.history.map((w) => (
-          <div key={w.week} className="row between" data-testid="clan-week">
-            <span className={`tag${w.result === 'won' ? ' ok' : ''}`}>{t(`clan.result.${w.result}`)}</span>
+          <div key={w.week} className="clan-week" data-testid="clan-week">
+            <span className={`tag res-${w.result}`}>{t(`clan.result.${w.result}`)}</span>
             <span className="grow">{w.own} – {w.rival_score} {t('clan.vs', { name: rivalName(w.rival_name, w.ghost) })}</span>
             <span className="muted">{w.week}</span>
           </div>
@@ -181,13 +214,15 @@ function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | nul
       </section>
       {error && <p role="alert" className="error">{error}</p>}
       {confirming ? (
-        <div className="row">
-          <span className="grow">{t('clan.leaveConfirm')}</span>
-          <button type="button" className="btn" onClick={() => setConfirming(false)}>{t('clan.cancel')}</button>
-          <button type="button" className="btn primary" disabled={leaving} onClick={leave}>{t('clan.leaveYes')}</button>
+        <div className="card clan-card clan-confirm">
+          <span>{t('clan.leaveConfirm')}</span>
+          <div className="row">
+            <button type="button" className="btn secondary" onClick={() => setConfirming(false)}>{t('clan.cancel')}</button>
+            <button type="button" className="btn primary" disabled={leaving} onClick={leave}>{t('clan.leaveYes')}</button>
+          </div>
         </div>
       ) : (
-        <button type="button" className="btn" onClick={() => setConfirming(true)}>{t('clan.leave')}</button>
+        <button type="button" className="btn ghost" onClick={() => setConfirming(true)}>{t('clan.leave')}</button>
       )}
     </>
   )
@@ -195,6 +230,7 @@ function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | nul
 
 export function Clan() {
   useLang()
+  const [authOpen, setAuthOpen] = useState(false)
   const account = useAccount()
   const [load, setLoad] = useState<Load>({ kind: 'loading' })
   const latest = useRef(0)
@@ -218,16 +254,17 @@ export function Clan() {
     <main className="screen" data-testid="screen-Clan">
       {!account.email ? (
         <>
-          <h1>{t('clan.title')}</h1>
-          <p>{t('clan.registerFirst')}</p>
+          <EmptyState emoji="🔒" title={t('clan.title')} body={t('clan.registerFirst')}>
+            <button type="button" className="btn primary" onClick={() => setAuthOpen(true)}>{t('auth.corner')}</button>
+          </EmptyState>
+          {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
         </>
       ) : load.kind === 'loading' ? (
-        <p className="muted">{t('bots.loading')}</p>
+        <Loader label={t('bots.loading')} />
       ) : load.kind === 'error' ? (
-        <>
-          <p role="alert" className="error">{t('clan.loadError')}</p>
-          <button type="button" className="btn" onClick={fetchMine}>{t('room.retry')}</button>
-        </>
+        <EmptyState emoji="😵" title={t('clan.title')} body={t('clan.loadError')} role="alert">
+          <button type="button" className="btn primary" onClick={fetchMine}>{t('room.retry')}</button>
+        </EmptyState>
       ) : load.data.clan ? (
         <Member clan={load.data.clan} season={load.data.season} onLeft={fetchMine} />
       ) : (

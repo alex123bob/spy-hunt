@@ -314,6 +314,8 @@
   "clan.openEmpty": "No open clans yet. Start one!",
   "clan.memberCount": "{n}/{max} members",
   "clan.inviteCode": "Invite code:",
+  "clan.copy": "Copy code",
+  "clan.copied": "Copied!",
   "clan.thisWeek": "This week",
   "clan.vs": "vs {name}",
   "clan.practiceRival": "Practice rival",
