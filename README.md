@@ -9,7 +9,7 @@ Mobile-first web app for the Spy Hunt word game. React + TypeScript + Vite; talk
     yarn test         # Vitest
     yarn build        # type-check + production build into dist/
 
-`API_PROXY=http://host:port yarn dev` points the dev proxy elsewhere. `VITE_API_BASE` sets the API base at build time (default `/api/spy-hunt`).
+`API_PROXY=http://host:port yarn dev` points the dev proxy elsewhere. `VITE_API_BASE` sets the API base at build time (default `/api/spy-hunt`). `VITE_BASE_PATH` sets the app's own base path for serving from a subpath, e.g. `VITE_BASE_PATH=/spy-hunt` (default: domain root).
 
 ## End-to-end smoke test
 
@@ -20,33 +20,16 @@ Starts a throwaway back end (fake LLM, temp DB, port 8010) and the dev server (p
 
 `BACKEND_DIR` must contain a `venv/` with the back-end dependencies. If Playwright's browser download is unavailable, set `CHROMIUM_PATH` to an existing Chrome/Chromium binary.
 
-## Deploy (Nginx)
+## Deploy
 
-Serve `dist/`, proxy `/api/`, and fall back to `index.html` so `/r/<code>` links work.
+Production deployment (GCP server, Nginx under `/spy-hunt/`, release flow): see
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-    server {
-        root /var/www/spy-hunt/dist;
-
-        location / {
-            try_files $uri /index.html;
-        }
-
-        location /api/ {
-            proxy_pass http://backend;
-            proxy_set_header X-Real-IP $remote_addr;
-        }
-
-        # Server-Sent Events: no buffering, long read timeout
-        location ~ ^/api/spy-hunt/rooms/[^/]+/events$ {
-            proxy_pass http://backend;
-            proxy_http_version 1.1;
-            proxy_set_header Connection "";
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_buffering off;
-            proxy_cache off;
-            proxy_read_timeout 3600s;
-        }
-    }
+For any other Nginx setup: serve `dist/`, proxy `/api/`, fall back to `index.html` so client-side
+routes (`/r/<code>`, `/daily`, ...) work, and give the SSE route (`/api/spy-hunt/rooms/<code>/events`)
+its own `proxy_buffering off` block so live game updates aren't delayed or cut off. If served from a
+subpath instead of domain root, build with `VITE_BASE_PATH=/<subpath>` so asset URLs, routing and
+share/QR-code links resolve correctly.
 
 The back end must run as a single process (see its README).
 

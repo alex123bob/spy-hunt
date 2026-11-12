@@ -20,7 +20,7 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
   const spy = puzzle.players.find((p) => p.seat === result.answer.spy_seat)?.name ?? ''
   const text = shareText({
     number: puzzle.number, tries: result.tries, solved: result.solved, elapsedMs: result.elapsed_ms,
-    wordCorrect: result.word_correct, streak: result.streak, url: `${window.location.origin}/daily`,
+    wordCorrect: result.word_correct, streak: result.streak, url: `${window.location.origin}${import.meta.env.BASE_URL}daily`,
   })
 
   const share = async () => {

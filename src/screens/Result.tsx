@@ -26,7 +26,7 @@ export function Result({ state }: { state: Snapshot }) {
   useEffect(() => {
     if (info.outcome === 'won') recordWin(`${state.code}:${state.game_no}`)
   }, [])
-  const card = info.outcome === 'ended' ? null : resultShareText(state, info, `${window.location.origin}/`)
+  const card = info.outcome === 'ended' ? null : resultShareText(state, info, `${window.location.origin}${import.meta.env.BASE_URL}`)
 
   const share = async () => {
     if (!card) return

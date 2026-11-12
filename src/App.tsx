@@ -5,7 +5,7 @@ import { TopBar } from './components/TopBar'
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <TopBar />
       <NudgeBanner />
       <AppRoutes />

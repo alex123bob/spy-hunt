@@ -19,7 +19,7 @@ export function Lobby({ state }: { state: Snapshot }) {
   const [myBots, setMyBots] = useState<BotCard[]>([])
   const [picking, setPicking] = useState(false)
   const code = state.code
-  const link = `${window.location.origin}/r/${code}`
+  const link = `${window.location.origin}${import.meta.env.BASE_URL}r/${code}`
   const isHost = state.me.is_host
   const bots = state.players.filter((p) => p.is_bot).length
   const short = state.players.length < state.config.min_players
