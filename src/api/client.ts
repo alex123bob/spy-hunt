@@ -20,7 +20,7 @@ export function authHeaders(): Record<string, string> {
   return credentials ? { Authorization: `Bearer ${credentials.playerId}.${credentials.token}` } : {}
 }
 
-export async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+export async function request<T>(method: string, path: string, body?: unknown, headers?: Record<string, string>): Promise<T> {
   let res: Response
   try {
     res = await fetch(API_BASE + path, {
@@ -28,6 +28,7 @@ export async function request<T>(method: string, path: string, body?: unknown): 
       headers: {
         ...authHeaders(),
         ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...(headers ?? {}),
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     })
