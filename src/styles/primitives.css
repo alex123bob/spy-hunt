@@ -20,7 +20,8 @@
 }
 .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 7px 0 var(--ink); }
 .btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
-.btn:disabled { background: var(--paper); color: var(--muted); border-style: dashed; box-shadow: 0 2px 0 var(--ink); cursor: default; } /* legible when off: muted on paper is 7.2:1 */
+.btn:disabled, .btn.primary:disabled, .btn.secondary:disabled, .btn.ghost:disabled { background: var(--paper); color: var(--muted); border-style: dashed; box-shadow: 0 2px 0 var(--ink); cursor: default; transform: none; } /* legible when off: muted on paper is 7.2:1; beats every variant */
+.btn.ghost:disabled { background: transparent; }
 .btn.primary { background: var(--tomato); color: #fff; font-size: 19px; font-weight: 700; } /* AA-large: white on tomato is 3.7:1 */
 .btn.secondary { background: var(--green); color: var(--paper); }
 .btn.ghost { background: transparent; border-style: dashed; box-shadow: none; }
