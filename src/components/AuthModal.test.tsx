@@ -75,3 +75,10 @@ test('a 401 on login shows the login failure copy', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Log in' }))
   expect(await screen.findByRole('alert')).toHaveTextContent('Email or password is incorrect.')
 })
+
+test('the sheet closes on Escape before submit', () => {
+  const onClose = vi.fn()
+  render(<AuthModal onClose={onClose} />)
+  fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+  expect(onClose).toHaveBeenCalled()
+})

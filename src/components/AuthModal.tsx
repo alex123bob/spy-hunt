@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { ApiError } from '../api/client'
 import { errorText } from '../api/errors'
 import { t } from '../i18n'
+import { Sheet } from './Sheet'
 import { login, register } from '../state/accounts'
 
 type Tab = 'register' | 'login'
@@ -23,6 +24,7 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(false)
+  const [errCount, setErrCount] = useState(0)
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
@@ -36,21 +38,22 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
       setTimeout(() => window.location.reload(), 400)
     } catch (x) {
       setErr(failureText(x, tab))
+      setErrCount((n) => n + 1)
       setBusy(false)
     }
   }
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <form className="panel modal" onSubmit={submit}>
-        <div className="row" role="tablist">
+    <Sheet label={t(tab === 'register' ? 'auth.registerTab' : 'auth.loginTab')} onClose={onClose} dismissible={!done}>
+      <div className="auth-avatar" aria-hidden="true">🕵️</div>
+      <form className="auth-form" onSubmit={submit}>
+        <div className="segmented" role="tablist">
           {(['register', 'login'] as const).map((k) => (
             <button
               key={k}
               type="button"
               role="tab"
               aria-selected={tab === k}
-              className={`btn chip ${tab === k ? 'primary' : ''}`}
               onClick={() => { setTab(k); setErr('') }}
             >
               {t(k === 'register' ? 'auth.registerTab' : 'auth.loginTab')}
@@ -74,13 +77,17 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
             autoComplete={tab === 'register' ? 'new-password' : 'current-password'}
           />
         </label>
-        {err && <p role="alert" className="error">{err}</p>}
-        {done && <p role="status" className="muted center">{t('auth.signedIn')}</p>}
+        {err && <p key={errCount} role="alert" className="error auth-error">{err}</p>}
+        {done && (
+          <p role="status" className="auth-done">
+            <span className="auth-check" aria-hidden="true">✓</span> {t('auth.signedIn')}
+          </p>
+        )}
         <button type="submit" className="btn primary" disabled={busy}>
           {t(tab === 'register' ? 'auth.submitRegister' : 'auth.submitLogin')}
         </button>
-        <button type="button" className="btn" onClick={onClose} disabled={done}>{t('auth.close')}</button>
+        <button type="button" className="btn ghost" onClick={onClose} disabled={done}>{t('auth.close')}</button>
       </form>
-    </div>
+    </Sheet>
   )
 }

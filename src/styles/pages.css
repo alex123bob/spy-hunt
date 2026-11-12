@@ -12,3 +12,14 @@
 .clan-title > * { flex: none; }
 .clan-score { font-size: 28px; align-items: baseline; }
 .clan-score .muted { font-size: 14px; }
+
+/* Auth sheet */
+.auth-avatar { width: 56px; height: 56px; margin: -44px auto 8px; display: flex; align-items: center; justify-content: center; font-size: 30px; background: var(--sun); border: 3px solid var(--ink); border-radius: 50%; }
+.auth-form { display: flex; flex-direction: column; gap: 12px; }
+.auth-form label { display: flex; flex-direction: column; gap: 4px; }
+.auth-form input { min-height: 48px; padding: 10px 14px; font: inherit; color: var(--ink); background: var(--paper); border: 3px solid var(--ink); border-radius: 14px; }
+.auth-form input:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.auth-error { margin: 0; color: var(--tomato-deep); animation: shake .4s; }
+.auth-done { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; font-weight: 700; }
+.auth-check { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--sun); border: 2px solid var(--ink); border-radius: 50%; animation: pop .35s; }
+@media (prefers-reduced-motion: reduce) { .auth-error, .auth-check { animation: none; } }

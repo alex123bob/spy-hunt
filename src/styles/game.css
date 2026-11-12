@@ -96,5 +96,3 @@ button.flip-scene { cursor: pointer; }
 .empty-state p { margin: 0; }
 .empty-state .spot { width: 84px; height: 84px; border-radius: 50%; background: var(--sun); border: 3px solid var(--ink); box-shadow: 0 5px 0 var(--ink); display: grid; place-items: center; font-size: 42px; }
 .empty-state .actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; margin-top: 8px; }
-.modal-backdrop { position: fixed; inset: 0; background: rgba(29, 59, 51, .6); display: flex; align-items: center; justify-content: center; padding: var(--gutter); z-index: 10; }
-.modal { width: 100%; max-width: 420px; max-height: 100dvh; overflow-y: auto; }
