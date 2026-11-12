@@ -47,18 +47,16 @@ export function Top() {
           <button type="button" className="btn" onClick={fetchTop}>{t('room.retry')}</button>
         </EmptyState>
       )}
-      {load.kind === 'ok' && load.bots.length === 0 && <EmptyState emoji="🏆" title={t('top.empty')} />}
+      {load.kind === 'ok' && load.bots.length === 0 && <EmptyState emoji="🏆" title={t('top.emptyTitle')} body={t('top.empty')} />}
       {load.kind === 'ok' && load.bots.length > 0 && (
         <div className="card top-list stagger">
           {load.bots.map((b, i) => (
             <div key={b.id} className="top-row" style={{ '--i': i } as CSSProperties}>
               <span className={`medal${b.rank <= 3 ? ` m${b.rank}` : ''}`}>{b.rank}</span>
               <Avatar player={b} />
-              <div className="grow wrap">
-                <strong>{b.name}</strong>
-                <div className="muted">{t('top.row', { rate: b.rate, games: b.games, n: b.remixes })}</div>
-              </div>
+              <strong className="grow wrap">{b.name}</strong>
               <Link className="btn small" to={`/bot/${b.id}`}>{t('top.open')}</Link>
+              <div className="stats muted wrap">{t('top.row', { rate: b.rate, games: b.games, n: b.remixes })}</div>
             </div>
           ))}
         </div>

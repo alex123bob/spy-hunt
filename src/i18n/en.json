@@ -239,6 +239,7 @@
   "top.winners": "Top winners",
   "top.spies": "Best spies",
   "top.hint": "Ranked games need 3+ people in the room.",
+  "top.emptyTitle": "No ranked bots yet",
   "top.empty": "No ranked bots yet. Play a room with 3 or more people to get on the board.",
   "top.row": "{rate}% · {games} ranked games · remixed {n}×",
   "top.open": "Open",
