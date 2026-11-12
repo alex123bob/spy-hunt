@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Clan } from './Clan'
 import type { MyClan, Season } from '../api/types'
@@ -152,4 +152,47 @@ test('load error offers retry', async () => {
   render(tree)
   fireEvent.click(await screen.findByRole('button', { name: 'Try again' }))
   expect(await screen.findByRole('button', { name: 'Create clan' })).toBeInTheDocument()
+})
+
+test('a double tap on Yes, leave sends one request', async () => {
+  vi.mocked(getMyClan).mockResolvedValue(memberOf(season()))
+  let finish: () => void = () => {}
+  vi.mocked(leaveClan).mockReturnValue(new Promise<void>((r) => { finish = r }))
+  render(tree)
+  fireEvent.click(await screen.findByRole('button', { name: 'Leave clan' }))
+  const yes = screen.getByRole('button', { name: 'Yes, leave' })
+  fireEvent.click(yes)
+  fireEvent.click(yes)
+  expect(leaveClan).toHaveBeenCalledTimes(1)
+  expect(yes).toBeDisabled()
+  finish()
+})
+
+test('if badges fail to load, the built-in set is offered', async () => {
+  vi.mocked(getBadges).mockRejectedValue(new Error('down'))
+  render(tree)
+  expect(await screen.findByRole('radio', { name: '🦊' })).toBeInTheDocument()
+  expect(screen.getAllByRole('radio').length).toBeGreaterThanOrEqual(6)
+})
+
+test('the name field explains the length rule, and bad_name shows it', async () => {
+  const { ApiError } = await import('../api/client')
+  vi.mocked(createClan).mockRejectedValue(new ApiError(400, 'bad_name'))
+  render(tree)
+  expect(await screen.findByText('3 to 20 characters.')).toBeInTheDocument()
+  fireEvent.change(screen.getByLabelText('Clan name'), { target: { value: 'Foxes' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Create clan' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent('Clan names are 3 to 20 characters.')
+})
+
+test('time left counts down while the page is open', async () => {
+  const ticks: (() => void)[] = []
+  const spy = vi.spyOn(window, 'setInterval').mockImplementation(((fn: () => void) => { ticks.push(fn); return 1 }) as unknown as typeof setInterval)
+  vi.mocked(getMyClan).mockResolvedValue(memberOf(season()))
+  render(tree)
+  expect(await screen.findByText(/4d 12h left/)).toBeInTheDocument()
+  vi.setSystemTime(NOW + 3 * 3_600_000)
+  act(() => ticks.forEach((f) => f()))
+  expect(screen.getByText(/4d 9h left/)).toBeInTheDocument()
+  spy.mockRestore()
 })

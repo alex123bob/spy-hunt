@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ClanBadge, ClanInfo, MyClan, Season } from '../api/types'
+import { ApiError } from '../api/client'
 import { errorText } from '../api/errors'
 import { t, useLang } from '../i18n'
 import { useAccount } from '../state/accounts'
 import { createClan, getBadges, getMyClan, joinClan, leaveClan, listOpenClans } from '../state/clans'
 
 const MAX_MEMBERS = 30
+// Same order as the server's list (clans.BADGES); used only if that request fails.
+const FALLBACK_BADGES: ClanBadge[] = [
+  ['🦊', '#ff6b6b'], ['🐺', '#ffa94d'], ['🦉', '#4cd08a'], ['🐉', '#38c9d6'], ['🦁', '#5b8cff'], ['🐙', '#b07cff'],
+  ['🦅', '#ff6b6b'], ['🐝', '#ffa94d'], ['🌵', '#4cd08a'], ['🚀', '#38c9d6'], ['⚡', '#5b8cff'], ['🔥', '#b07cff'],
+].map(([emoji, color]) => ({ emoji, color }))
 
 type Load = { kind: 'loading' } | { kind: 'error' } | { kind: 'ok'; data: MyClan }
 
@@ -17,6 +23,15 @@ function Badge({ badge, label }: { badge: ClanBadge | null | undefined; label?: 
       {badge.emoji}
     </span>
   )
+}
+
+// re-render once a minute so the time-left label keeps counting down
+function useTick(ms = 60_000) {
+  const [, setN] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setN((n) => n + 1), ms)
+    return () => clearInterval(id)
+  }, [ms])
 }
 
 function timeLeft(endsAt: number): string {
@@ -35,7 +50,7 @@ function NoClan({ onDone }: { onDone: () => void }) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    getBadges().then(setBadges, () => setBadges([]))
+    getBadges().then(setBadges, () => setBadges(FALLBACK_BADGES))
     listOpenClans().then(setOpen, () => setOpen([]))
   }, [])
 
@@ -46,7 +61,7 @@ function NoClan({ onDone }: { onDone: () => void }) {
       await fn()
       onDone()
     } catch (e) {
-      setError(errorText(e))
+      setError(e instanceof ApiError && e.code === 'bad_name' ? t('clan.nameRule') : errorText(e))
       setBusy(false)
     }
   }
@@ -59,8 +74,9 @@ function NoClan({ onDone }: { onDone: () => void }) {
         <h2>{t('clan.createTitle')}</h2>
         <label>
           <span>{t('clan.name')}</span>
-          <input value={name} maxLength={20} onChange={(e) => setName(e.target.value)} />
+          <input value={name} maxLength={20} aria-describedby="clan-name-hint" onChange={(e) => setName(e.target.value)} />
         </label>
+        <span id="clan-name-hint" className="muted small">{t('clan.nameHint')}</span>
         <div role="radiogroup" aria-label={t('clan.badge')} className="badges">
           {badges.map((b, i) => (
             <button key={i} type="button" role="radio" aria-checked={badge === i} aria-label={b.emoji}
@@ -101,16 +117,21 @@ function NoClan({ onDone }: { onDone: () => void }) {
 
 function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | null | undefined; onLeft: () => void }) {
   const [confirming, setConfirming] = useState(false)
+  const [leaving, setLeaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  useTick()
   const wk = season?.this_week
   const rivalName = (name: string | null | undefined, ghost: boolean) => (ghost ? t('clan.practiceRival') : name ?? '—')
 
   const leave = async () => {
+    if (leaving) return
+    setLeaving(true)
     try {
       await leaveClan()
       onLeft()
     } catch (e) {
       setError(errorText(e))
+      setLeaving(false)
     }
   }
 
@@ -163,7 +184,7 @@ function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | nul
         <div className="row">
           <span className="grow">{t('clan.leaveConfirm')}</span>
           <button type="button" className="btn" onClick={() => setConfirming(false)}>{t('clan.cancel')}</button>
-          <button type="button" className="btn primary" onClick={leave}>{t('clan.leaveYes')}</button>
+          <button type="button" className="btn primary" disabled={leaving} onClick={leave}>{t('clan.leaveYes')}</button>
         </div>
       ) : (
         <button type="button" className="btn" onClick={() => setConfirming(true)}>{t('clan.leave')}</button>

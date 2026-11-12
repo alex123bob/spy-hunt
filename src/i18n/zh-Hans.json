@@ -327,5 +327,7 @@
   "error.code.no_clan": "没有使用该邀请码的战队。",
   "error.code.not_in_clan": "你不在任何战队中。",
   "error.code.bad_badge": "请选择一个徽章。",
-  "clan.badgeLabel": "战队：{name}"
+  "clan.badgeLabel": "战队：{name}",
+  "clan.nameHint": "3 到 20 个字符。",
+  "clan.nameRule": "战队名称需为 3 到 20 个字符。"
 }

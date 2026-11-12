@@ -327,5 +327,7 @@
   "error.code.no_clan": "No clan has that code.",
   "error.code.not_in_clan": "You are not in a clan.",
   "error.code.bad_badge": "Pick one of the badges.",
-  "clan.badgeLabel": "Clan: {name}"
+  "clan.badgeLabel": "Clan: {name}",
+  "clan.nameHint": "3 to 20 characters.",
+  "clan.nameRule": "Clan names are 3 to 20 characters."
 }
