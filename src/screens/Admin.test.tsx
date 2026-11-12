@@ -44,3 +44,13 @@ test('refill triggers startRefill and shows refilling state', async () => {
   await userEvent.click(await screen.findByRole('button', { name: /refill/i }))
   expect(startRefill).toHaveBeenCalled()
 })
+
+test('a 401 on the refill click clears the token and re-prompts', async () => {
+  vi.mocked(getToken).mockReturnValue('tok')
+  vi.mocked(getAdminStatus).mockResolvedValue({ ready_count: 2, total_count: 2, refilling: false })
+  vi.mocked(startRefill).mockRejectedValue(new ApiError(401, 'unauthorized'))
+  render(<Admin />)
+  await userEvent.click(await screen.findByRole('button', { name: /refill/i }))
+  await waitFor(() => expect(clearToken).toHaveBeenCalled())
+  expect(screen.getByLabelText(/token/i)).toBeInTheDocument()
+})

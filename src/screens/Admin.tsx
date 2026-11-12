@@ -21,6 +21,17 @@ export function Admin() {
     }
   }, [])
 
+  const onError = useCallback((e: unknown) => {
+    if (e instanceof ApiError && e.status === 401) {
+      clearToken()
+      stopPoll()
+      setPromptMsg('Invalid token.')
+      setPhase('prompt')
+    } else {
+      setPhase('error')
+    }
+  }, [stopPoll])
+
   const load = useCallback(() => {
     setPhase('loading')
     getAdminStatus()
@@ -28,17 +39,8 @@ export function Admin() {
         setStatus(s)
         setPhase('ready')
       })
-      .catch((e) => {
-        if (e instanceof ApiError && e.status === 401) {
-          clearToken()
-          stopPoll()
-          setPromptMsg('Invalid token.')
-          setPhase('prompt')
-        } else {
-          setPhase('error')
-        }
-      })
-  }, [stopPoll])
+      .catch(onError)
+  }, [onError])
 
   useEffect(() => {
     if (getToken()) load()
@@ -62,7 +64,7 @@ export function Admin() {
   }
 
   const refill = () => {
-    startRefill().then(load)
+    startRefill().then(load).catch(onError)
   }
 
   if (phase === 'prompt') {
