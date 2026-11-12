@@ -8,7 +8,7 @@
 .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--sky); border: 2px solid var(--ink); display: grid; place-items: center; font-weight: 700; font-size: 18px; line-height: 1; flex: none; }
 .qr { width: 180px; height: 180px; background: #fff; border: 2.5px solid var(--ink); border-radius: 12px; padding: 6px; margin: 0 auto; }
 .qr svg { width: 100%; height: 100%; }
-.link { font-size: 14px; opacity: .65; }
+.link { font-size: 14px; color: var(--muted); }
 .wordcard { background: var(--green); border: 3px solid var(--ink); box-shadow: var(--shadow); border-radius: 20px; color: var(--paper); padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit; cursor: pointer; }
 .wordcard .word { font: 700 30px/1.2 var(--font-display); }
 .table .feed { flex: 1; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; min-height: 120px; }
@@ -20,10 +20,10 @@
 .bubble.skipped { background: transparent; box-shadow: none; border-style: dashed; font-size: 14px; }
 .turnbar { position: sticky; bottom: 0; }
 .countdown { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 22px; }
-.countdown.urgent { color: var(--tomato); }
+.countdown.urgent { color: var(--tomato-deep); }
 .targets { display: flex; flex-direction: column; gap: 10px; }
 .btn.target { min-height: 64px; font-size: 20px; text-align: left; }
-.role.spy { color: var(--tomato); font-weight: 800; }
+.role.spy { color: var(--tomato-deep); font-weight: 800; }
 .role.civilian { color: #1c6b43; font-weight: 800; }
 .history { max-height: 45vh; overflow-y: auto; }
 .history .round { display: flex; flex-direction: column; gap: 6px; }
@@ -37,7 +37,7 @@
 .rule-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .rule-row select { min-height: 44px; }
 .code { letter-spacing: 2px; }
-.banner { position: sticky; top: 0; background: var(--tomato); color: #fff; text-align: center; padding: 6px; font-size: 14px; font-weight: 700; z-index: 5; }
+.banner { position: sticky; top: 0; background: var(--tomato-deep); color: #fff; text-align: center; padding: 6px; font-size: 14px; font-weight: 700; z-index: 5; }
 .modal-backdrop { position: fixed; inset: 0; background: rgba(29, 59, 51, .6); display: flex; align-items: center; justify-content: center; padding: var(--gutter); z-index: 10; }
 .modal { width: 100%; max-width: 420px; max-height: 100dvh; overflow-y: auto; }
 .panel.share { white-space: pre-wrap; margin: 0; font: inherit; }

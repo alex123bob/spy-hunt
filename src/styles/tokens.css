@@ -1,9 +1,9 @@
-@import '@fontsource/fredoka/500.css';
-@import '@fontsource/fredoka/600.css';
-@import '@fontsource/fredoka/700.css';
-@import '@fontsource/nunito/500.css';
-@import '@fontsource/nunito/700.css';
-@import '@fontsource/nunito/800.css';
+@import '@fontsource/fredoka/latin-500.css';
+@import '@fontsource/fredoka/latin-600.css';
+@import '@fontsource/fredoka/latin-700.css';
+@import '@fontsource/nunito/latin-500.css';
+@import '@fontsource/nunito/latin-700.css';
+@import '@fontsource/nunito/latin-800.css';
 
 :root {
   color-scheme: light;
@@ -17,6 +17,8 @@
   --pink: #f7a8b8;
   --mint: #9fe0b5;
   --lilac: #d9c4f2;
+  --tomato-deep: #b5361f; /* text-safe tomato, 5.1:1 on cream */
+  --muted: #3f5a50; /* 6.4:1 on cream, 7.2:1 on paper */
   --line: var(--ink);
   --shadow: 6px 6px 0 var(--ink);
   --shadow-btn: 0 5px 0 var(--ink);

@@ -2,6 +2,11 @@
 
 /* Buttons */
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
   font: 600 18px/1.2 var(--font-display);
   border: 2.5px solid var(--ink);
   border-radius: 18px;
@@ -16,7 +21,7 @@
 .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 7px 0 var(--ink); }
 .btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
 .btn:disabled { opacity: .5; cursor: default; }
-.btn.primary { background: var(--tomato); color: #fff; }
+.btn.primary { background: var(--tomato); color: #fff; font-size: 19px; font-weight: 700; } /* AA-large: white on tomato is 3.7:1 */
 .btn.secondary { background: var(--green); color: var(--paper); }
 .btn.ghost { background: transparent; border-style: dashed; box-shadow: none; }
 .btn.ghost:hover:not(:disabled), .btn.ghost:active:not(:disabled) { box-shadow: none; }
@@ -44,6 +49,7 @@
   cursor: pointer;
   transition: transform 150ms var(--ease-spring);
 }
+.tile small { color: var(--ink); }
 .tile:hover { transform: translateY(-3px) rotate(-2deg); }
 .tile.c-sun { background: var(--sun); }
 .tile.c-sky { background: var(--sky); }
@@ -70,7 +76,7 @@
   color: var(--ink);
 }
 .tag.ok { background: var(--mint); color: var(--ink); }
-.tag.bad { background: var(--tomato); color: #fff; }
+.tag.bad { background: var(--tomato-deep); color: #fff; }
 .tape {
   display: inline-block;
   background: var(--sun);
@@ -181,11 +187,11 @@ label:has(> input.toggle), label.toggle { flex-direction: row; align-items: cent
 .between { justify-content: space-between; align-items: center; }
 .center { text-align: center; align-items: center; }
 .narrow { flex: 0 0 auto !important; }
-.muted { color: var(--ink); opacity: .65; }
+.muted { color: var(--muted); }
 .small { font-size: 13px; }
 .big { font: 700 28px/1.1 var(--font-display); }
 .wrap { overflow-wrap: anywhere; word-break: break-word; white-space: pre-wrap; }
-.error { color: var(--tomato); font-weight: 700; margin: 0; }
+.error { color: var(--tomato-deep); font-weight: 700; margin: 0; }
 .ok { color: #1c6b43; }
 
 /* Keyframes */
