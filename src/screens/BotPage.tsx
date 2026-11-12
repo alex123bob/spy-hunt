@@ -4,6 +4,9 @@ import { ApiError } from '../api/client'
 import type { BotCard } from '../api/types'
 import { getBotCard, listMyBots } from '../bots/api'
 import { BotCardView } from '../bots/BotCardView'
+import { EmptyState } from '../components/EmptyState'
+import { Loader } from '../components/Loader'
+import { Toast } from '../components/Toast'
 import { shareResult } from '../daily/share'
 import { t, useLang } from '../i18n'
 import { getSession } from '../state/session'
@@ -51,21 +54,21 @@ export function BotPage() {
     setShareState(r === 'shared' ? t('result.shared') : r === 'copied' ? t('result.copied') : t('result.shareFailed'))
   }
 
-  if (load.kind === 'loading') return <main className="screen"><p className="muted center">{t('bots.loading')}</p></main>
+  if (load.kind === 'loading') return <main className="screen"><Loader label={t('bots.loading')} /></main>
   if (load.kind !== 'ok') {
     return (
       <main className="screen">
-        <h2 className="center">{t(load.kind === 'notFound' ? 'bots.notFound' : 'bots.error')}</h2>
-        {load.kind === 'notFound' && <p className="muted center">{t('bots.notFoundBody')}</p>}
-        <Link className="btn center" to="/">{t('bots.home')}</Link>
+        <EmptyState emoji="🤖❓" title={t(load.kind === 'notFound' ? 'bots.notFound' : 'bots.error')} body={load.kind === 'notFound' ? t('bots.notFoundBody') : undefined}>
+          <Link className="btn" to="/">{t('bots.home')}</Link>
+        </EmptyState>
       </main>
     )
   }
   return (
     <main className="screen">
-      <BotCardView bot={load.bot} />
+      <BotCardView bot={load.bot} float />
       <button type="button" className="btn" onClick={share}>{t('bots.copyLink')}</button>
-      {shareState && <p role="status" className="muted center">{shareState}</p>}
+      <Toast text={shareState} />
       {known && !mine && load.bot.remixable && (count >= 3
         ? <p className="muted center">{t('bots.limit')}</p>
         : <button type="button" className="btn primary" onClick={() => navigate(`/bots?remix=${load.bot.id}`)}>{t('bots.remix')}</button>)}

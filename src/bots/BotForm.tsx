@@ -21,7 +21,7 @@ function colorName(c: string): string {
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <span className="muted">{label}</span>
+      <span className="field-label">{label}</span>
       <div role="radiogroup" aria-label={label} className="picker">{children}</div>
     </div>
   )
@@ -59,7 +59,7 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
   const radio = (on: boolean, label: string, pick: () => void, extra: { className?: string; style?: React.CSSProperties; text?: string }) => (
     <button
       key={label} type="button" role="radio" aria-checked={on} aria-label={label}
-      className={`btn chip ${on ? 'primary' : ''} ${extra.className ?? ''}`} style={extra.style} onClick={pick}
+      className={`btn chip ${on ? 'primary pick' : ''} ${extra.className ?? ''}`} style={extra.style} onClick={pick}
     >
       {extra.text}
     </button>
@@ -89,29 +89,29 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
   }
 
   return (
-    <section className="panel">
-      <label>
-        <span className="muted">{t('bots.name')}</span>
+    <section className="card bot-form">
+      <label className="form-sec">
+        <span className="field-label">{t('bots.name')}</span>
         <input value={draft.name} maxLength={16} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
       </label>
-      <Group label={t('bots.emoji')}>
+      <div className="form-sec"><Group label={t('bots.emoji')}>
         {catalog.emojis.map((em) =>
           radio(draft.avatar.emoji === em, em, () => setDraft({ ...draft, avatar: { ...draft.avatar, emoji: em } }), { text: em }))}
-      </Group>
-      <Group label={t('bots.color')}>
+      </Group></div>
+      <div className="form-sec"><Group label={t('bots.color')}>
         {catalog.colors.map((c) =>
           radio(draft.avatar.color === c, colorName(c), () => setDraft({ ...draft, avatar: { ...draft.avatar, color: c } }),
-            { className: 'swatch', style: { background: c } }))}
-      </Group>
-      {GROUPS.map(({ slot, key }) => (
+            { className: 'swatch', style: { background: c }, text: draft.avatar.color === c ? '✓' : '' }))}
+      </Group></div>
+      <div className="form-sec">{GROUPS.map(({ slot, key }) => (
         <Group key={slot} label={t(`bots.slot.${slot}`)}>
           {catalog[key].map((id) =>
             radio(draft.outfit[slot] === id, t(`bots.${slot}.${id}`), () => setDraft({ ...draft, outfit: { ...draft.outfit, [slot]: id } }),
               { text: t(`bots.${slot}.${id}`) }))}
         </Group>
-      ))}
-      <div>
-        <span className="muted">{t('bots.rules')}</span>
+      ))}</div>
+      <div className="form-sec">
+        <span className="field-label">{t('bots.rules')}</span>
         {rules.map((r, i) => (
           <div key={i} className="rule-row">
             <select aria-label={t('bots.rules.whenN', { n: i + 1 })} value={r.when} onChange={(e) => setRule(i, { when: e.target.value })}>
@@ -130,21 +130,23 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
           {t('bots.rules.add')}
         </button>
         {duplicate && <p role="alert" className="error">{t('bots.rules.duplicate')}</p>}
-        {rules.length >= catalog.max_rules && <p className="muted">{t('bots.rules.limit')}</p>}
+        {rules.length >= catalog.max_rules && <p className="tc-sub">{t('bots.rules.limit')}</p>}
       </div>
-      <label className="row">
+      <div className="form-sec"><label className="row toggle">
         <input type="checkbox" checked={draft.listed ?? true} onChange={(e) => setDraft({ ...draft, listed: e.target.checked })} />
         <span>{t('bots.listed')}</span>
       </label>
-      <label className="row">
+      <label className="row toggle">
         <input type="checkbox" checked={draft.arena ?? true} onChange={(e) => setDraft({ ...draft, arena: e.target.checked })} />
         <span>{t('arena.opt')}</span>
-      </label>
-      <BotCardView bot={{ name: draft.name.trim() || ' ', avatar: draft.avatar, outfit: draft.outfit }} />
+      </label></div>
+      <div className="preview-frame">
+        <BotCardView bot={{ name: draft.name.trim() || ' ', avatar: draft.avatar, outfit: draft.outfit }} />
+      </div>
       {err && <p role="alert" className="error wrap">{err}</p>}
       <div className="row">
         <button type="button" className="btn primary" disabled={busy || duplicate || !draft.name.trim()} onClick={save}>{t('bots.save')}</button>
-        <button type="button" className="btn" onClick={onCancel}>{t('bots.cancel')}</button>
+        <button type="button" className="btn ghost" onClick={onCancel}>{t('bots.cancel')}</button>
       </div>
     </section>
   )

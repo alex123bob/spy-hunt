@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import type { Recap } from '../api/types'
 import { Avatar } from '../components/Avatar'
@@ -17,16 +18,19 @@ export function RecapList({ recaps }: { recaps: Recap[] }) {
   return (
     <section className="recaps">
       <h2>{t('arena.title')}</h2>
-      {recaps.map((r) => (
-        <div key={`${r.match_id}-${r.bot_id}`} className={r.seen ? 'recap' : 'recap recap-new'}>
+      <div className="stagger recap-list">
+      {recaps.map((r, i) => (
+        <div key={`${r.match_id}-${r.bot_id}`} className={r.seen ? 'recap card' : 'recap recap-new card'} style={{ '--i': i } as CSSProperties}>
+          {!r.seen && <span className="new-dot" aria-hidden />}
           <Avatar player={{ name: r.bot_name, avatar: r.avatar }} />
           <div>
             <p>{sentence(r)}</p>
-            {r.quote && <p className="muted">“{r.quote}”</p>}
+            {r.quote && <p className="quote">“{r.quote}”</p>}
             <Link to={`/match/${r.match_id}`}>{t('arena.see')}</Link>
           </div>
         </div>
       ))}
+      </div>
     </section>
   )
 }

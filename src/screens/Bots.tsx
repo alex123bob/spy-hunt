@@ -7,6 +7,8 @@ import { deleteBot, getBotCard, getCatalog, getRecaps, listMyBots, markRecapsSee
 import { BotCardView } from '../bots/BotCardView'
 import { BotForm } from '../bots/BotForm'
 import { RecapList } from '../bots/RecapList'
+import { EmptyState } from '../components/EmptyState'
+import { Loader } from '../components/Loader'
 import { t, useLang } from '../i18n'
 
 const MAX_BOTS = 3
@@ -109,21 +111,20 @@ export function Bots() {
       <h1>{t('bots.title')}</h1>
       {recaps.kind === 'ok' && <RecapList recaps={recaps.list} />}
       {recaps.kind === 'error' && <p className="muted">{t('arena.recapsError')}</p>}
-      {load.kind === 'loading' && <p className="muted">{t('bots.loading')}</p>}
+      {load.kind === 'loading' && <Loader label={t('bots.loading')} />}
       {load.kind === 'error' && (
-        <>
-          <p role="alert" className="error">{t('bots.listError')}</p>
+        <EmptyState emoji="🤖" title={t('bots.listError')} role="alert">
           <button type="button" className="btn" onClick={fetchAll}>{t('room.retry')}</button>
-        </>
+        </EmptyState>
       )}
       {load.kind === 'ok' && (
         <>
           {load.bots.map((b) => (
             <div key={b.id} className="bot-item">
               <BotCardView bot={b} />
-              <div className="row">
+              <div className="row bot-actions">
                 <button type="button" className="btn" onClick={() => { setForm({ bot: b }); setConfirming('') }}>{t('bots.edit')}</button>
-                <button type="button" className="btn" onClick={() => remove(b.id)}>
+                <button type="button" className={confirming === b.id ? 'btn primary' : 'btn'} onClick={() => remove(b.id)}>
                   {confirming === b.id ? t('bots.confirmDelete') : t('bots.delete')}
                 </button>
               </div>
