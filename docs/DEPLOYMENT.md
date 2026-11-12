@@ -11,7 +11,7 @@ Full Nginx config for reference: [nginx.conf.example](nginx.conf.example).
 Day-to-day usage: [README](../README.md).
 
 **Checklist (first deployment):** backend pulled and restarted (§1) → Nginx block added and reloaded (§2) →
-`yarn release` on your laptop, push, run the workflow on GitHub, then `./server-deploy.sh` on the server (§3).
+run the release workflow on GitHub, then `./server-deploy.sh` on the server (§3).
 
 ## 1. Backend (PP-AI-Service)
 
@@ -88,19 +88,12 @@ The server needs **no Node**: releases are built by GitHub Actions and the serve
 The build is produced with `VITE_BASE_PATH=/spy-hunt` (set in the workflow) so asset URLs, the router's
 `basename`, and the share/QR-code links all resolve under `/spy-hunt/` instead of domain root.
 
-**On your laptop** (clean `main`):
-
-```bash
-yarn release                    # patch bump, e.g. 0.1.0 -> 0.1.1; or: yarn release minor|major
-```
-
-It pulls, checks that the build works, bumps the version in `package.json` / `yarn.lock` and commits
-"Release vX.Y.Z". It does **not** tag or push:
-
-1. Push the commit: `git push`
-2. On GitHub: **Actions -> release -> Run workflow**, branch `main`, tag field empty. The workflow builds the
-   app, creates the `vX.Y.Z` tag on that commit and publishes `spy-hunt-dist.tar.gz` as a GitHub Release
-   asset. (Pushing a `v*` tag by hand also triggers it, but you don't need to.)
+**One click, no laptop step:** on GitHub, **Actions -> release -> Run workflow**, branch `main`, pick a
+bump (`patch`/`minor`/`major`, default `patch`). The workflow runs the tests, bumps the version in
+`package.json` (committed and pushed to `main` as `github-actions[bot]`), builds the app, creates the
+`vX.Y.Z` tag on that commit, and publishes `spy-hunt-dist.tar.gz` as a GitHub Release asset.
+(Pushing a `v*` tag by hand also triggers a release, using whatever `main` is at — it skips the version
+bump, so use it only to re-publish an existing version, not for a normal release.)
 
 **On the server** (needs only `curl` and `tar`):
 

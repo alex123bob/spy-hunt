@@ -1,6 +1,7 @@
-# Builds the frontend and publishes dist/ as a GitHub Release asset. Runs when a version tag (v*) is pushed,
-# or manually from the Actions tab ("Run workflow"): with the tag left empty it releases v<package.json version>
-# from the branch you pick, creating the tag if it does not exist yet.
+# One-click release: run from the Actions tab and pick a bump size. It tests, builds, bumps the
+# version in package.json/yarn.lock, commits and pushes that to main, then tags it and publishes
+# dist/ as a GitHub Release asset. Pushing a v* tag by hand still works too (e.g. to re-publish
+# a release for an existing commit) and skips the bump/commit/push steps.
 # The server has no Node, so it just downloads spy-hunt-dist.tar.gz (see scripts/server-deploy.sh).
 name: release
 
@@ -9,10 +10,12 @@ on:
     tags: ['v*']
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Release tag, e.g. v0.1.1 (leave empty to use the version in package.json)'
-        required: false
-        type: string
+      bump:
+        description: 'Version bump'
+        required: true
+        type: choice
+        default: patch
+        options: [patch, minor, major]
 
 permissions:
   contents: write
@@ -22,11 +25,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Require main branch
+        if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
+        run: |
+          echo "Run this workflow from main, not ${{ github.ref_name }}."
+          exit 1
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: yarn
       - run: yarn install --frozen-lockfile
+      - run: yarn test
+
+      - name: Bump version, commit, push
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          VERSION=$(yarn version --"$BUMP" --no-git-tag-version | sed -n 's/^info New version: //p')
+          git add package.json yarn.lock
+          git commit -m "Release v$VERSION"
+          git push
+          echo "TAG=v$VERSION" >> "$GITHUB_ENV"
+
       - name: Build (served from /spy-hunt/ in production)
         run: yarn build
         env:
@@ -36,13 +59,11 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-          INPUT_TAG: ${{ inputs.tag }}
         run: |
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
             TAG="$GITHUB_REF_NAME"
-          else
-            TAG="${INPUT_TAG:-v$(node -p "require('./package.json').version")}"
           fi
+          # TAG came from the bump step above on workflow_dispatch, or from the tag push here
           case "$TAG" in v[0-9]*) ;; *) echo "Invalid tag '$TAG', expected something like v0.1.1"; exit 1;; esac
-          # --target only matters when the tag does not exist yet: it is created at the commit being built
-          gh release create "$TAG" spy-hunt-dist.tar.gz --title "$TAG" --generate-notes --target "$GITHUB_SHA"
+          # --target pins the release to the commit just pushed (bump step), not whatever main is at by the time this runs
+          gh release create "$TAG" spy-hunt-dist.tar.gz --title "$TAG" --generate-notes --target "$(git rev-parse HEAD)"
