@@ -49,6 +49,8 @@
   "room.reconnecting": "重新连接中…",
   "word.yourWord": "你的词",
   "word.hide": "点击隐藏",
+  "word.secret": "绝密",
+  "word.peek": "点击偷看",
   "word.show": "点击查看你的词",
   "table.round": "第 {n} 轮",
   "table.yourTurn": "轮到你了",

@@ -65,29 +65,40 @@ export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot
   return (
     <main className="screen table" data-testid="screen-Table">
       <header className="row between">
-        <strong>{t('table.round', { n: state.round })}</strong>
+        <span className="pill">{t('table.round', { n: state.round })}</span>
         <LangPicker value={lang} onChange={pickLang} label={t('lobby.yourLang')} />
       </header>
       <WordCard word={state.me.my_word} />
       <section className="feed" aria-live="polite">
         {state.messages.map((m) => (
-          <StatementBubble key={m.id} message={m} name={nameOf(m.seat)} viewerLang={viewerLang} mine={m.seat === state.me.seat} />
+          <StatementBubble
+            key={m.id}
+            message={m}
+            name={nameOf(m.seat)}
+            viewerLang={viewerLang}
+            mine={m.seat === state.me.seat}
+            avatar={m.kind === 'host' || m.kind === 'skipped' ? undefined : state.players.find((p) => p.seat === m.seat)}
+          />
         ))}
         <div ref={endRef} />
       </section>
-      <section className="panel turnbar">
+      <section className="turnbar">
         {speaker ? (
-          <div className="row between">
-            <span className="wrap">{myTurn ? t('table.yourTurn') : <><Avatar player={speaker} /> {t('table.speaking', { name: speaker.name })}</>}</span>
-            <Countdown deadline={state.phase_deadline} offset={offset} />
+          <div className="turn-line">
+            <span className={`turn-text wrap${myTurn ? ' my-turn' : ''}`}>
+              <Avatar player={speaker} size="s" />
+              {myTurn ? t('table.yourTurn') : t('table.speaking', { name: speaker.name })}
+              {!myTurn && <span className="typing" aria-hidden="true"><i /><i /><i /></span>}
+            </span>
+            <Countdown deadline={state.phase_deadline} offset={offset} total={state.config.turn_seconds} />
           </div>
         ) : holdUntil != null ? (
-          <div className="row between">
-            <span>{t('table.votingSoon')}</span>
+          <div className="turn-line">
+            <span className="turn-text">{t('table.votingSoon')}</span>
             <Countdown deadline={holdUntil} vibrate={false} />
           </div>
         ) : null}
-        {eliminated && <p className="muted">{t('table.eliminated')}</p>}
+        {eliminated && <p className="ghost-note">👻 {t('table.eliminated')}</p>}
         <div className="row">
           <input
             value={text}

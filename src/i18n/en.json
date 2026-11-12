@@ -49,6 +49,8 @@
   "room.reconnecting": "Reconnecting…",
   "word.yourWord": "Your word",
   "word.hide": "Tap to hide",
+  "word.secret": "Top secret",
+  "word.peek": "Tap to peek",
   "word.show": "Tap to show your word",
   "table.round": "Round {n}",
   "table.yourTurn": "Your turn",
