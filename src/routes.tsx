@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import { Admin } from './screens/Admin'
 import { BotPage } from './screens/BotPage'
 import { Clan } from './screens/Clan'
 import { Bots } from './screens/Bots'
@@ -12,6 +13,7 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/admin" element={<Admin />} />
       <Route path="/daily" element={<Daily />} />
       <Route path="/r/:code" element={<Room />} />
       <Route path="/bots" element={<Bots />} />
