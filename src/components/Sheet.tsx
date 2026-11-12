@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
-export function Sheet({ label, onClose, children, dismissible = true }: { label: string; onClose: () => void; children: ReactNode; dismissible?: boolean }) {
+export function Sheet({ label, onClose, children, dismissible = true, adornment }: { label: string; onClose: () => void; children: ReactNode; dismissible?: boolean; adornment?: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
   const closeRef = useRef(onClose)
   closeRef.current = onClose
@@ -42,7 +42,8 @@ export function Sheet({ label, onClose, children, dismissible = true }: { label:
   return (
     <div className="sheet-backdrop" onClick={(e) => { if (dismissible && e.target === e.currentTarget) onClose() }}>
       <div ref={ref} role="dialog" aria-modal="true" aria-label={label} className="sheet" tabIndex={-1}>
-        {children}
+        {adornment && <div className="sheet-adornment">{adornment}</div>}
+        <div className={`sheet-body${adornment ? ' has-adornment' : ''}`}>{children}</div>
       </div>
     </div>
   )

@@ -44,8 +44,9 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Sheet label={t(tab === 'register' ? 'auth.registerTab' : 'auth.loginTab')} onClose={onClose} dismissible={!done}>
-      <div className="auth-avatar" aria-hidden="true">🕵️</div>
+    <Sheet label={t(tab === 'register' ? 'auth.registerTab' : 'auth.loginTab')} onClose={onClose} dismissible={!done}
+      adornment={<div className="auth-avatar" aria-hidden="true">🕵️</div>}
+    >
       <form className="auth-form" onSubmit={submit}>
         <div className="segmented" role="tablist">
           {(['register', 'login'] as const).map((k) => (

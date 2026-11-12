@@ -14,8 +14,9 @@
 .clan-score .muted { font-size: 14px; }
 
 /* Auth sheet */
-.auth-avatar { width: 56px; height: 56px; margin: -44px auto 8px; display: flex; align-items: center; justify-content: center; font-size: 30px; background: var(--sun); border: 3px solid var(--ink); border-radius: 50%; }
+.auth-avatar { width: 56px; height: 56px;  display: flex; align-items: center; justify-content: center; font-size: 30px; background: var(--sun); border: 3px solid var(--ink); border-radius: 50%; }
 .auth-form { display: flex; flex-direction: column; gap: 12px; }
+.auth-form p { margin: 0; }
 .auth-form label { display: flex; flex-direction: column; gap: 4px; }
 .auth-form input { min-height: 48px; padding: 10px 14px; font: inherit; color: var(--ink); background: var(--paper); border: 3px solid var(--ink); border-radius: 14px; }
 .auth-form input:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
