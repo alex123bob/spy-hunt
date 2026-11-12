@@ -1,11 +1,5 @@
 /* Page styles (landing, daily, bots, top, clan, match). Interim ports of the old stylesheet; later tasks restyle them. */
 
-.topbar { max-width: 520px; margin: 0 auto; padding: 12px var(--gutter) 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.topbar .langpicker { flex: 0 0 auto; }
-.topbar .chip { padding: 10px; min-height: 44px; }
-.topbar-account { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.topbar-email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.nudge { max-width: 520px; margin: 8px auto 0; padding: 10px 14px; background: var(--sun); border: 2.5px solid var(--ink); border-radius: 18px; box-shadow: 0 4px 0 var(--ink); display: flex; align-items: center; justify-content: space-between; gap: 10px; width: calc(100% - 2 * var(--gutter)); }
 .daily .stats { display: flex; flex-direction: column; gap: 6px; }
 .daily .share { white-space: pre-wrap; margin: 0; font: inherit; }
 .daily-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }

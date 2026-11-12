@@ -30,6 +30,7 @@ test('shows the language picker and the register link for a guest', () => {
 test('shows the email and logs out then reloads', async () => {
   vi.mocked(useAccount).mockReturnValue({ email: 'a@b.com' })
   render(<TopBar />)
+  fireEvent.click(screen.getByRole('button', { name: 'Account' }))
   expect(screen.getByText('a@b.com')).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Log out' }))
   await waitFor(() => expect(reload).toHaveBeenCalled())

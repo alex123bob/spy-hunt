@@ -267,6 +267,8 @@
   "arena.match.error": "Could not load this match.",
   "arena.recapsError": "Could not load your recaps.",
   "auth.corner": "Register / log in",
+  "auth.account": "Account",
+  "app.trust": "Trust nobody",
   "auth.logout": "Log out",
   "auth.registerTab": "Register",
   "auth.loginTab": "Log in",

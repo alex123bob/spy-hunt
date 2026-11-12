@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Lang } from '../api/types'
 import { LangPicker } from './LangPicker'
+import { Logo } from './Logo'
+import { AccountMenu } from './AccountMenu'
 import { AuthModal } from './AuthModal'
 import { setLang, t, useLang } from '../i18n'
 import { logout, useAccount } from '../state/accounts'
@@ -23,16 +25,18 @@ export function TopBar() {
 
   return (
     <header className="topbar">
-      <LangPicker value={lang} onChange={pickLang} />
-      {account.email ? (
-        <div className="topbar-account">
-          <Link className="btn chip" to="/clan">{t('clan.topbar')}</Link>
-          <span className="topbar-email">{account.email}</span>
-          <button type="button" className="btn chip" onClick={signOut}>{t('auth.logout')}</button>
-        </div>
-      ) : (
-        <button type="button" className="btn chip" onClick={() => setOpen(true)}>{t('auth.corner')}</button>
-      )}
+      <Link to="/" className="topbar-logo" aria-label={t('app.title')}><Logo /></Link>
+      <div className="topbar-right">
+        <LangPicker value={lang} onChange={pickLang} />
+        {account.email ? (
+          <>
+            <Link className="pill" to="/clan">{t('clan.topbar')}</Link>
+            <AccountMenu email={account.email} onLogout={signOut} />
+          </>
+        ) : (
+          <button type="button" className="pill" onClick={() => setOpen(true)}>{t('auth.corner')}</button>
+        )}
+      </div>
       {open && <AuthModal onClose={() => setOpen(false)} />}
     </header>
   )

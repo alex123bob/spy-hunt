@@ -15,7 +15,7 @@ export function NudgeBanner() {
   return (
     <div className="nudge" role="status">
       <span>{t(`nudge.${trigger}`, { n: pendingStreak() })}</span>
-      <button type="button" className="btn chip" aria-label={t('nudge.dismiss')} onClick={close}>✕</button>
+      <button type="button" className="pill" aria-label={t('nudge.dismiss')} onClick={close}>✕</button>
     </div>
   )
 }
