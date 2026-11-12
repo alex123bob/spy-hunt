@@ -38,7 +38,7 @@ export function Result({ state }: { state: Snapshot }) {
     <main className="screen result">
       <h2 className="center">{t('result.title')}</h2>
       <div className="result-hero">
-        <Confetti run={info.outcome === 'won'} />
+        <Confetti run={info.outcome === 'won'} fullscreen />
         <p className={`center big result-banner${info.outcome === 'lost' ? ' droop' : ''}`}>{t(`result.${info.outcome}`)}</p>
         {state.winner && (
           <p className="center muted result-side">{t(state.winner === 'spies' ? 'result.sideSpies' : 'result.sideCivilians')}</p>

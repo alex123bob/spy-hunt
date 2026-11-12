@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useReducedMotion } from '../motion/useReducedMotion'
 
 const COLORS = ['#f6c445', '#e5533d', '#8fd3e8', '#9fe0b5', '#f4a6c1', '#c9b6f2']
@@ -21,7 +22,7 @@ function makePieces(n: number): Piece[] {
   }))
 }
 
-export function Confetti({ run, pieces = MAX }: { run: boolean; pieces?: number }) {
+export function Confetti({ run, pieces = MAX, fullscreen = false }: { run: boolean; pieces?: number; fullscreen?: boolean }) {
   const reduced = useReducedMotion()
   const active = run && !reduced
   const [list, setList] = useState<Piece[]>([])
@@ -37,8 +38,8 @@ export function Confetti({ run, pieces = MAX }: { run: boolean; pieces?: number 
   }, [active, pieces])
 
   if (!active) return null
-  return (
-    <div className="confetti" aria-hidden="true">
+  const node = (
+    <div className={fullscreen ? 'confetti fullscreen' : 'confetti'} aria-hidden="true">
       {list.map((p, i) => (
         <i
           key={i}
@@ -52,4 +53,5 @@ export function Confetti({ run, pieces = MAX }: { run: boolean; pieces?: number 
       ))}
     </div>
   )
+  return fullscreen ? createPortal(node, document.body) : node
 }

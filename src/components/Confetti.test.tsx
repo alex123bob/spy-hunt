@@ -20,6 +20,14 @@ describe('Confetti', () => {
     expect(container.firstElementChild).toHaveAttribute('aria-hidden', 'true')
   })
 
+  it('fullscreen confetti renders into document.body', () => {
+    const { container } = render(<Confetti run fullscreen />)
+    expect(container).toBeEmptyDOMElement()
+    const el = document.body.querySelector(':scope > .confetti.fullscreen')
+    expect(el).not.toBeNull()
+    expect(el!.querySelectorAll('i').length).toBe(40)
+  })
+
   it('renders nothing when not running', () => {
     const { container } = render(<Confetti run={false} />)
     expect(container).toBeEmptyDOMElement()

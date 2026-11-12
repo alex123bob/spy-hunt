@@ -179,3 +179,6 @@ button.flip-scene { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .droop { animation: none; filter: saturate(.3); } }
 .word-cards .colon { display: none; }
 .everyone .row > .wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.confetti.fullscreen { position: fixed; z-index: 50; }
+.confetti.fullscreen i { animation-name: fall-full; }
+@keyframes fall-full { to { transform: translateY(110vh) rotate(540deg); } }
