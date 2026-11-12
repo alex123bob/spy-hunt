@@ -136,3 +136,4 @@
 .match-reveal .reveal-line { margin: 0; }
 .match-reveal .role { border: 2px solid currentColor; border-radius: 8px; padding: 1px 8px; font-size: 13px; text-transform: uppercase; display: inline-block; transform: rotate(-4deg); }
 .winner-banner { margin: 4px 0 0; padding: 10px 12px; text-align: center; background: var(--sun); color: var(--ink); border: 2.5px solid var(--ink); border-radius: 16px; box-shadow: 0 3px 0 var(--ink); font: 700 18px/1.2 var(--font-display); }
+.match-round h3.round-pill { margin: 0; }

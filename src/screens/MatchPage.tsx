@@ -64,7 +64,7 @@ export function MatchPage() {
         const stages = [0, 1].filter((st) => r.statements.some((s) => s.stage === st) || r.votes.some((v) => v.stage === st))
         return (
           <section key={r.round} className="card match-round">
-            <span className="pill round-pill">{t('arena.match.round', { n: r.round })}</span>
+            <h3 className="pill round-pill">{t('arena.match.round', { n: r.round })}</h3>
             {stages.map((st) => (
               <div key={st} className="match-stage">
                 {st === 1 && <p className="muted">{t('arena.match.tiebreak')}</p>}
