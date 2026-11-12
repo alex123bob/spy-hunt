@@ -20,3 +20,4 @@ coverage/
 *.log
 test-results/
 playwright-report/
+.superpowers/
