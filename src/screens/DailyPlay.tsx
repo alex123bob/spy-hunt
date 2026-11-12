@@ -14,6 +14,7 @@ export function DailyPlay({ puzzle, me, onGuess }: Props) {
   const lang = useLang()
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState(false)
+  const [fresh, setFresh] = useState<number | null>(null)
   const nameOf = (seat: number | null) => puzzle.players.find((p) => p.seat === seat)?.name ?? ''
   const rounds = [...new Set(puzzle.statements.map((m) => m.round))].sort((a, b) => a - b)
 
@@ -22,7 +23,8 @@ export function DailyPlay({ puzzle, me, onGuess }: Props) {
     setBusy(true)
     setErr(false)
     try {
-      await onGuess(seat)
+      const r = await onGuess(seat)
+      if (!r.correct) setFresh(seat)
     } catch {
       setErr(true)
     } finally {
@@ -75,7 +77,8 @@ export function DailyPlay({ puzzle, me, onGuess }: Props) {
             <button
               key={isWrong ? `${p.seat}-wrong` : p.seat}
               type="button"
-              className={`btn target${isWrong ? ' wrong' : ''}${p.seat === last ? ' shake' : ''}`}
+              className={`btn target${isWrong ? ' wrong' : ''}${p.seat === fresh ? ' shake' : ''}`}
+              onAnimationEnd={() => p.seat === fresh && setFresh(null)}
               disabled={busy || isWrong}
               onClick={() => guess(p.seat)}
             >

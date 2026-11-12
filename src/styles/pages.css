@@ -68,6 +68,7 @@
 .stats-trio .big { font-size: 24px; }
 .streak-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .streak-row p { margin: 0; font-weight: 700; }
-.streak-row .flame { font-size: 28px; }
 @media (prefers-reduced-motion: reduce) { .btn.target.shake { animation: none; } }
 .daily .row.between { flex-wrap: wrap; gap: 4px 10px; }
+.daily-spy { position: relative; padding-top: 22px; }
+.daily-spy .tape { position: absolute; top: -10px; left: 50%; width: 64px; height: 20px; padding: 0; transform: translateX(-50%) rotate(-3deg); }

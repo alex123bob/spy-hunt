@@ -32,9 +32,8 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
     <main className="screen daily">
       <Confetti run={result.solved} fullscreen />
       <h2 className={`center big daily-banner${result.solved ? '' : ' droop'}`}>{result.solved ? t('daily.found') : t('daily.missed')}</h2>
-      <section className="card spy-panel">
-        <span className="tape tape-l" aria-hidden="true" />
-        <span className="tape tape-r" aria-hidden="true" />
+      <section className="card spy-panel daily-spy">
+        <span className="tape" aria-hidden="true" />
         <p className="wrap center">{t('daily.spyWas', { name: spy, word: result.answer.spy_word[lang] })}</p>
       </section>
       <section className="stats-trio">
@@ -43,7 +42,7 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
         <div className="tile c-pink"><span>{t('daily.tries')}</span> <strong className="big">{result.tries}</strong></div>
       </section>
       <p className="muted center">{t('daily.stats', { pct: result.stats.solved_pct, n: result.stats.players })}</p>
-      <div className="streak-row"><span className="flame" aria-hidden>🔥</span><p>{t('daily.streak', { n: result.streak })}</p></div>
+      <div className="streak-row"><p>{t('daily.streak', { n: result.streak })}</p></div>
       <pre className="ticket share torn" data-testid="share-preview">{text}</pre>
       <button type="button" className="btn primary" onClick={share}>{t('daily.share')}</button>
       <Toast text={shareState} />
