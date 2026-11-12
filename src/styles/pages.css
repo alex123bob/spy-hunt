@@ -117,3 +117,22 @@
 .bot-form > .row { display: flex; gap: 10px; }
 .bot-form > .row .btn { flex: 1; }
 @media (prefers-reduced-motion: reduce) { .trading-card.float, .new-dot, .picker .chip.pick { animation: none; } }
+.top-list { padding: 4px 12px; gap: 0; }
+.top-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; min-width: 0; }
+.top-row + .top-row { border-top: 2px dashed var(--ink); }
+.top-row .grow { min-width: 0; flex: 1; }
+.medal { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--paper); color: var(--ink); border: 2.5px solid var(--ink); font: 700 16px/1 var(--font-display); }
+.medal.m1 { background: #f6c445; box-shadow: 0 2px 0 var(--ink); }
+.medal.m2 { background: #cfd6dc; box-shadow: 0 2px 0 var(--ink); }
+.medal.m3 { background: #d99a5b; box-shadow: 0 2px 0 var(--ink); }
+.match-players { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.match-players .pill a { color: var(--ink); }
+.match-round { gap: 10px; }
+.match-round .round-pill { align-self: flex-start; }
+.match-stage { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.match-stage > .muted { margin: 0; font-weight: 700; }
+.vote-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.match-out { margin: 0; font-weight: 700; }
+.match-reveal .reveal-line { margin: 0; }
+.match-reveal .role { border: 2px solid currentColor; border-radius: 8px; padding: 1px 8px; font-size: 13px; text-transform: uppercase; display: inline-block; transform: rotate(-4deg); }
+.winner-banner { margin: 4px 0 0; padding: 10px 12px; text-align: center; background: var(--sun); color: var(--ink); border: 2.5px solid var(--ink); border-radius: 16px; box-shadow: 0 3px 0 var(--ink); font: 700 18px/1.2 var(--font-display); }
