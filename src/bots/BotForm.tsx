@@ -141,6 +141,7 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
         <span>{t('arena.opt')}</span>
       </label></div>
       <div className="preview-frame">
+        <h3 className="preview-title"><span aria-hidden="true">👀</span> {t('bots.preview')}</h3>
         <BotCardView bot={{ name: draft.name.trim() || ' ', avatar: draft.avatar, outfit: draft.outfit }} />
       </div>
       {err && <p role="alert" className="error wrap">{err}</p>}

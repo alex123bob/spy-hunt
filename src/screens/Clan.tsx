@@ -277,7 +277,7 @@ export function Clan() {
           <NoClan onDone={fetchMine} />
         </>
       )}
-      <Link to="/" className="muted center">{t('bots.home')}</Link>
+      <Link to="/" className="btn">{t('bots.home')}</Link>
     </main>
   )
 }

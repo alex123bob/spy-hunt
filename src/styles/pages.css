@@ -138,7 +138,7 @@
 .rule-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0; padding: 8px; background: var(--cream); border: 2.5px solid var(--ink); border-radius: 16px; }
 .rule-row select { flex: 1 1 120px; min-width: 0; min-height: 44px; border: 2.5px solid var(--ink); border-radius: 12px; background: var(--paper); color: var(--ink); font: 600 15px var(--font-body); padding: 0 8px; }
 .preview-frame { background: var(--cream); position: relative; padding-top: 24px; }
-.preview-frame::before { content: "👀"; position: absolute; top: 4px; left: 14px; font-size: 16px; }
+.preview-title { position: absolute; top: 4px; left: 14px; font-size: 14px; }
 .preview-frame > .trading-card { transform: rotate(-1deg); }
 .bot-form > .row { display: flex; gap: 10px; }
 .bot-form > .row .btn { flex: 1; }

@@ -144,7 +144,7 @@ export function Bots() {
           )}
         </>
       )}
-      <Link to="/" className="muted center">{t('bots.home')}</Link>
+      <Link to="/" className="btn">{t('bots.home')}</Link>
     </main>
   )
 }
