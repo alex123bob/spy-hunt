@@ -214,15 +214,24 @@ label:has(> input.toggle), label.toggle { flex-direction: row; align-items: cent
 .eye::before { content: ""; width: 16px; height: 16px; border-radius: 50%; background: var(--paper); }
 .eye::after { content: ""; position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--ink); animation: look 4s ease-in-out infinite; }
 .logo-s .eye { width: 28px; height: 28px; }
-.topbar { max-width: 520px; margin: 0 auto; padding: 12px var(--gutter) 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.topbar { flex-wrap: wrap; max-width: 520px; margin: 0 auto; padding: 12px var(--gutter) 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .topbar-logo { text-decoration: none; color: inherit; min-height: 44px; display: inline-flex; align-items: center; }
 .topbar-right { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.topbar .pill { text-decoration: none; color: var(--ink); cursor: pointer; min-height: 36px; display: inline-flex; align-items: center; }
+.topbar .pill { text-decoration: none; color: var(--ink); cursor: pointer; min-height: 44px; display: inline-flex; align-items: center; }
 .topbar .segmented { flex: 0 0 auto; }
 .account-menu { position: relative; }
 .account-pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; width: max-content; max-width: 240px; display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--paper); border: 2.5px solid var(--ink); border-radius: 18px; box-shadow: 0 4px 0 var(--ink); animation: pop .2s var(--ease-spring); }
 .account-pop .wrap { overflow-wrap: anywhere; font-weight: 600; }
-.nudge { max-width: 520px; margin: 8px auto 0; padding: 10px 14px; background: var(--sun); color: var(--ink); border: 2.5px solid var(--ink); border-radius: 18px; box-shadow: 0 4px 0 var(--ink); display: flex; align-items: center; justify-content: space-between; gap: 10px; width: calc(100% - 2 * var(--gutter)); transform: rotate(-1deg); animation: nudge-in .4s var(--ease-spring); }
+.nudge { max-width: 520px; margin: 8px auto 0; padding: 10px 14px; background: var(--sun); color: var(--ink); border: 2.5px solid var(--ink); border-radius: 18px; box-shadow: 0 4px 0 var(--ink); display: flex; align-items: center; justify-content: space-between; gap: 10px; width: calc(100% - 2 * var(--gutter) - 8px); transform: rotate(-1deg); animation: nudge-in .4s var(--ease-spring); }
 @keyframes nudge-in { from { transform: translateY(-24px) rotate(-1deg); opacity: 0; } to { transform: rotate(-1deg); opacity: 1; } }
 .banner { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--tomato-deep); color: #fff; padding: 6px; font-size: 14px; font-weight: 700; }
 .banner .dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: pulse 1.2s ease-in-out infinite; }
+
+.nudge .pill { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.langpicker.compact .chip { min-width: 44px; min-height: 44px; padding-inline: 8px; }
+@media (max-width: 400px) {
+  .topbar .logo-text { display: none; }
+  .topbar-right { gap: 6px; }
+  .topbar .pill { padding-inline: 8px; }
+  .nudge { transform: none; animation: none; }
+}

@@ -27,3 +27,21 @@ test('outside click closes it', () => {
   fireEvent.mouseDown(document.body)
   expect(screen.queryByText('a@b.com')).toBeNull()
 })
+
+test('Escape returns focus to the Account button', () => {
+  render(<AccountMenu email="a@b.com" onLogout={vi.fn()} />)
+  const btn = screen.getByRole('button', { name: 'Account' })
+  fireEvent.click(btn)
+  fireEvent.keyDown(document, { key: 'Escape' })
+  expect(btn).toHaveFocus()
+})
+
+test('Log out closes the menu and calls onLogout', () => {
+  const onLogout = vi.fn()
+  render(<AccountMenu email="a@b.com" onLogout={onLogout} />)
+  const btn = screen.getByRole('button', { name: 'Account' })
+  fireEvent.click(btn)
+  fireEvent.click(screen.getByRole('button', { name: 'Log out' }))
+  expect(btn).toHaveAttribute('aria-expanded', 'false')
+  expect(onLogout).toHaveBeenCalledTimes(1)
+})

@@ -11,6 +11,8 @@
   "error.network": "无法连接服务器,请检查网络。",
   "lang.en": "English",
   "lang.zh-Hans": "简体中文",
+  "lang.short.en": "EN",
+  "lang.short.zh-Hans": "中",
   "lobby.title": "大厅",
   "lobby.players": "玩家",
   "lobby.bot": "机器人",
