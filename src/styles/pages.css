@@ -13,6 +13,7 @@
 .clan-card h2 { margin: 0; }
 .clan-crest { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .clan-title { font-family: var(--font-display); margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.clan-card p { margin: 0; }
 .clan-code-input { letter-spacing: 3px; text-transform: uppercase; text-align: center; }
 .clan-open { display: flex; flex-direction: column; gap: 10px; }
 .clan-open-row { display: flex; align-items: center; gap: 10px; }
@@ -22,9 +23,10 @@
 .clan-invite .code { font: 700 28px/1.2 var(--font-display); letter-spacing: 4px; }
 .clan-copy { min-height: 44px; cursor: pointer; }
 .clan-score { font: 700 40px/1 var(--font-display); align-items: baseline; gap: 8px; }
-.clan-score .muted { font-size: 14px; font-family: var(--font-body); text-align: center; }
-.tug { height: 18px; border: 2.5px solid var(--ink); border-radius: var(--radius-pill); background: var(--pink); overflow: hidden; }
-.tug-own { height: 100%; background: var(--mint); border-right: 2.5px solid var(--ink); transform-origin: left; animation: tug-in 600ms var(--ease-spring) 1; }
+.clan-score .muted { min-width: 0; overflow-wrap: anywhere; font-size: 14px; font-family: var(--font-body); text-align: center; }
+.tug { display: flex; height: 18px; border: 2.5px solid var(--ink); border-radius: var(--radius-pill); background: var(--pink); overflow: hidden; }
+.tug-rival { flex: 1; min-width: 0; border-left: 2.5px solid var(--ink); }
+.tug-own { height: 100%; min-width: 0; flex: none; background: var(--mint); transform-origin: left; animation: tug-in 600ms var(--ease-spring) 1; }
 @keyframes tug-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .clan-member { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
 .clan-leader { margin-inline-start: 8px; background: var(--sun); }

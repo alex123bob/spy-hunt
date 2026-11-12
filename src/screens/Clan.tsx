@@ -95,7 +95,7 @@ function NoClan({ onDone }: { onDone: () => void }) {
         <h2>{t('clan.joinTitle')}</h2>
         <label>
           <span>{t('clan.code')}</span>
-          <input className="ticket clan-code-input" value={code} maxLength={6} autoCapitalize="characters" onChange={(e) => setCode(e.target.value)} />
+          <input className="clan-code-input" value={code} maxLength={6} autoCapitalize="characters" onChange={(e) => setCode(e.target.value)} />
         </label>
         <button type="submit" className="btn secondary" disabled={busy || code.trim().length === 0}>{t('clan.join')}</button>
       </form>
@@ -125,6 +125,8 @@ function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | nul
   const [confirming, setConfirming] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const [copied, setCopied] = useState(false)
+  const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(copyTimer.current), [])
   const [error, setError] = useState<string | null>(null)
   useTick()
   const wk = season?.this_week
@@ -146,7 +148,8 @@ function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | nul
     try {
       await navigator.clipboard.writeText(clan.code)
       setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
+      clearTimeout(copyTimer.current)
+      copyTimer.current = setTimeout(() => setCopied(false), 1500)
     } catch {
       // clipboard blocked: the code is selectable text
     }
@@ -181,6 +184,7 @@ function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | nul
               </div>
               <div className="tug" aria-hidden>
                 <div className="tug-own" data-testid="tug-own" style={{ width: `${share * 100}%` }} />
+                <div className="tug-rival" />
               </div>
             </>
           ) : (
