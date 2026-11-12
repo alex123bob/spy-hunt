@@ -24,6 +24,7 @@
   "lobby.link": "Invite link",
   "lobby.copy": "Copy link",
   "lobby.copied": "Copied!",
+  "lobby.emptySeat": "Empty seat",
   "lobby.mainLang": "Room language",
   "lobby.addBot": "Add bot",
   "lobby.removeBot": "Remove bot",

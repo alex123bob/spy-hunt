@@ -12,5 +12,5 @@ export function QrCode({ text }: { text: string }) {
       alive = false
     }
   }, [text])
-  return <div className="qr" aria-label="QR code" dangerouslySetInnerHTML={{ __html: svg }} />
+  return <div className="qr card" aria-label="QR code" dangerouslySetInnerHTML={{ __html: svg }} />
 }

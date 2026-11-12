@@ -8,6 +8,7 @@ import { reloadDelay } from '../state/backoff'
 import { RoomStore, useRoomStore } from '../state/roomStore'
 import { useHeldScreen, type Screen } from '../state/useHeldScreen'
 import { ensureGuest, forgetGuest, getSession, setName as saveName } from '../state/session'
+import { Loader } from '../components/Loader'
 import { Lobby } from './Lobby'
 import { Reveal } from './Reveal'
 import { Result } from './Result'
@@ -109,14 +110,14 @@ export function Room() {
     }
   }, [ready, code, store])
 
-  if (boot.kind === 'loading') return <main className="screen center"><p>{t('room.loading')}</p></main>
+  if (boot.kind === 'loading') return <main className="screen center"><Loader label={t('room.loading')} /></main>
   if (boot.kind === 'error') {
     return <RoomError kind={boot.error} onRetry={() => setAttempt((a) => a + 1)} />
   }
   if (boot.kind === 'needName') {
     return (
       <main className="screen">
-        <h2>{code}</h2>
+        <div className="ticket need-name-code"><span className="lobby-code">{code}</span></div>
         <label>
           <span className="muted">{t('landing.name')}</span>
           <input value={nameInput} maxLength={16} onChange={(e) => setNameInput(e.target.value)} />

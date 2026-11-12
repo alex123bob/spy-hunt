@@ -1,6 +1,7 @@
 /* Room flow styles (lobby, table, vote, reveal, result). Interim ports of the old stylesheet; later tasks restyle them. */
 
-.qr { width: 180px; height: 180px; background: #fff; border: 2.5px solid var(--ink); border-radius: 12px; padding: 6px; margin: 0 auto; }
+.qr { position: relative; width: 180px; height: 180px; background: #fff; padding: 8px; margin: 0 auto; display: block; }
+.qr::after { content: ''; position: absolute; top: -8px; right: -12px; width: 44px; height: 16px; background: var(--sun); border: 2px solid var(--ink); transform: rotate(25deg); }
 .qr svg { width: 100%; height: 100%; }
 .link { font-size: 14px; color: var(--muted); }
 .wordcard { background: var(--green); border: 3px solid var(--ink); box-shadow: var(--shadow); border-radius: 20px; color: var(--paper); padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit; cursor: pointer; }
@@ -99,3 +100,17 @@ button.flip-scene { cursor: pointer; }
 .empty-state p { margin: 0; }
 .empty-state .spot { width: 84px; height: 84px; border-radius: 50%; background: var(--sun); border: 3px solid var(--ink); box-shadow: 0 5px 0 var(--ink); display: grid; place-items: center; font-size: 42px; }
 .empty-state .actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; margin-top: 8px; }
+
+/* lobby */
+.lobby.has-dock { padding-bottom: 16px; }
+.lobby-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.lobby-head .pill { min-height: 44px; cursor: pointer; }
+.lobby-code { font: 700 44px/1 Fredoka, system-ui, sans-serif; letter-spacing: 4px; margin: 0; }
+.need-name-code { text-align: center; }
+.seats { display: flex; flex-direction: column; gap: 8px; }
+.seat.row { align-items: center; }
+.btn.small { min-height: 44px; padding: 4px 10px; font-size: 14px; }
+.seat.empty { border: 2.5px dashed var(--muted); border-radius: 14px; color: var(--muted); padding: 12px; text-align: center; font-weight: 700; }
+.bot-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.bot-card { align-items: center; text-align: center; cursor: pointer; font: inherit; color: inherit; min-height: 44px; padding: 8px; }
+.host-dock { position: sticky; bottom: 0; z-index: 5; gap: 8px; padding: 10px 14px; }
