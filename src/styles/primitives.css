@@ -52,11 +52,11 @@
 }
 .tile small { color: var(--ink); }
 .tile:hover { transform: translateY(-3px) rotate(-2deg); }
-.tile.c-sun { background: var(--sun); }
-.tile.c-sky { background: var(--sky); }
-.tile.c-pink { background: var(--pink); }
-.tile.c-mint { background: var(--mint); }
-.tile.c-lilac { background: var(--lilac); }
+.tile.c-sun, .m.c-sun { background: var(--sun); }
+.tile.c-sky, .m.c-sky { background: var(--sky); }
+.tile.c-pink, .m.c-pink { background: var(--pink); }
+.tile.c-mint, .m.c-mint { background: var(--mint); }
+.tile.c-lilac, .m.c-lilac { background: var(--lilac); }
 .pill {
   display: inline-flex;
   align-items: center;
