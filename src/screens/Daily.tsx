@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import type { DailyResult as Result, DailyState } from '../api/types'
 import { getDaily, getResult, guessSpy, guessWord } from '../daily/api'
+import { EmptyState } from '../components/EmptyState'
+import { Loader } from '../components/Loader'
 import { t } from '../i18n'
 import { DailyPlay } from './DailyPlay'
 import { DailyResult } from './DailyResult'
@@ -34,20 +36,22 @@ export function Daily() {
   if (failure === 'no_puzzle') {
     return (
       <main className="screen">
-        <p className="center">{t('daily.noPuzzle')}</p>
-        <button type="button" className="btn" onClick={() => nav('/')}>{t('daily.home')}</button>
+        <EmptyState emoji="😴" title={t('daily.noPuzzle')}>
+          <button type="button" className="btn" onClick={() => nav('/')}>{t('daily.home')}</button>
+        </EmptyState>
       </main>
     )
   }
   if (failure === 'error') {
     return (
       <main className="screen">
-        <p role="alert" className="error center">{t('error.generic')}</p>
-        <button type="button" className="btn primary" onClick={load}>{t('daily.retry')}</button>
+        <EmptyState emoji="🙈" title={t('error.generic')} role="alert">
+          <button type="button" className="btn primary" onClick={load}>{t('daily.retry')}</button>
+        </EmptyState>
       </main>
     )
   }
-  if (!state) return <main className="screen"><p className="muted center">{t('daily.loading')}</p></main>
+  if (!state) return <main className="screen"><Loader label={t('daily.loading')} /></main>
 
   if (state.me.stage === 'spy') {
     const onGuess = async (seat: number) => {
@@ -68,6 +72,6 @@ export function Daily() {
     }
     return <DailyWord puzzle={state.puzzle} onPick={onPick} />
   }
-  if (!result) return <main className="screen"><p className="muted center">{t('daily.loading')}</p></main>
+  if (!result) return <main className="screen"><Loader label={t('daily.loading')} /></main>
   return <DailyResult puzzle={state.puzzle} result={result} />
 }

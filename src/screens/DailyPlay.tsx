@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { DailyMe, DailyPuzzle, GuessResult } from '../api/types'
+import { FlipCard } from '../components/FlipCard'
 import { StatementBubble } from '../components/StatementBubble'
 import { t, useLang } from '../i18n'
 
@@ -35,16 +36,20 @@ export function DailyPlay({ puzzle, me, onGuess }: Props) {
     <main className="screen daily">
       <header className="row between">
         <h2>{t('daily.number', { n: puzzle.number })}</h2>
-        <span className="muted">{t(`daily.difficulty.${puzzle.difficulty}`)}</span>
+        <span className="pill">{t(`daily.difficulty.${puzzle.difficulty}`)}</span>
       </header>
-      <div className="wordcard">
-        <span className="word wrap">{t('daily.civilianWord', { word: puzzle.civilian_word[lang] })}</span>
-      </div>
+      <FlipCard
+        flipped
+        size="sm"
+        label={t('daily.civilianWord', { word: puzzle.civilian_word[lang] })}
+        back={<span className="word-q">?</span>}
+        front={<span className="wrap">{t('daily.civilianWord', { word: puzzle.civilian_word[lang] })}</span>}
+      />
       <p className="muted">{t('daily.intro')}</p>
       <section className="panel history">
         {rounds.map((r) => (
           <div key={r} className="round">
-            <p className="muted small">{t('table.round', { n: r })}</p>
+            <span className="pill">{t('table.round', { n: r })}</span>
             {puzzle.statements
               .filter((m) => m.round === r)
               .map((m) => (
@@ -54,16 +59,31 @@ export function DailyPlay({ puzzle, me, onGuess }: Props) {
         ))}
       </section>
       <div className="row between">
-        <span className="muted">{t('daily.triesLeft', { n: me.tries_left })}</span>
+        <span className="muted">
+          {t('daily.triesLeft', { n: me.tries_left })}{' '}
+          <span className="hearts" aria-hidden>
+            {[0, 1].map((i) => (i < me.tries_left ? '❤️' : '🤍'))}
+          </span>
+        </span>
         {last !== undefined && <span role="status" className="error wrap">{t('daily.wrong', { name: nameOf(last) })}</span>}
       </div>
       {err && <p role="alert" className="error">{t('error.generic')}</p>}
       <div className="targets">
-        {puzzle.players.map((p) => (
-          <button key={p.seat} type="button" className="btn target" disabled={busy || wrong.includes(p.seat)} onClick={() => guess(p.seat)}>
-            {p.name}
-          </button>
-        ))}
+        {puzzle.players.map((p) => {
+          const isWrong = wrong.includes(p.seat)
+          return (
+            <button
+              key={isWrong ? `${p.seat}-wrong` : p.seat}
+              type="button"
+              className={`btn target${isWrong ? ' wrong' : ''}${p.seat === last ? ' shake' : ''}`}
+              disabled={busy || isWrong}
+              onClick={() => guess(p.seat)}
+            >
+              <span className="wrap">{p.name}</span>
+              {isWrong && <span className="sticker x" aria-hidden>✕</span>}
+            </button>
+          )
+        })}
       </div>
     </main>
   )

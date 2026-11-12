@@ -52,3 +52,22 @@
 .landing .join-row { display: flex; gap: 8px; align-items: flex-end; }
 .landing .join-row .btn { flex: none; width: auto; padding-inline: 18px; }
 @media (prefers-reduced-motion: reduce) { .landing .title .spy, .landing .m { animation: none; } }
+
+/* daily puzzle */
+.daily .round { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.daily .round > .pill { align-self: flex-start; }
+.daily .hearts { letter-spacing: 2px; }
+.daily .flip-card .front .wrap { overflow-wrap: anywhere; }
+.btn.target.wrong { opacity: 1; background: var(--paper); color: var(--ink); text-decoration: line-through; text-decoration-thickness: 2px; filter: grayscale(.6); cursor: default; }
+.btn.target.shake { animation: shake .4s; }
+.btn.target .sticker.x { background: var(--tomato-deep); }
+.daily-banner { margin: 0; }
+.stats-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stats-trio .tile { cursor: default; display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.stats-trio .tile:hover { transform: none; }
+.stats-trio .big { font-size: 24px; }
+.streak-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.streak-row p { margin: 0; font-weight: 700; }
+.streak-row .flame { font-size: 28px; }
+@media (prefers-reduced-motion: reduce) { .btn.target.shake { animation: none; } }
+.daily .row.between { flex-wrap: wrap; gap: 4px 10px; }

@@ -26,10 +26,10 @@ export function DailyWord({ puzzle, onPick }: { puzzle: DailyPuzzle; onPick: (op
       <div className="targets">
         {puzzle.options.map((o, i) => (
           <button key={i} type="button" className="btn target" disabled={busy} onClick={() => pick(i)}>
-            {o[lang]}
+            <span className="wrap">{o[lang]}</span>
           </button>
         ))}
-        <button type="button" className="btn" disabled={busy} onClick={() => pick(null)}>
+        <button type="button" className="btn ghost abstain" disabled={busy} onClick={() => pick(null)}>
           {t('daily.skip')}
         </button>
       </div>
