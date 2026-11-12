@@ -12,6 +12,7 @@ export function Admin() {
   const [status, setStatus] = useState<AdminStatus | null>(null)
   const [promptMsg, setPromptMsg] = useState<string | null>(null)
   const [tokenInput, setTokenInput] = useState('')
+  const [count, setCount] = useState('3')
   const pollRef = useRef<number | null>(null)
 
   const stopPoll = useCallback(() => {
@@ -64,7 +65,8 @@ export function Admin() {
   }
 
   const refill = () => {
-    startRefill().then(load).catch(onError)
+    const n = Math.max(1, Math.min(50, Math.floor(Number(count)) || 1))
+    startRefill(n).then(load).catch(onError)
   }
 
   if (phase === 'prompt') {
@@ -108,6 +110,16 @@ export function Admin() {
         <p>Ready: {status?.ready_count} / {status?.total_count} total</p>
         {status?.refilling && <p className="muted">Refilling…</p>}
         <div className="actions">
+          <label htmlFor="refill-count">How many to generate</label>
+          <input
+            id="refill-count"
+            type="number"
+            min={1}
+            max={50}
+            value={count}
+            onChange={(e) => setCount(e.target.value)}
+            disabled={status?.refilling}
+          />
           <button type="button" className="btn primary" onClick={refill} disabled={status?.refilling}>
             Refill
           </button>
