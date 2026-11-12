@@ -13,4 +13,8 @@ describe('Countdown', () => {
     render(<Countdown deadline={Date.now() + 4_000} total={20} vibrate={false} />)
     expect(screen.getByRole('timer')).toHaveClass('urgent')
   })
+  it('pulses while urgent', () => {
+    render(<Countdown deadline={Date.now() + 4_000} total={20} vibrate={false} />)
+    expect(screen.getByRole('timer')).toHaveClass('pulse')
+  })
 })

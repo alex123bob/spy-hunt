@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { NudgeBanner } from './NudgeBanner'
 import { setLang } from '../i18n'
 import { recordStreakMilestone, recordWin, resetNudgesForTests } from '../state/nudges'
@@ -26,19 +26,27 @@ test('renders nothing for a registered account even with a pending nudge', () =>
 })
 
 test('shows the streak copy and dismisses without a remount', () => {
+  vi.useFakeTimers()
   recordStreakMilestone(4)
   render(<NudgeBanner />)
   expect(screen.getByText(/4-day streak/)).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+  expect(screen.getByText(/4-day streak/)).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Dismiss' })).toHaveClass('closing')
+  act(() => vi.advanceTimersByTime(300))
   expect(screen.queryByText(/4-day streak/)).toBeNull()
+  vi.useRealTimers()
 })
 
 test('dismissing streak reveals the pending win banner', () => {
+  vi.useFakeTimers()
   recordWin()
   recordStreakMilestone(3)
   render(<NudgeBanner />)
   fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+  act(() => vi.advanceTimersByTime(300))
   expect(screen.getByText(/Nice win/)).toBeInTheDocument()
+  vi.useRealTimers()
 })
 
 test('appears when a nudge is recorded after mount', async () => {
@@ -47,4 +55,16 @@ test('appears when a nudge is recorded after mount', async () => {
   expect(screen.queryByText(/Nice win/)).toBeNull()
   act(() => recordWin())
   expect(screen.getByText(/Nice win/)).toBeInTheDocument()
+})
+
+test('dismisses immediately under reduced motion, skipping the spin delay', () => {
+  vi.stubGlobal('matchMedia', () => ({
+    matches: true,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }))
+  recordStreakMilestone(4)
+  render(<NudgeBanner />)
+  fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+  expect(screen.queryByText(/4-day streak/)).toBeNull()
 })

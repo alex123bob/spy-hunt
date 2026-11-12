@@ -118,6 +118,7 @@ button.flip-scene { cursor: pointer; }
 .countdown-ring::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--cream); border: 2px solid var(--ink); }
 .countdown { position: relative; font: 700 20px/1 var(--font-display); font-variant-numeric: tabular-nums; }
 .countdown.urgent { color: var(--tomato-deep); }
+.countdown.pulse { animation: pulse .6s ease-in-out infinite; }
 .sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
 .sheet-body.has-adornment { padding-top: 36px; }
 .sheet-adornment { position: absolute; top: -28px; left: 50%; width: 56px; height: 56px; margin-left: -28px; z-index: 1; }

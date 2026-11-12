@@ -229,6 +229,8 @@ label:has(> input.toggle), label.toggle { flex-direction: row; align-items: cent
 .banner .dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: pulse 1.2s ease-in-out infinite; }
 
 .nudge .pill { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.nudge .pill.closing { animation: spin-out .3s ease-in forwards; }
+@keyframes spin-out { to { transform: rotate(360deg); opacity: 0; } }
 .langpicker.compact .chip { min-width: 44px; min-height: 44px; padding-inline: 8px; }
 @media (max-width: 400px) {
   .topbar .logo-text { display: none; }

@@ -120,7 +120,7 @@
 .recap p { margin: 0 0 4px; overflow-wrap: anywhere; }
 .recap .quote { font-style: italic; color: var(--muted); }
 .recap-new { background: #fff3c9; }
-.new-dot { position: absolute; top: 10px; right: 12px; width: 12px; height: 12px; border-radius: 50%; background: var(--tomato); border: 2px solid var(--ink); box-shadow: 0 0 0 4px rgba(229,83,61,.3); animation: bob 1.6s ease-in-out infinite; }
+.new-dot { position: absolute; top: 10px; right: 12px; width: 12px; height: 12px; border-radius: 50%; background: var(--tomato); border: 2px solid var(--ink); box-shadow: 0 0 0 4px rgba(229,83,61,.3); }
 .bot-form { gap: 0; padding: 0; }
 .bot-form > * { padding: 14px; }
 .bot-form > * + * { border-top: 2.5px dashed var(--ink); }
@@ -142,7 +142,7 @@
 .preview-frame > .trading-card { transform: rotate(-1deg); }
 .bot-form > .row { display: flex; gap: 10px; }
 .bot-form > .row .btn { flex: 1; }
-@media (prefers-reduced-motion: reduce) { .trading-card.float, .new-dot, .picker .chip.pick { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .trading-card.float, .picker .chip.pick { animation: none; } }
 .top-list { padding: 4px 12px; gap: 0; }
 .top-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 10px 0; min-width: 0; }
 .top-row .stats { flex-basis: 100%; padding-left: 90px; font-size: 13px; line-height: 1.3; }
