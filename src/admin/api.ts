@@ -15,6 +15,6 @@ export async function getAdminStatus(): Promise<AdminStatus> {
   return request<AdminStatus>('GET', '/admin/status', undefined, adminHeaders())
 }
 
-export async function startRefill(): Promise<{ started: boolean; refilling?: boolean }> {
-  return request<{ started: boolean; refilling?: boolean }>('POST', '/admin/refill', undefined, adminHeaders())
+export async function startRefill(count: number): Promise<{ started: boolean; refilling?: boolean }> {
+  return request<{ started: boolean; refilling?: boolean }>('POST', '/admin/refill', { count }, adminHeaders())
 }

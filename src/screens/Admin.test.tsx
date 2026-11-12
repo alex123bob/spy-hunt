@@ -36,13 +36,25 @@ test('a 401 clears the stored token and re-prompts', async () => {
   expect(screen.getByLabelText(/token/i)).toBeInTheDocument()
 })
 
-test('refill triggers startRefill and shows refilling state', async () => {
+test('refill triggers startRefill with the chosen count and shows refilling state', async () => {
   vi.mocked(getToken).mockReturnValue('tok')
   vi.mocked(getAdminStatus).mockResolvedValue({ ready_count: 2, total_count: 2, refilling: false })
   vi.mocked(startRefill).mockResolvedValue({ started: true })
   render(<Admin />)
   await userEvent.click(await screen.findByRole('button', { name: /refill/i }))
-  expect(startRefill).toHaveBeenCalled()
+  expect(startRefill).toHaveBeenCalledWith(3) // default
+})
+
+test('the operator can change how many puzzles to generate', async () => {
+  vi.mocked(getToken).mockReturnValue('tok')
+  vi.mocked(getAdminStatus).mockResolvedValue({ ready_count: 2, total_count: 2, refilling: false })
+  vi.mocked(startRefill).mockResolvedValue({ started: true })
+  render(<Admin />)
+  const input = await screen.findByLabelText(/how many/i)
+  await userEvent.clear(input)
+  await userEvent.type(input, '7')
+  await userEvent.click(screen.getByRole('button', { name: /refill/i }))
+  expect(startRefill).toHaveBeenCalledWith(7)
 })
 
 test('a 401 on the refill click clears the token and re-prompts', async () => {

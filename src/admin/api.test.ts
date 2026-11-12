@@ -15,7 +15,7 @@ test('getAdminStatus GETs with the admin header and no guest', async () => {
   expect(request).toHaveBeenCalledWith('GET', '/admin/status', undefined, { 'X-Admin-Token': 'tok' })
 })
 
-test('startRefill POSTs with the admin header', async () => {
-  await startRefill()
-  expect(request).toHaveBeenCalledWith('POST', '/admin/refill', undefined, { 'X-Admin-Token': 'tok' })
+test('startRefill POSTs the count in the body with the admin header', async () => {
+  await startRefill(4)
+  expect(request).toHaveBeenCalledWith('POST', '/admin/refill', { count: 4 }, { 'X-Admin-Token': 'tok' })
 })
