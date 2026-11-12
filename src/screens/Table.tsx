@@ -66,7 +66,7 @@ export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot
     <main className="screen table" data-testid="screen-Table">
       <header className="row between">
         <span className="pill">{t('table.round', { n: state.round })}</span>
-        <LangPicker value={lang} onChange={pickLang} label={t('lobby.yourLang')} />
+        <LangPicker compact value={lang} onChange={pickLang} label={t('lobby.yourLang')} />
       </header>
       <WordCard word={state.me.my_word} />
       <section className="feed" aria-live="polite">

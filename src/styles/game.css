@@ -10,10 +10,10 @@
 @keyframes turn-bounce { 0%, 100% { transform: none; } 40% { transform: translateY(-6px) scale(1.04); } }
 .table > header { align-items: center; }
 .table > header .pill { font-weight: 800; }
-.turnbar { position: sticky; bottom: 0; display: flex; flex-direction: column; gap: 8px; background: var(--sun); border: 2.5px solid var(--ink); border-radius: 18px; padding: 8px 12px; box-shadow: 0 4px 0 var(--ink); font-family: var(--font-display); font-weight: 600; }
+.turnbar { position: sticky; bottom: 0; display: flex; flex-direction: column; gap: 8px; background: var(--sun); border: 2.5px solid var(--ink); border-radius: 18px; padding: 8px 12px; box-shadow: 0 4px 0 var(--ink); font-family: var(--font-display); font-weight: 600; font-size: 15px; }
 .turnbar input { font-family: inherit; }
 .turn-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
-.turn-text { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.turn-text { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
 .turn-text.my-turn { animation: turn-bounce .6s var(--ease-spring) 1; text-shadow: 0 0 12px #fff; }
 .turnbar:has(.my-turn) { box-shadow: 0 4px 0 var(--ink), 0 0 0 4px rgba(255,255,255,.7); }
 .typing { display: inline-flex; gap: 3px; }
