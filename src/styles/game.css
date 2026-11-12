@@ -155,3 +155,27 @@ button.flip-scene { cursor: pointer; }
 .start-bar .btn { width: 100%; min-height: 52px; }
 .bot-btns .btn { white-space: nowrap; }
 @media (max-width: 400px) { .bot-btns { flex-direction: column; } }
+
+/* result */
+.result-hero { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 8px 0; }
+.result-hero p { margin: 0; }
+.result-side { font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; }
+.droop { transform-origin: 50% 100%; animation: droop 2.4s ease-in .3s both; }
+@keyframes droop { to { transform: rotate(4deg) translateY(6px); filter: saturate(.3); opacity: .8; } }
+.result .spy-panel { position: relative; background: var(--paper); border: 3px solid var(--ink); padding-top: 22px; transform: rotate(-.8deg); }
+.result .spy-panel .tape { position: absolute; top: -9px; width: 54px; height: 18px; padding: 0; }
+.result .spy-panel .tape-l { left: 10px; transform: rotate(-12deg); }
+.result .spy-panel .tape-r { right: 10px; transform: rotate(10deg); }
+.spy-title { margin: 0; font: 700 20px/1.2 var(--font-display); color: var(--tomato-deep); text-transform: uppercase; letter-spacing: 2px; }
+.word-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+.word-cards .flip-card .front .wrap { font-size: 16px; overflow-wrap: anywhere; line-height: 1.25; }
+.word-cards .flip-card .front strong { display: block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--tomato-deep); }
+.word-q { font: 700 40px var(--font-display); color: var(--sun); }
+.everyone { display: flex; flex-direction: column; gap: 8px; }
+.result .role { border: 2px solid currentColor; border-radius: 8px; padding: 1px 8px; font-size: 13px; text-transform: uppercase; transform: rotate(-4deg); }
+.ticket.share.torn { white-space: pre-wrap; margin: 0; font: inherit; padding-bottom: 20px; overflow-wrap: anywhere;
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%; }
+@media (prefers-reduced-motion: reduce) { .droop { animation: none; filter: saturate(.3); } }
+.word-cards .colon { display: none; }
+.everyone .row > .wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }

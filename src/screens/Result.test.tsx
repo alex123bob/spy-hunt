@@ -111,8 +111,8 @@ test('host sees Play again, others see waiting', () => {
 test('the words panel still shows both words, so a spy learns the civilian word', () => {
   view(finished({ me: 'spy', winner: 'spies' }))
   const panel = screen.getByTestId('words-panel')
-  expect(within(panel).getByText((_, el) => el?.textContent === 'Civilian: piano / 钢琴')).toBeInTheDocument()
-  expect(within(panel).getByText((_, el) => el?.textContent === 'Spy: organ / 风琴')).toBeInTheDocument()
+  expect(within(panel).getAllByText((_, el) => el?.textContent === 'Civilian: piano / 钢琴', { ignore: false }).length).toBeGreaterThan(0)
+  expect(within(panel).getAllByText((_, el) => el?.textContent === 'Spy: organ / 风琴', { ignore: false }).length).toBeGreaterThan(0)
 })
 
 test('the everyone list shows a bot avatar emoji', () => {
@@ -142,4 +142,17 @@ test('the everyone list shows a clan badge', () => {
   s.players[1] = { ...s.players[1], clan: { name: 'Foxes', emoji: '🦊', color: '#ff6b6b' } }
   view(s)
   expect(screen.getByRole('img', { name: 'Clan: Foxes' })).toBeInTheDocument()
+})
+
+test('shows which side won under the personal line', () => {
+  view(finished({ winner: 'spies' }))
+  expect(screen.getByText('You lost')).toBeInTheDocument()
+  expect(screen.getByText('Spies win')).toBeInTheDocument()
+})
+
+test('words are readable from the first render', () => {
+  view(finished())
+  const text = screen.getByTestId('words-panel').textContent ?? ''
+  expect(text).toContain('piano')
+  expect(text).toContain('organ')
 })

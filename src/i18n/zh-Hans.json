@@ -126,6 +126,8 @@
   "result.theSpy": "卧底",
   "result.theSpies": "卧底们",
   "result.everyone": "所有人",
+  "result.sideCivilians": "平民获胜",
+  "result.sideSpies": "卧底获胜",
   "result.rounds": "共进行 {n} 轮",
   "result.share": "分享",
   "result.shared": "已分享",

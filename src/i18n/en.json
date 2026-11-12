@@ -126,6 +126,8 @@
   "result.theSpy": "The spy",
   "result.theSpies": "The spies",
   "result.everyone": "Everyone",
+  "result.sideCivilians": "Civilians win",
+  "result.sideSpies": "Spies win",
   "result.rounds": "Rounds played: {n}",
   "result.share": "Share",
   "result.shared": "Shared",

@@ -4,6 +4,10 @@ import { request } from '../api/client'
 import { LANGS, type Role } from '../api/types'
 import { Avatar } from '../components/Avatar'
 import { ClanTag } from '../components/ClanTag'
+import { Confetti } from '../components/Confetti'
+import { FlipCard } from '../components/FlipCard'
+import { Toast } from '../components/Toast'
+import { useStaged } from '../motion/useStaged'
 import { shareResult } from '../daily/share'
 import { resultInfo, resultShareText } from '../game/result'
 import { t, useLang } from '../i18n'
@@ -18,6 +22,7 @@ export function Result({ state }: { state: Snapshot }) {
   const leave = () => void request('POST', `/rooms/${state.code}/leave`).catch(() => {})
   const roles: Role[] = ['civilian', 'spy']
   const info = resultInfo(state, lang)
+  const step = useStaged([300, 250])
   useEffect(() => {
     if (info.outcome === 'won') recordWin(`${state.code}:${state.game_no}`)
   }, [])
@@ -30,9 +35,15 @@ export function Result({ state }: { state: Snapshot }) {
   }
 
   return (
-    <main className="screen">
+    <main className="screen result">
       <h2 className="center">{t('result.title')}</h2>
-      <p className="center big">{t(`result.${info.outcome}`)}</p>
+      <div className="result-hero">
+        <Confetti run={info.outcome === 'won'} />
+        <p className={`center big result-banner${info.outcome === 'lost' ? ' droop' : ''}`}>{t(`result.${info.outcome}`)}</p>
+        {state.winner && (
+          <p className="center muted result-side">{t(state.winner === 'spies' ? 'result.sideSpies' : 'result.sideCivilians')}</p>
+        )}
+      </div>
       {info.myRole && (
         <div className="center">
           <p>{t('result.yourRole', { role: t(`role.${info.myRole}`) })}</p>
@@ -40,8 +51,10 @@ export function Result({ state }: { state: Snapshot }) {
         </div>
       )}
       {info.spies.length > 0 && (
-        <section className="panel spy-panel" data-testid="spy-panel">
-          <p className="muted">{t(info.spies.length > 1 ? 'result.theSpies' : 'result.theSpy')}</p>
+        <section className="card spy-panel" data-testid="spy-panel">
+          <span className="tape tape-l" aria-hidden="true" />
+          <span className="tape tape-r" aria-hidden="true" />
+          <p className="spy-title">{t(info.spies.length > 1 ? 'result.theSpies' : 'result.theSpy')}</p>
           {info.spies.map((s) => (
             <div key={s.name} className="row between">
               <strong className="wrap">{s.name}</strong>
@@ -53,28 +66,41 @@ export function Result({ state }: { state: Snapshot }) {
       {state.words && (
         <section className="panel" data-testid="words-panel">
           <p className="muted">{t('result.words')}</p>
-          {roles.map((r) => (
-            <div key={r} className="wrap">
-              <strong>{t(`role.${r}`)}</strong>: {LANGS.map((l) => state.words?.[r]?.[l]).filter(Boolean).join(' / ')}
-            </div>
-          ))}
+          <div className="word-cards">
+            {roles.map((r, n) => (
+              <FlipCard
+                key={r}
+                size="sm"
+                flipped={step > n}
+                label={t(`role.${r}`)}
+                back={<span className="word-q">?</span>}
+                front={
+                  <div className="wrap">
+                    <strong>{t(`role.${r}`)}</strong><span className="colon">: </span>{LANGS.map((l) => state.words?.[r]?.[l]).filter(Boolean).join(' / ')}
+                  </div>
+                }
+              />
+            ))}
+          </div>
         </section>
       )}
       <section className="panel">
         <p className="muted">{t('result.everyone')}</p>
-        {state.players.map((p) => (
-          <div key={p.seat} className="row between">
+        <div className="stagger everyone">
+        {state.players.map((p, i) => (
+          <div key={p.seat} className="row between" style={{ '--i': i } as React.CSSProperties}>
             <span className="wrap"><Avatar player={p} /> {p.name} <ClanTag clan={p.clan} /></span>
             <span className={`role ${p.role ?? ''}`}>{p.role ? t(`role.${p.role}`) : ''}</span>
           </div>
         ))}
+        </div>
       </section>
       <p className="muted center">{t('result.rounds', { n: info.rounds })}</p>
       {card && (
         <>
-          <pre className="panel share" data-testid="share-preview">{card}</pre>
+          <pre className="ticket share torn" data-testid="share-preview">{card}</pre>
           <button type="button" className="btn" onClick={share}>{t('result.share')}</button>
-          {shareState && <p role="status" className="muted center">{shareState}</p>}
+          <Toast text={shareState} />
         </>
       )}
       {isHost ? (
