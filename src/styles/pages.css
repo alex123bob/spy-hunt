@@ -24,3 +24,31 @@
 .auth-done { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; font-weight: 700; }
 .auth-check { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--sun); border: 2px solid var(--ink); border-radius: 50%; animation: pop .35s; }
 @media (prefers-reduced-motion: reduce) { .auth-error, .auth-check { animation: none; } }
+
+/* Landing */
+.landing { gap: 12px; }
+.landing .hero { text-align: center; padding-top: 6px; }
+.landing .title { font-family: var(--font-display, inherit); font-weight: 700; font-size: clamp(40px, 14vw, 52px); line-height: .95; margin: 10px 0 6px; overflow-wrap: anywhere; }
+.landing .title .spy { color: var(--tomato-deep); display: inline-block; animation: bob 2.6s ease-in-out infinite; }
+.landing .hero p { margin: 0 auto; max-width: 32ch; }
+.landing .mascots { display: flex; justify-content: center; margin: 12px 0 4px; }
+.landing .m { width: 46px; height: 46px; border-radius: 50%; border: 2.5px solid var(--ink); display: grid; place-items: center; font-size: 22px; margin: 0 -4px; box-shadow: 0 3px 0 var(--ink); animation: hop 2.4s ease-in-out infinite; }
+.landing .m:nth-child(2) { animation-delay: .2s; }
+.landing .m:nth-child(3) { animation-delay: .4s; }
+.landing .m:nth-child(4) { animation-delay: .6s; }
+.landing .m:nth-child(5) { animation-delay: .8s; }
+.landing .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.landing .tile { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 8px 4px; overflow-wrap: anywhere; font: inherit; color: var(--ink); }
+.landing .tile b { font-size: 22px; }
+.landing .tile strong { font-size: 13px; line-height: 1.15; }
+.landing .tile small { font-size: 11px; line-height: 1.2; }
+.landing .tile .badge { background: var(--paper); border: 2px solid var(--ink); border-radius: 99px; padding: 0 6px; font-weight: 700; }
+.landing .field-label { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.landing .join-row .field-label { flex: 1; }
+.landing .field { width: 100%; min-height: 48px; padding: 10px 14px; font: inherit; font-weight: 700; color: var(--ink); background: var(--paper); border: 2.5px solid var(--ink); border-radius: 16px; }
+.landing .field:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.landing .field.ticket { letter-spacing: 3px; text-transform: uppercase; }
+.landing .or { margin: 0; text-align: center; font-size: 13px; font-weight: 700; color: var(--muted); }
+.landing .join-row { display: flex; gap: 8px; align-items: flex-end; }
+.landing .join-row .btn { flex: none; width: auto; padding-inline: 18px; }
+@media (prefers-reduced-motion: reduce) { .landing .title .spy, .landing .m { animation: none; } }

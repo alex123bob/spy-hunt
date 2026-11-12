@@ -1,5 +1,7 @@
 {
   "app.title": "谁是卧底",
+  "landing.hero": "找出{spy}",
+  "landing.heroSpy": "卧底！",
   "landing.tagline": "每人一个词,其中一人拿到不同的词。找出卧底。",
   "landing.name": "你的名字",
   "landing.create": "创建房间",

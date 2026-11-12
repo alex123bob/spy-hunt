@@ -1,5 +1,7 @@
 {
   "app.title": "Spy Hunt",
+  "landing.hero": "Find the {spy}",
+  "landing.heroSpy": "spy!",
   "landing.tagline": "Everyone gets a word. One gets a different one. Find the spy.",
   "landing.name": "Your name",
   "landing.create": "Create room",
