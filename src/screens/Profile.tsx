@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { CreditSummary } from '../api/types'
+import type { CreditSummary, GameSummary } from '../api/types'
 import { HeroCard } from '../components/HeroCard'
 import { LookEditor } from '../looks/LookEditor'
 import { getCredits } from '../credits/api'
+import { getMyGames } from '../games/api'
 import { RANKS, rankByIndex, rankTitleKey } from '../game/rank'
 import { t, useLang } from '../i18n'
 
@@ -13,6 +14,12 @@ export function Profile() {
   useEffect(() => {
     let live = true
     getCredits().then((s) => { if (live) setSummary(s) }).catch(() => {})
+    return () => { live = false }
+  }, [])
+  const [games, setGames] = useState<GameSummary[] | null>(null)
+  useEffect(() => {
+    let live = true
+    getMyGames().then((g) => { if (live) setGames(g) }).catch(() => {})
     return () => { live = false }
   }, [])
   const current = summary ? summary.rank.index : 0
@@ -34,6 +41,20 @@ export function Profile() {
         </Link>
       </section>
       <LookEditor name={t('credits.profile')} />
+      {games && games.length > 0 && (
+        <section className="recent-games">
+          <h3 className="center">{t('profile.recentGames')}</h3>
+          <ol className="game-list">
+            {games.map((gm) => (
+              <li key={`${gm.room_id}-${gm.game_no}`}>
+                <Link to={`/games/${gm.room_id}/${gm.game_no}`}>
+                  {t(`profile.gameOutcome.${gm.won ? 'won' : 'lost'}`, { credits: gm.credits_earned })}
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
       <h3 className="center">{t('credits.ranksTitle')}</h3>
       <ol className="ladder">
         {RANKS.map((r, i) => (

@@ -4,7 +4,10 @@ import { Profile } from './Profile'
 import { getCredits } from '../credits/api'
 import { RANKS } from '../game/rank'
 import { t } from '../i18n'
+import { getMyGames } from '../games/api'
 
+vi.mock('../games/api', () => ({ getMyGames: vi.fn() }))
+beforeEach(() => { vi.mocked(getMyGames).mockResolvedValue([]) })
 vi.mock('../credits/api', () => ({ getCredits: vi.fn() }))
 vi.mock('../state/looks', () => ({ getLooks: vi.fn().mockRejectedValue(new Error('offline')), saveLook: vi.fn() }))
 
@@ -56,4 +59,14 @@ test('the how-to-earn entry is there even when /credits fails', async () => {
   render(tree)
   await waitFor(() => expect(getCredits).toHaveBeenCalled())
   expect(screen.getByTestId('how-to-earn')).toBeInTheDocument()
+})
+
+test('shows recent games and links to the detail screen', async () => {
+  vi.mocked(getCredits).mockResolvedValue(summary)
+  vi.mocked(getMyGames).mockResolvedValue([
+    { room_id: 'r1', game_no: 1, finished_at: 0, winner: 'civilians', your_role: 'civilian', won: true, credits_earned: 20 },
+  ])
+  render(tree)
+  const link = await screen.findByRole('link', { name: new RegExp(t('profile.gameOutcome.won', { credits: 20 })) })
+  expect(link).toHaveAttribute('href', '/games/r1/1')
 })
