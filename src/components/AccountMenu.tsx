@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { t } from '../i18n'
 
-export function AccountMenu({ email, onLogout }: { email: string; onLogout: () => void }) {
+/** One top-bar menu for everyone: guests get Profile + sign-in; accounts get Profile, Clan and Log out. */
+export function AccountMenu({ email, onLogout, onSignIn }: { email: string | null; onLogout: () => void; onSignIn: () => void }) {
   const [open, setOpen] = useState(false)
   const root = useRef<HTMLDivElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
@@ -20,14 +22,19 @@ export function AccountMenu({ email, onLogout }: { email: string; onLogout: () =
     }
   }, [open])
 
+  const close = () => setOpen(false)
   return (
     <div className="account-menu" ref={root}>
       <button type="button" className="pill account-btn" ref={trigger} aria-haspopup="menu" aria-expanded={open}
         onClick={() => setOpen(o => !o)}>{t('auth.account')}</button>
       {open && (
         <div className="account-pop">
-          <span className="wrap">{email}</span>
-          <button type="button" className="btn secondary" onClick={() => { setOpen(false); onLogout() }}>{t('auth.logout')}</button>
+          {email && <span className="wrap">{email}</span>}
+          <Link className="btn secondary" to="/me" onClick={close}>{t('credits.profile')}</Link>
+          {email && <Link className="btn secondary" to="/clan" onClick={close}>{t('clan.topbar')}</Link>}
+          {email
+            ? <button type="button" className="btn secondary" onClick={() => { close(); onLogout() }}>{t('auth.logout')}</button>
+            : <button type="button" className="btn primary" onClick={() => { close(); onSignIn() }}>{t('auth.corner')}</button>}
         </div>
       )}
     </div>
