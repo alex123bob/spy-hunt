@@ -4,6 +4,7 @@ import { request } from '../api/client'
 import { LANGS, type Role } from '../api/types'
 import { Avatar } from '../components/Avatar'
 import { ClanTag } from '../components/ClanTag'
+import { CreditBurst } from '../components/CreditBurst'
 import { HeroCard } from '../components/HeroCard'
 import { RankBadge } from '../components/RankBadge'
 import { getCredits } from '../credits/api'
@@ -114,7 +115,7 @@ export function Result({ state }: { state: Snapshot }) {
         ))}
         </div>
       </section>
-      {earned > 0 && <p className="center big" data-testid="credits-earned">{t('credits.earned', { n: earned })}</p>}
+      <CreditBurst total={earned} parts={state.credit_parts?.[String(state.me.seat)]} />
       <HeroCard summary={summary} />
       <p className="muted center">{t('result.rounds', { n: info.rounds })}</p>
       {shareable && (

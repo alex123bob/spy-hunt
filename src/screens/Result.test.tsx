@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Result } from './Result'
 import type { Role, Snapshot } from '../api/types'
@@ -171,6 +171,12 @@ describe('credits and ranks', () => {
   test('shows credits earned for the viewer when > 0', async () => {
     view({ ...finished(), credits: { '1': 12, '0': 5 } })
     expect(screen.getByTestId('credits-earned')).toHaveTextContent('+12 credits')
+  })
+
+  test('shows what the viewer earned credits for', async () => {
+    view({ ...finished(), credits: { '1': 20 }, credit_parts: { '1': [{ kind: 'played', n: 10 }, { kind: 'won', n: 10 }] } })
+    await waitFor(() => expect(screen.getByTestId('credits-earned').querySelectorAll('.credit-chip')).toHaveLength(2))
+    expect(screen.getByTestId('credits-earned')).toHaveTextContent('Your side won')
   })
 
   test('no credits line when delta is absent', () => {

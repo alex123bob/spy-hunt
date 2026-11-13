@@ -150,6 +150,7 @@ function apply(s: Snapshot, type: string, d: Data): Snapshot {
         winner: d.winner ?? null,
         words: d.words as WordsByRole,
         credits: (d.credits as Record<string, number> | undefined) ?? undefined,
+        credit_parts: (d.credit_parts as Snapshot['credit_parts']) ?? undefined,
         players: s.players.map((p) => ({ ...p, role: roles.find((r) => r.seat === p.seat)?.role ?? p.role })),
       }
     }

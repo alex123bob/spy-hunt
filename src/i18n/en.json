@@ -395,5 +395,21 @@
   "clan.badgeColor": "Badge colour",
   "clan.changeBadge": "Change badge",
   "clan.saveBadge": "Save badge",
-  "clan.cancel": "Cancel"
+  "credits.kind.played": "Played a game",
+  "credits.kind.won": "Your side won",
+  "credits.kind.daily": "Daily puzzle done",
+  "credits.kind.found": "Found the spy",
+  "credits.kind.streak": "Streak bonus",
+  "credits.howTitle": "How to earn credits",
+  "credits.how.played": "Finish a game with {n}+ real players",
+  "credits.how.won": "Your side wins the game",
+  "credits.how.daily": "Finish the daily puzzle",
+  "credits.how.found": "Find the spy in the daily",
+  "credits.how.streak": "Daily streak: +{step} per day in a row",
+  "credits.how.streakAmt": "up to +{n}",
+  "credits.how.cap": "You can earn up to {n} credits a day. Credits never run out and only go up.",
+  "credits.how.bots": "Bots don't count as real players, and replaying a game or daily you already finished earns nothing new.",
+  "credits.ranksTitle": "Ranks",
+  "credits.howLink": "How to earn",
+  "common.back": "Back"
 }

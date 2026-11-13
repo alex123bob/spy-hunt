@@ -69,6 +69,12 @@ test('game_over reveals roles and words', () => {
   expect(s.words?.spy.en).toBe('a')
 })
 
+test('game_over keeps the per-seat credit breakdown', () => {
+  const parts = { '1': [{ kind: 'played', n: 10 }] }
+  const s = reduce(base(), ev('game_over', { winner: 'spies', roles: [], words: {}, credits: { '1': 10 }, credit_parts: parts }))
+  expect(s.credit_parts).toEqual(parts)
+})
+
 test('with a clock 10 minutes fast, remainingMs is still the true remainder', () => {
   const serverNow = 1_000_000
   const localNow = serverNow + 10 * 60 * 1000

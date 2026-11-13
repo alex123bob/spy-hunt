@@ -21,13 +21,20 @@ export function Profile() {
     <main className="screen profile">
       <h2 className="center big">{t('credits.title')}</h2>
       <HeroCard summary={summary} />
-      {summary && (
-        <section className="stats-trio">
-          <div className="tile c-sun"><span>{t('credits.lifetime')}</span> <strong className="big">{summary.credits}</strong></div>
-          <div className="tile c-mint"><span>{t('credits.today')}</span> <strong className="big">{summary.today}</strong></div>
-        </section>
-      )}
+      <section className="stats-trio">
+        {summary && (
+          <>
+            <div className="tile c-sun"><span>{t('credits.lifetime')}</span> <strong className="big">{summary.credits}</strong></div>
+            <div className="tile c-mint"><span>{t('credits.today')}</span> <strong className="big">{summary.today}</strong></div>
+          </>
+        )}
+        <Link to="/credits/how" className="tile c-lilac earn-link" data-testid="how-to-earn">
+            <span className="earn-link-icon" aria-hidden="true">i</span>
+            <span>{t('credits.howLink')}</span>
+        </Link>
+      </section>
       <LookEditor name={t('credits.profile')} />
+      <h3 className="center">{t('credits.ranksTitle')}</h3>
       <ol className="ladder">
         {RANKS.map((r, i) => (
           <li key={r.key} className={`ladder-row ladder-${i}${i === current ? ' current' : ''}`}

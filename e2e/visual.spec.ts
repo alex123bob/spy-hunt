@@ -46,7 +46,18 @@ for (const vp of Object.keys(VIEWPORTS) as (keyof typeof VIEWPORTS)[]) {
         // localized ("organ" / "风琴"), so pick it by position rather than by name.
         await page.locator('main .targets button.target').first().click()
         await page.waitForTimeout(800)
+        await expect(page.getByTestId('credits-earned').locator('.credit-chip').first()).toBeVisible()
+        await page.waitForTimeout(1200)
         await shot(page, 'daily-result', vp, lang)
+
+        // Profile, then the how-to-earn page behind its info tile, and back
+        await go(page, '/me', lang)
+        await shot(page, 'profile', vp, lang)
+        await page.getByTestId('how-to-earn').click()
+        await expect(page.getByTestId('earn-guide')).toBeVisible()
+        await shot(page, 'how-to-earn', vp, lang)
+        await page.locator('.back-btn').click()
+        await expect(page).toHaveURL(/\/me$/)
 
         // Bots: empty, form, list, page
         await go(page, '/bots', lang)
