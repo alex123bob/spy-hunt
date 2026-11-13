@@ -102,6 +102,8 @@
 .daily .row.between { flex-wrap: wrap; gap: 4px 10px; }
 .daily-spy { position: relative; padding-top: 22px; }
 .daily-spy .tape { position: absolute; top: -10px; left: 50%; width: 64px; height: 20px; padding: 0; transform: translateX(-50%) rotate(-3deg); }
+.daily-word-outcome { margin-top: 6px; font-weight: 700; }
+.daily-score-parts { margin-top: -4px; font-size: 14px; }
 
 /* Bots */
 .trading-card { padding: 0; overflow: hidden; gap: 0; box-shadow: var(--shadow); min-width: 0; }

@@ -6,6 +6,7 @@ import { CreditBurst } from '../components/CreditBurst'
 import { HeroCard } from '../components/HeroCard'
 import { getCredits } from '../credits/api'
 import { Toast } from '../components/Toast'
+import { scoreParts } from '../daily/score'
 import { drawShareCard, shareDailyResult, type ShareInput } from '../daily/share'
 import { t, useLang } from '../i18n'
 import { recordStreakMilestone } from '../state/nudges'
@@ -27,6 +28,7 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
     return () => { live = false }
   }, [])
   useEffect(() => recordStreakMilestone(result.streak), [])
+  const parts = scoreParts(result)
   const spy = puzzle.players.find((p) => p.seat === result.answer.spy_seat)?.name ?? ''
   const input: ShareInput = {
     number: puzzle.number, tries: result.tries, solved: result.solved, elapsedMs: result.elapsed_ms,
@@ -51,12 +53,22 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
       <section className="card spy-panel daily-spy">
         <span className="tape" aria-hidden="true" />
         <p className="wrap center">{t('daily.spyWas', { name: spy, word: result.answer.spy_word[lang] })}</p>
+        {result.solved && (
+          <p className={`wrap center daily-word-outcome${result.word_correct === true ? ' right' : ''}`}>
+            {t(result.word_correct === true ? 'daily.wordRight' : result.word_correct === false ? 'daily.wordWrong' : 'daily.wordSkipped')}
+          </p>
+        )}
       </section>
       <section className="stats-trio">
         <div className="tile c-sun"><span>{t('daily.score')}</span> <strong className="big">{result.score}</strong></div>
         <div className="tile c-sky"><span>{t('daily.time')}</span> <strong className="big">{clock(result.elapsed_ms)}</strong></div>
         <div className="tile c-pink"><span>{t('daily.tries')}</span> <strong className="big">{result.tries}</strong></div>
       </section>
+      {parts.length > 0 && (
+        <p className="muted center wrap daily-score-parts">
+          {parts.map((p) => t(`daily.scorePart.${p.kind}`, { n: p.n, t: result.tries })).join(' + ')}
+        </p>
+      )}
       <p className="muted center">{t('daily.stats', { pct: result.stats.solved_pct, n: result.stats.players })}</p>
       <div className="streak-row"><p>{t('daily.streak', { n: result.streak })}</p></div>
       <HeroCard summary={summary} />

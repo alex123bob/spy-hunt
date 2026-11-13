@@ -22,11 +22,15 @@ describe('shareCardModel', () => {
   })
 
   test('first-try find earns the first-try badge', () => {
-    expect(shareCardModel({ ...base, tries: 1 }).badge).toBe('First try!')
+    expect(shareCardModel({ ...base, tries: 1, wordCorrect: false }).badge).toBe('First try!')
   })
 
   test('getting the word on a multi-try find earns the word badge', () => {
     expect(shareCardModel(base).badge).toBe('Nailed the word too!')
+  })
+
+  test('a first-try find that also got the word says both', () => {
+    expect(shareCardModel({ ...base, tries: 1 }).badge).toBe('First try, word too!')
   })
 
   test('a plain find with the word skipped has no badge', () => {
@@ -49,7 +53,11 @@ describe('shareCardModel', () => {
 
 describe('shareText', () => {
   test('a find is a readable, localized sentence with the link', () => {
-    expect(shareText(base)).toBe('I found the spy in Spy Hunter #12 🕵️ — 1:12, streak 4 🔥\nhttps://x/daily')
+    expect(shareText(base)).toBe('I found the spy and their word in Spy Hunter #12 🕵️ — 1:12, streak 4 🔥\nhttps://x/daily')
+  })
+
+  test('a find without the word does not claim the word', () => {
+    expect(shareText({ ...base, wordCorrect: false })).toBe('I found the spy in Spy Hunter #12 🕵️ — 1:12, streak 4 🔥\nhttps://x/daily')
   })
 
   test('a miss invites a rematch', () => {
