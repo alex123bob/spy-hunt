@@ -34,8 +34,12 @@ test('add appends a row with first options and shows the preview line', () => {
 test('add is disabled at the limit with a hint', () => {
   ui()
   add(); add(); add()
-  expect(screen.getByRole('button', { name: 'Add rule' })).toBeDisabled()
-  expect(screen.getByText('Up to 3 rules.')).toBeInTheDocument()
+  const btn = screen.getByRole('button', { name: 'Add rule' })
+  expect(btn).toHaveAttribute('aria-disabled', 'true')
+  expect(screen.queryByText('Up to 3 rules.')).toBeNull()
+  fireEvent.click(btn)
+  expect(screen.getByRole('tooltip')).toHaveTextContent('Up to 3 rules.')
+  expect(screen.getAllByLabelText(/^When, rule/)).toHaveLength(3)
 })
 
 test('changing selects updates the preview', () => {

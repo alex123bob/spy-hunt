@@ -5,6 +5,7 @@ import type { BotCard, BotCatalog, BotDraft, BotRule } from '../api/types'
 import { t } from '../i18n'
 import { createBot, updateBot } from './api'
 import { BotCardView } from './BotCardView'
+import { WhyButton } from '../components/WhyButton'
 import { colorName } from '../looks/Picker'
 
 type Slot = 'voice' | 'style' | 'quirk'
@@ -120,14 +121,10 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
             <button type="button" className="btn" aria-label={t('bots.rules.removeN', { n: i + 1 })} onClick={() => setRules(rules.filter((_, j) => j !== i))}>{t('bots.rules.remove')}</button>
           </div>
         ))}
-        <button
-          type="button" className="btn" disabled={rules.length >= catalog.max_rules}
-          onClick={() => setRules([...rules, nextPair()])}
-        >
+        <WhyButton why={rules.length >= catalog.max_rules && t('bots.rules.limit')} onClick={() => setRules([...rules, nextPair()])}>
           {t('bots.rules.add')}
-        </button>
+        </WhyButton>
         {duplicate && <p role="alert" className="error">{t('bots.rules.duplicate')}</p>}
-        {rules.length >= catalog.max_rules && <p className="tc-sub">{t('bots.rules.limit')}</p>}
       </div>
       <div className="form-sec"><label className="row toggle">
         <input type="checkbox" checked={draft.listed ?? true} onChange={(e) => setDraft({ ...draft, listed: e.target.checked })} />

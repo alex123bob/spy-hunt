@@ -52,13 +52,13 @@ test('a failed save says so', async () => {
   expect(await screen.findByText('Could not save your look.')).toBeInTheDocument()
 })
 
-test('tapping a locked item says which rank unlocks it, picking a free one clears that', async () => {
+test('tapping a locked item pops a bubble saying which rank unlocks it', async () => {
   vi.mocked(getLooks).mockResolvedValue(cat())
   render(<LookEditor name="Me" />)
-  fireEvent.click(await screen.findByRole('radio', { name: /Crown — Unlocks at Legend/ }))
-  expect(screen.getByText(/Crown: Unlocks at Legend/)).toBeVisible()
-  fireEvent.click(screen.getByRole('radio', { name: /👑 — Unlocks at Legend/ }))
-  expect(screen.getByText(/👑 Unlocks at Legend/)).toBeVisible()
-  fireEvent.click(screen.getByRole('radio', { name: '🐱' }))
-  expect(screen.queryByText(/👑 Unlocks at Legend/)).toBeNull()
+  const crown = await screen.findByRole('radio', { name: /Crown — Unlocks at Legend/ })
+  fireEvent.click(crown)
+  expect(screen.getByRole('tooltip')).toHaveTextContent('🔒 Unlocks at Legend')
+  expect(crown).toHaveAttribute('aria-checked', 'false')
+  fireEvent.pointerDown(document.body)
+  expect(screen.queryByRole('tooltip')).toBeNull()
 })

@@ -209,5 +209,3 @@ button.flip-scene { cursor: pointer; }
 .picker .chip .lock { position: absolute; font-size: 11px; right: 2px; bottom: 2px; }
 .picker .chip { position: relative; }
 .picker .swatch.primary { color: #fff; box-shadow: 0 0 0 3px var(--paper), 0 0 0 6px var(--ink); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
-.pick-note { min-height: 0; margin: 6px 0 0; font-size: 14px; font-weight: 700; color: var(--ink); }
-.pick-note:empty { margin: 0; }

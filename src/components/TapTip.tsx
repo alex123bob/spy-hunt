@@ -1,40 +1,27 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { Bubble } from './Bubble'
 
 /**
- * A small icon that explains itself on tap (phones have no hover), on mouse hover, or on
- * keyboard focus + Enter. The bubble closes on an outside tap, Escape, or after a few seconds.
+ * A small icon that explains itself in a bubble on tap (phones have no hover), on mouse
+ * hover, or on keyboard focus + Enter.
  */
 export function TapTip({ label, children, className, style }: {
   label: string; children: ReactNode; className?: string; style?: CSSProperties
 }) {
   const [open, setOpen] = useState(false)
-  const root = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    const outside = (e: PointerEvent) => { if (!root.current?.contains(e.target as Node)) setOpen(false) }
-    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
-    const timer = setTimeout(() => setOpen(false), 3000)
-    document.addEventListener('pointerdown', outside)
-    document.addEventListener('keydown', key)
-    return () => {
-      clearTimeout(timer)
-      document.removeEventListener('pointerdown', outside)
-      document.removeEventListener('keydown', key)
-    }
-  }, [open])
+  const btn = useRef<HTMLButtonElement>(null)
 
   return (
-    <span className="tip" ref={root}>
+    <span className="tip">
       <button
-        type="button" className={`tip-btn ${className ?? ''}`} style={style} aria-label={label} aria-expanded={open}
+        ref={btn} type="button" className={`tip-btn ${className ?? ''}`} style={style} aria-label={label} aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
         onPointerEnter={(e) => { if (e.pointerType === 'mouse') setOpen(true) }}
         onPointerLeave={(e) => { if (e.pointerType === 'mouse') setOpen(false) }}
       >
         {children}
       </button>
-      {open && <span role="tooltip" className="tip-bubble">{label}</span>}
+      {open && <Bubble anchor={btn} text={label} onClose={() => setOpen(false)} />}
     </span>
   )
 }

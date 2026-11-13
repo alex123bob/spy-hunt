@@ -4,6 +4,7 @@ import { errorText } from '../api/errors'
 import type { BotCard, Lang, Snapshot } from '../api/types'
 import { listMyBots } from '../bots/api'
 import { Avatar } from '../components/Avatar'
+import { WhyButton } from '../components/WhyButton'
 import { Loader } from '../components/Loader'
 import { Toast } from '../components/Toast'
 import { LangPicker } from '../components/LangPicker'
@@ -102,10 +103,9 @@ export function Lobby({ state }: { state: Snapshot }) {
         )}
         {myBots.length > 0 && (
           <>
-            <button type="button" className="btn" disabled={full || ownBotIn} onClick={() => setPicking((v) => !v)}>
+            <WhyButton why={full ? t('lobby.full') : ownBotIn && t('lobby.ownBotIn')} onClick={() => setPicking((v) => !v)}>
               {t('lobby.addMyBot')}
-            </button>
-            {(full || ownBotIn) && <p className="muted small">{t(full ? 'lobby.full' : 'lobby.ownBotIn')}</p>}
+            </WhyButton>
             {picking && !full && !ownBotIn && (
               <div className="bot-picker">
                 {myBots.map((b) => (
@@ -123,14 +123,13 @@ export function Lobby({ state }: { state: Snapshot }) {
           <p className="muted">{t('lobby.mainLang')}</p>
           <LangPicker label={t('lobby.mainLang')} value={state.main_lang} onChange={(l) => call('PATCH', '/settings', { main_lang: l })} />
           <div className="row bot-btns">
-            <button type="button" className="btn" disabled={full} onClick={() => call('POST', '/bots', { action: 'add' })}>
+            <WhyButton why={full && t('lobby.full')} onClick={() => call('POST', '/bots', { action: 'add' })}>
               {t('lobby.addBot')}
-            </button>
+            </WhyButton>
             <button type="button" className="btn" disabled={bots === 0} onClick={() => call('POST', '/bots', { action: 'remove' })}>
               {t('lobby.removeBot')}
             </button>
           </div>
-          {full && <p className="muted small">{t('lobby.full')}</p>}
         </section>
       )}
       <section className="card center">

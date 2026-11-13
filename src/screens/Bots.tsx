@@ -7,6 +7,7 @@ import { deleteBot, getBotCard, getCatalog, getRecaps, listMyBots, markRecapsSee
 import { BotCardView } from '../bots/BotCardView'
 import { BotForm } from '../bots/BotForm'
 import { RecapList } from '../bots/RecapList'
+import { WhyButton } from '../components/WhyButton'
 import { EmptyState } from '../components/EmptyState'
 import { Loader } from '../components/Loader'
 import { t, useLang } from '../i18n'
@@ -131,10 +132,10 @@ export function Bots() {
             </div>
           ))}
           {err && <p role="alert" className="error">{err}</p>}
-          <button type="button" className="btn primary" disabled={load.bots.length >= MAX_BOTS} onClick={() => setForm({})}>
+          <WhyButton className="btn primary" why={load.bots.length >= MAX_BOTS && t('bots.limit')} onClick={() => setForm({})}>
             {t('bots.new')}
-          </button>
-          {load.bots.length >= MAX_BOTS && <p className="muted">{t('bots.limit')}</p>}
+          </WhyButton>
+          {remixId && count >= MAX_BOTS && <p role="alert" className="error">{t('bots.limit')}</p>}
           {remixId && remix.kind === 'denied' && <p role="alert" className="error">{t('bots.remixNotAllowed')}</p>}
           {remixId && remix.kind === 'error' && <p role="alert" className="error">{t('bots.error')}</p>}
           {form ? (

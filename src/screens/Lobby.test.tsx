@@ -97,8 +97,11 @@ test('picking a bot posts add with its id and closes the list', async () => {
 test('Add my bot is disabled once my bot is in the room, and room bots are not offered', async () => {
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
   render(<Lobby state={withBots(false, [botP(3, 'b1', 'Rex')])} />)
-  expect(await screen.findByRole('button', { name: 'Add my bot' })).toBeDisabled()
-  expect(screen.getByText('Your bot is already in this room.')).toBeInTheDocument()
+  const btn = await screen.findByRole('button', { name: 'Add my bot' })
+  expect(btn).toHaveAttribute('aria-disabled', 'true')
+  fireEvent.click(btn)
+  expect(screen.getByRole('tooltip')).toHaveTextContent('Your bot is already in this room.')
+  expect(screen.queryByRole('button', { name: 'Rex' })).toBeNull()
 })
 
 test('the picker offers each of my bots when none is in the room', async () => {

@@ -13,8 +13,6 @@ export function LookEditor({ name }: { name: string }) {
   const [draft, setDraft] = useState<Look | null>(null)
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState('')
-  // which group's locked chip was tapped last, and why it is locked
-  const [lockNote, setLockNote] = useState<{ group: 'emoji' | 'frame'; text: string } | null>(null)
 
   useEffect(() => {
     let live = true
@@ -49,11 +47,10 @@ export function LookEditor({ name }: { name: string }) {
       <div className="look-preview" data-testid="look-preview">
         <Avatar player={{ name, avatar: draft }} size="l" />
       </div>
-      <PickGroup label={t('looks.emoji')} note={lockNote?.group === 'emoji' ? lockNote.text : undefined}>
+      <PickGroup label={t('looks.emoji')}>
         {cat.emojis.map(({ emoji, rank }) => (
           <Pick key={emoji} on={draft.emoji === emoji} label={emoji} locked={rank > cat.rank} hint={hint(rank)}
-            onLocked={(text) => setLockNote({ group: 'emoji', text: `${emoji} ${text}` })}
-            onPick={() => { setLockNote(null); setDraft({ ...draft, emoji }) }}>{emoji}</Pick>
+            onPick={() => setDraft({ ...draft, emoji })}>{emoji}</Pick>
         ))}
       </PickGroup>
       <PickGroup label={t('looks.color')}>
@@ -62,11 +59,10 @@ export function LookEditor({ name }: { name: string }) {
             onPick={() => setDraft({ ...draft, color: c })}>{draft.color === c ? '✓' : ''}</Pick>
         ))}
       </PickGroup>
-      <PickGroup label={t('looks.frame')} note={lockNote?.group === 'frame' ? lockNote.text : undefined}>
+      <PickGroup label={t('looks.frame')}>
         {cat.frames.map(({ key, rank }) => (
           <Pick key={key} on={draft.frame === key} label={t(`looks.frame.${key}`)} locked={rank > cat.rank} hint={hint(rank)}
-            onLocked={(text) => setLockNote({ group: 'frame', text: `${t(`looks.frame.${key}`)}: ${text}` })}
-            onPick={() => { setLockNote(null); setDraft({ ...draft, frame: key as Frame }) }}>
+            onPick={() => setDraft({ ...draft, frame: key as Frame })}>
             <Avatar player={{ name, avatar: { emoji: draft.emoji, color: draft.color, frame: key } }} size="s" />
           </Pick>
         ))}

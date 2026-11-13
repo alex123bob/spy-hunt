@@ -18,9 +18,9 @@
   cursor: pointer;
   transition: transform 120ms var(--ease-spring), box-shadow 120ms var(--ease-spring);
 }
-.btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 7px 0 var(--ink); }
-.btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
-.btn:disabled, .btn.primary:disabled, .btn.secondary:disabled, .btn.ghost:disabled { background: var(--paper); color: var(--muted); border-style: dashed; box-shadow: 0 2px 0 var(--ink); cursor: default; transform: none; } /* legible when off: muted on paper is 7.2:1; beats every variant */
+.btn:hover:not(:disabled):not(.is-blocked) { transform: translateY(-2px); box-shadow: 0 7px 0 var(--ink); }
+.btn:active:not(:disabled):not(.is-blocked) { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.btn:disabled, .btn.primary:disabled, .btn.secondary:disabled, .btn.ghost:disabled, .btn.is-blocked, .btn.primary.is-blocked, .btn.secondary.is-blocked, .btn.ghost.is-blocked { background: var(--paper); color: var(--muted); border-style: dashed; box-shadow: 0 2px 0 var(--ink); cursor: default; transform: none; } /* legible when off: muted on paper is 7.2:1; beats every variant */
 .btn.ghost:disabled { background: transparent; }
 .btn.primary { background: var(--tomato); color: #fff; font-size: 19px; font-weight: 700; } /* AA-large: white on tomato is 3.7:1 */
 .btn.secondary { background: var(--green); color: var(--paper); }
@@ -246,8 +246,14 @@ label:has(> input.toggle), label.toggle { flex-direction: row; align-items: cent
 .tip-btn:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
 /* a 44px tap target around a tiny icon, without changing the layout */
 .tip-btn::after { content: ""; position: absolute; inset: -12px; }
-.tip-bubble { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 30;
-  width: max-content; max-width: min(220px, 60vw); padding: 6px 10px; border-radius: 10px;
-  background: var(--ink); color: var(--paper); font-size: 13px; font-weight: 700; line-height: 1.3; text-align: center;
-  white-space: normal; pointer-events: none; animation: pop .2s var(--ease-spring); }
-.tip-bubble::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -6px; border: 6px solid transparent; border-top-color: var(--ink); }
+.hint-bubble { position: fixed; z-index: 60; width: max-content; max-width: min(240px, calc(100vw - 16px));
+  padding: 7px 11px; border-radius: 12px; background: var(--ink); color: var(--paper);
+  font-size: 14px; font-weight: 700; line-height: 1.3; text-align: center; pointer-events: none;
+  box-shadow: 0 3px 0 rgba(0,0,0,.18); animation: hint-bubble-in .18s var(--ease-spring) both; }
+.hint-bubble::after { content: ""; position: absolute; top: 100%; left: var(--tail, 50%); margin-left: -6px;
+  border: 6px solid transparent; border-top-color: var(--ink); }
+.hint-bubble.below::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--ink); }
+@keyframes hint-bubble-in { from { opacity: 0; transform: translateY(4px) scale(.94); } }
+.hint-bubble.below { animation-name: hint-bubble-in-below; }
+@keyframes hint-bubble-in-below { from { opacity: 0; transform: translateY(-4px) scale(.94); } }
+@media (prefers-reduced-motion: reduce) { .hint-bubble { animation: none; } }

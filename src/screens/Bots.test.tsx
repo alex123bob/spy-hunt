@@ -165,8 +165,11 @@ test('at 3 bots new bot is disabled with a hint', async () => {
   vi.mocked(listMyBots).mockResolvedValue([a, b, mk('dddddddd', 'Gamma')])
   render(tree)
   await screen.findByText('Alpha')
-  expect(screen.getByRole('button', { name: 'New bot' })).toBeDisabled()
-  expect(screen.getByText('You can have up to 3 bots.')).toBeInTheDocument()
+  const btn = screen.getByRole('button', { name: 'New bot' })
+  expect(btn).toHaveAttribute('aria-disabled', 'true')
+  fireEvent.click(btn)
+  expect(screen.getByRole('tooltip')).toHaveTextContent('You can have up to 3 bots.')
+  expect(screen.queryByLabelText('Name')).toBeNull()
 })
 
 test('save is disabled for a blank name', async () => {
