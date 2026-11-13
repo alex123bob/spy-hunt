@@ -142,13 +142,13 @@ export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): P
   // header
   ctx.fillStyle = ink
   ctx.font = font(78)
-  ctx.fillText(`🕵️ ${m.title}`, S / 2, 210)
+  ctx.fillText(`🕵️ ${m.title}`, S / 2, 175)
   ctx.font = font(40, 600)
   ctx.fillStyle = c('--tomato')
-  ctx.fillText(m.puzzle.toUpperCase(), S / 2, 278)
+  ctx.fillText(m.puzzle.toUpperCase(), S / 2, 235)
 
   // hero + rank title band
-  const hW = 520, hH = 70, hX = (S - hW) / 2, hY = 308
+  const hW = 520, hH = 66, hX = (S - hW) / 2, hY = 272
   ctx.fillStyle = ink
   rounded(ctx, hX + 5, hY + 6, hW, hH, hH / 2); ctx.fill()
   ctx.fillStyle = c('--sun'); ctx.lineWidth = 6; ctx.strokeStyle = ink
@@ -158,21 +158,21 @@ export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): P
   ctx.fillText(`${m.hero} ${m.rankTitle}`, S / 2, hY + hH / 2 + 3)
 
   // verdict pill
-  const vW = 620, vH = 104, vX = (S - vW) / 2, vY = 404
+  const vW = 620, vH = 98, vX = (S - vW) / 2, vY = 364
   ctx.fillStyle = ink
   rounded(ctx, vX + 7, vY + 9, vW, vH, vH / 2); ctx.fill()
   ctx.fillStyle = m.solved ? c('--mint') : c('--pink')
   ctx.lineWidth = 8; ctx.strokeStyle = ink
   rounded(ctx, vX, vY, vW, vH, vH / 2); ctx.fill(); ctx.stroke()
   ctx.fillStyle = ink
-  ctx.font = font(62)
+  ctx.font = font(60)
   ctx.fillText(`${m.mascot} ${m.verdict}`, S / 2, vY + vH / 2 + 4)
 
   // badge ribbon (optional)
-  let statY = 580
+  let statY = 532
   if (m.badge) {
     ctx.save()
-    ctx.translate(S / 2, 540)
+    ctx.translate(S / 2, 500)
     ctx.rotate(-0.04)
     ctx.font = font(34, 600)
     const bw = ctx.measureText(m.badge).width + 60
@@ -181,11 +181,11 @@ export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): P
     ctx.fillStyle = ink
     ctx.fillText(m.badge, 0, 2)
     ctx.restore()
-    statY = 622
+    statY = 548
   }
 
   // three stat tiles
-  const gap = 28, tW = (620 - 2 * gap) / 3, tH = 130, tX0 = (S - 620) / 2
+  const gap = 28, tW = (620 - 2 * gap) / 3, tH = 124, tX0 = (S - 620) / 2
   m.tiles.forEach((tile, i) => {
     const x = tX0 + i * (tW + gap)
     ctx.fillStyle = ink
@@ -194,25 +194,27 @@ export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): P
     rounded(ctx, x, statY, tW, tH, 22); ctx.fill(); ctx.stroke()
     ctx.fillStyle = ink
     ctx.font = font(26, 600)
-    ctx.fillText(tile.label, x + tW / 2, statY + 38)
-    ctx.font = font(58)
-    ctx.fillText(tile.value, x + tW / 2, statY + 90)
+    ctx.fillText(tile.label, x + tW / 2, statY + 36)
+    ctx.font = font(56)
+    ctx.fillText(tile.value, x + tW / 2, statY + 88)
   })
 
-  // QR + hint at the bottom
-  const qrSize = 190, qrY = S - pad - qrSize - 46, qrX = (S - qrSize) / 2
+  // QR + hint at the bottom, positioned from the tiles so nothing clips the card edge
+  const qrSize = 172
+  const qrBoxTop = statY + tH + 30
+  const qrX = (S - qrSize) / 2, qrY = qrBoxTop + 12
   try {
     const dataUrl = await QRCode.toDataURL(m.url, { margin: 1, width: qrSize * 2, color: { dark: '#1d3b33', light: '#fffaf0' } })
     const img = await loadImage(dataUrl)
     ctx.fillStyle = c('--paper'); ctx.lineWidth = 6; ctx.strokeStyle = ink
-    rounded(ctx, qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 18); ctx.fill(); ctx.stroke()
+    rounded(ctx, qrX - 12, qrBoxTop, qrSize + 24, qrSize + 24, 18); ctx.fill(); ctx.stroke()
     ctx.drawImage(img, qrX, qrY, qrSize, qrSize)
   } catch {
     // no QR: the link below still carries the invite
   }
   ctx.fillStyle = c('--ink')
   ctx.font = font(28, 600)
-  ctx.fillText(m.scanHint, S / 2, S - pad - 8)
+  ctx.fillText(m.scanHint, S / 2, qrBoxTop + qrSize + 24 + 30)
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
