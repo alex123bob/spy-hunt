@@ -5,6 +5,7 @@ import type { BotCard, BotCatalog, BotDraft, BotRule } from '../api/types'
 import { t } from '../i18n'
 import { createBot, updateBot } from './api'
 import { BotCardView } from './BotCardView'
+import { colorName } from '../looks/Picker'
 
 type Slot = 'voice' | 'style' | 'quirk'
 const GROUPS: { slot: Slot; key: 'voices' | 'styles' | 'quirks' }[] = [
@@ -13,10 +14,6 @@ const GROUPS: { slot: Slot; key: 'voices' | 'styles' | 'quirks' }[] = [
   { slot: 'quirk', key: 'quirks' },
 ]
 
-function colorName(c: string): string {
-  const key = `bots.color.${c.replace('#', '').toLowerCase()}`
-  return t(key) !== key ? t(key) : c
-}
 
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (

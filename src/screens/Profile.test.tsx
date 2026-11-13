@@ -6,6 +6,7 @@ import { RANKS } from '../game/rank'
 import { t } from '../i18n'
 
 vi.mock('../credits/api', () => ({ getCredits: vi.fn() }))
+vi.mock('../state/looks', () => ({ getLooks: vi.fn().mockRejectedValue(new Error('offline')), saveLook: vi.fn() }))
 
 const summary = {
   credits: 900, today: 40,

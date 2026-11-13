@@ -14,3 +14,10 @@ test('falls back to the initial, then ?', () => {
   rerender(<Avatar player={{ name: '' }} />)
   expect(screen.getByText('?')).toBeInTheDocument()
 })
+
+test('a frame adds its class; none adds nothing', () => {
+  const { container, rerender } = render(<Avatar player={{ name: 'Bo', avatar: { emoji: '🐙', color: '#123456', frame: 'crown' } }} />)
+  expect(container.querySelector('span.avatar')).toHaveClass('frame-crown')
+  rerender(<Avatar player={{ name: 'Bo', avatar: { emoji: '🐙', color: '#123456', frame: 'none' } }} />)
+  expect(container.querySelector('span.avatar')!.className).not.toContain('frame-')
+})

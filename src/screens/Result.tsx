@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { request } from '../api/client'
 import { LANGS, type Role } from '../api/types'
@@ -11,8 +11,8 @@ import { Confetti } from '../components/Confetti'
 import { FlipCard } from '../components/FlipCard'
 import { Toast } from '../components/Toast'
 import { useStaged } from '../motion/useStaged'
-import { shareResult } from '../daily/share'
-import { resultInfo, resultShareText } from '../game/result'
+import { drawCard, shareCard } from '../daily/share'
+import { resultInfo, resultShareText, roomCardModel } from '../game/result'
 import { t, useLang } from '../i18n'
 import { recordWin } from '../state/nudges'
 import type { CreditSummary, Snapshot } from '../api/types'
@@ -36,11 +36,20 @@ export function Result({ state }: { state: Snapshot }) {
   useEffect(() => {
     if (info.outcome === 'won') recordWin(`${state.code}:${state.game_no}`)
   }, [])
-  const card = info.outcome === 'ended' ? null : resultShareText(state, info, `${window.location.origin}${import.meta.env.BASE_URL}`)
+  const url = `${window.location.origin}${import.meta.env.BASE_URL}`
+  const shareable = info.outcome !== 'ended'
+  const model = () => roomCardModel(state, info, { url, earned, rankIndex: summary?.rank.index })
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  // redraw the preview when the language or rank arrives
+  useEffect(() => {
+    if (shareable && canvasRef.current) void drawCard(canvasRef.current, model())
+  }, [lang, summary, shareable])
 
   const share = async () => {
-    if (!card) return
-    const r = await shareResult(card)
+    if (!shareable) return
+    const r = await shareCard({
+      model: model(), text: resultShareText(state, info, url), filename: `spy-hunt-${state.code}-${state.game_no}.png`,
+    })
     setShareState(r === 'shared' ? t('result.shared') : r === 'copied' ? t('result.copied') : t('result.shareFailed'))
   }
 
@@ -108,9 +117,9 @@ export function Result({ state }: { state: Snapshot }) {
       {earned > 0 && <p className="center big" data-testid="credits-earned">{t('credits.earned', { n: earned })}</p>}
       <HeroCard summary={summary} />
       <p className="muted center">{t('result.rounds', { n: info.rounds })}</p>
-      {card && (
+      {shareable && (
         <>
-          <pre className="ticket share torn" data-testid="share-preview">{card}</pre>
+          <canvas ref={canvasRef} className="share-card" data-testid="share-card" role="img" aria-label={t('result.title')} />
           <button type="button" className="btn" onClick={share}>{t('result.share')}</button>
           <Toast text={shareState} />
         </>

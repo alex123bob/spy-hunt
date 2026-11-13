@@ -3,10 +3,12 @@ import { expect, test, type Browser, type Page } from '@playwright/test'
 async function registered(browser: Browser, tag: string): Promise<Page> {
   const page = await (await browser.newContext()).newPage()
   await page.goto('/')
+  await page.getByRole('button', { name: 'Account', exact: true }).click()
   await page.getByRole('button', { name: 'Register / log in' }).click()
   await page.getByLabel('Email').fill(`e2e-${tag}-${Date.now()}@example.com`)
   await page.getByLabel('Password').fill('longenough')
   await page.getByRole('button', { name: 'Create account' }).click()
+  await page.getByRole('button', { name: 'Account', exact: true }).click()
   await expect(page.getByRole('link', { name: 'Clan' })).toBeVisible()
   return page
 }

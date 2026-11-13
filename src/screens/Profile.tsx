@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { CreditSummary } from '../api/types'
 import { HeroCard } from '../components/HeroCard'
+import { LookEditor } from '../looks/LookEditor'
 import { getCredits } from '../credits/api'
 import { RANKS, rankByIndex, rankTitleKey } from '../game/rank'
 import { t, useLang } from '../i18n'
@@ -26,6 +27,7 @@ export function Profile() {
           <div className="tile c-mint"><span>{t('credits.today')}</span> <strong className="big">{summary.today}</strong></div>
         </section>
       )}
+      <LookEditor name={t('credits.profile')} />
       <ol className="ladder">
         {RANKS.map((r, i) => (
           <li key={r.key} className={`ladder-row ladder-${i}${i === current ? ' current' : ''}`}

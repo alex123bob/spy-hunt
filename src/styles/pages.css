@@ -10,7 +10,9 @@
 .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; font-size: 14px; vertical-align: middle; flex: none !important; }
 .clan-badge.big { width: 64px; height: 64px; border-radius: 20px; font-size: 34px; box-shadow: 3px 3px 0 var(--ink); animation: wob 700ms var(--ease-spring) 1; }
 .badges { display: flex; flex-wrap: wrap; gap: 8px; }
-.clan-pick { padding: 6px; min-height: 44px; }
+.clan-pick { padding: 6px; min-height: 44px; font-size: 20px; }
+.badge-builder { display: flex; flex-direction: column; gap: 10px; }
+.badge-preview { display: flex; justify-content: center; padding: 4px 0; }
 .clan-card { display: flex; flex-direction: column; gap: 10px; }
 .clan-card h2 { margin: 0; }
 .clan-crest { display: flex; align-items: center; gap: 14px; min-width: 0; }

@@ -158,7 +158,17 @@ export interface DailyResult {
 
 export interface Account { email: string | null }
 
-export interface Avatar { emoji: string; color: string }
+export type Frame = 'none' | 'leaf' | 'ribbon' | 'star' | 'gold' | 'crown'
+export interface Avatar { emoji: string; color: string; frame?: Frame }
+export interface Look { emoji: string; color: string; frame: Frame }
+export interface LooksCatalog {
+  emojis: { emoji: string; rank: number }[]
+  colors: string[]
+  frames: { key: Frame; rank: number }[]
+  rank: number
+  mine: Look | null
+}
+export interface BadgeCatalog { badges: ClanBadge[]; emojis: string[]; colors: string[] }
 export interface BotRule { when: string; do: string }
 export interface BotOutfit { voice: string; style: string; quirk: string; rules: BotRule[] }
 export interface BotRecord { games: number; wins: number; spy_games: number; spy_wins: number }

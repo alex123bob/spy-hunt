@@ -19,7 +19,13 @@ test('a player solves the daily puzzle and sees it done on the landing page', as
 
   await expect(page.getByText('You found the spy!')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Share' })).toBeVisible()
-  await expect(page.getByTestId('share-preview')).toContainText('🟥🟩')
+  // the share card is a 1080×1080 canvas that actually got painted
+  const card = page.getByTestId('share-card')
+  await expect(card).toBeVisible()
+  await expect.poll(() => card.evaluate((c: HTMLCanvasElement) => {
+    const px = c.getContext('2d')!.getImageData(540, 540, 1, 1).data
+    return c.width === 1080 && px[3] > 0
+  })).toBe(true)
 
   await page.reload()
   await expect(page.getByText('You found the spy!')).toBeVisible()
