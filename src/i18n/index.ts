@@ -3,12 +3,13 @@ import type { Lang } from '../api/types'
 import en from './en.json'
 import zhHans from './zh-Hans.json'
 import { detectLang } from './detect'
+import { getSession } from '../state/session'
 
 export { detectLang }
 
 const dicts: Record<Lang, Record<string, string>> = { en, 'zh-Hans': zhHans }
 
-let current: Lang = detectLang(typeof navigator !== 'undefined' ? navigator.language : 'en')
+let current: Lang = getSession().lang
 const listeners = new Set<() => void>()
 
 export function getLang(): Lang {

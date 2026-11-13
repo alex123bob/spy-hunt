@@ -202,3 +202,25 @@ test('arena copy exists in both languages', () => {
     expect(zh).toHaveProperty([k], z)
   }
 })
+
+test('boots from the stored session language, not the browser locale', async () => {
+  vi.resetModules()
+  vi.doMock('../state/session', () => ({ getSession: () => ({ lang: 'zh-Hans' }) }))
+  const mod = await import('./index')
+  expect(mod.getLang()).toBe('zh-Hans')
+  vi.doUnmock('../state/session')
+  vi.resetModules()
+})
+
+test('a brand-new browser with no stored session still falls back to the browser locale', async () => {
+  localStorage.clear()
+  sessionStorage.clear()
+  vi.resetModules()
+  const { resetSessionForTests } = await import('../state/session')
+  resetSessionForTests()
+  vi.stubGlobal('navigator', { ...navigator, language: 'zh' })
+  const mod = await import('./index')
+  expect(mod.getLang()).toBe('zh-Hans')
+  vi.unstubAllGlobals()
+  vi.resetModules()
+})
