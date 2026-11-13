@@ -2,6 +2,7 @@
 
 .daily .stats { display: flex; flex-direction: column; gap: 6px; }
 .daily .share { white-space: pre-wrap; margin: 0; font: inherit; }
+.share-card { display: block; width: 100%; max-width: 320px; aspect-ratio: 1; height: auto; margin: 4px auto 0; border-radius: 20px; }
 .daily-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }
 .daily .history { max-height: none; overflow: visible; }
 .clan-badge { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 2.5px solid var(--ink); border-radius: 10px; font-size: 18px; flex: none !important; }

@@ -36,8 +36,12 @@ The back end must run as a single process (see its README).
 ## Daily puzzle
 
 `/daily` is a Wordle-style puzzle: everyone gets the same bot-vs-bot transcript each UTC day.
-Read it, tap the spy (two tries), optionally pick the spy's word, then share an emoji result card.
+Read it, tap the spy (two tries), optionally pick the spy's word, then share a cartoon result card
+(a PNG with your verdict, time, tries, streak and a QR code back to the puzzle; falls back to a
+short localized message where image sharing isn't available).
 The landing page has a "Daily Spy Hunter" card that shows your streak and whether you are done today.
+
+- **Timing** starts on your first guess, not when you open the puzzle, so peeking early doesn't run up the clock.
 
 - **Streaks** live in the browser (`localStorage`, key `spy-hunt.daily`): current, best and a per-day history. Clearing browser data clears them.
 - **Scoring and timing** are done on the server; the answer is never sent before you finish.

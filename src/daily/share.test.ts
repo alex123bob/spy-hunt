@@ -1,54 +1,106 @@
-import { shareResult, shareText } from './share'
+import { shareCardModel, shareDailyResult, shareText } from './share'
+import { setLang } from '../i18n'
 
-const base = { number: 12, tries: 2, solved: true, elapsedMs: 72000, wordCorrect: true as boolean | null, streak: 4, url: 'https://x/daily' }
+const base = {
+  number: 12, tries: 2, solved: true, elapsedMs: 72000,
+  wordCorrect: true as boolean | null, streak: 4, url: 'https://x/daily',
+}
 
-test('solved on try two with the word right', () => {
-  expect(shareText(base)).toBe('Spy Hunter #12 🕵️\n🟥🟩 ⏱ 1:12 ✅ word\nStreak 4 🔥 https://x/daily')
-})
-
-test('solved on try one has no red square', () => {
-  expect(shareText({ ...base, tries: 1 })).toContain('\n🟩 ⏱ 1:12')
-})
-
-test('unsolved shows a red square per tap and no green', () => {
-  const t = shareText({ ...base, solved: false, wordCorrect: null, streak: 0 })
-  expect(t).toBe('Spy Hunter #12 🕵️\n🟥🟥 ⏱ 1:12\nStreak 0 https://x/daily')
-})
-
-test('skipped word has no suffix, wrong word shows a cross', () => {
-  expect(shareText({ ...base, wordCorrect: null })).not.toMatch(/word/)
-  expect(shareText({ ...base, wordCorrect: false })).toContain(' ❌ word')
-})
-
-test('only the exact line formats appear: no words, names or seats', () => {
-  const re = /^Spy Hunter #\d+ 🕵️\n🟥*🟩? ⏱ \d+:\d\d( ✅ word| ❌ word)?\nStreak \d+( 🔥)? \S+$/u
-  for (const o of [base, { ...base, tries: 1, wordCorrect: false }, { ...base, solved: false, wordCorrect: null, streak: 0 }]) {
-    expect(shareText(o)).toMatch(re)
-  }
-})
-
+beforeEach(() => setLang('en'))
 afterEach(() => {
   vi.unstubAllGlobals()
+  setLang('en')
 })
 
-test('shareResult uses navigator.share when present', async () => {
-  const share = vi.fn().mockResolvedValue(undefined)
-  vi.stubGlobal('navigator', { share })
-  expect(await shareResult('hi')).toBe('shared')
-  expect(share).toHaveBeenCalledWith({ text: 'hi' })
-})
-
-test('shareResult falls back to the clipboard', async () => {
-  const writeText = vi.fn().mockResolvedValue(undefined)
-  vi.stubGlobal('navigator', { clipboard: { writeText } })
-  expect(await shareResult('hi')).toBe('copied')
-  expect(writeText).toHaveBeenCalledWith('hi')
-})
-
-test('shareResult reports failure when both throw', async () => {
-  vi.stubGlobal('navigator', {
-    share: vi.fn().mockRejectedValue(new Error('x')),
-    clipboard: { writeText: vi.fn().mockRejectedValue(new Error('y')) },
+describe('shareCardModel', () => {
+  test('solved result reads as a find, with localized tiles', () => {
+    const m = shareCardModel(base)
+    expect(m.solved).toBe(true)
+    expect(m.verdict).toBe('Spy found!')
+    expect(m.tiles.map((t) => t.value)).toEqual(['1:12', '2', '4'])
+    expect(m.tiles.map((t) => t.label)).toEqual(['Time', 'Tries', 'Streak'])
   })
-  expect(await shareResult('hi')).toBe('failed')
+
+  test('first-try find earns the first-try badge', () => {
+    expect(shareCardModel({ ...base, tries: 1 }).badge).toBe('First try!')
+  })
+
+  test('getting the word on a multi-try find earns the word badge', () => {
+    expect(shareCardModel(base).badge).toBe('Nailed the word too!')
+  })
+
+  test('a plain find with the word skipped has no badge', () => {
+    expect(shareCardModel({ ...base, wordCorrect: null }).badge).toBeNull()
+  })
+
+  test('a miss reads as the spy getting away, no badge', () => {
+    const m = shareCardModel({ ...base, solved: false, wordCorrect: null })
+    expect(m.verdict).toBe('Spy got away')
+    expect(m.badge).toBeNull()
+  })
+
+  test('follows the active language', () => {
+    setLang('zh-Hans')
+    const m = shareCardModel(base)
+    expect(m.verdict).toBe('揪出间谍！')
+    expect(m.tiles[0].label).toBe('用时')
+  })
+})
+
+describe('shareText', () => {
+  test('a find is a readable, localized sentence with the link', () => {
+    expect(shareText(base)).toBe('I found the spy in Spy Hunter #12 🕵️ — 1:12, streak 4 🔥\nhttps://x/daily')
+  })
+
+  test('a miss invites a rematch', () => {
+    expect(shareText({ ...base, solved: false, streak: 0 })).toBe(
+      'The spy got away in Spy Hunter #12 🕵️ — can you do better? Streak 0\nhttps://x/daily',
+    )
+  })
+
+  test('is localized', () => {
+    setLang('zh-Hans')
+    expect(shareText(base)).toContain('《谍影追踪》第 12 期')
+  })
+})
+
+describe('shareResult', () => {
+  // jsdom has no real canvas; stub document.createElement to skip the image path
+  const noCanvas = () => vi.stubGlobal('document', undefined)
+
+  test('shares the plain text when no image can be produced', async () => {
+    noCanvas()
+    const share = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', { share })
+    expect(await shareDailyResult(base)).toBe('shared')
+    expect(share).toHaveBeenCalledWith({ text: expect.stringContaining('Spy Hunter #12') })
+  })
+
+  test('falls back to the clipboard when share is unavailable', async () => {
+    noCanvas()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+    expect(await shareDailyResult(base)).toBe('copied')
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('https://x/daily'))
+  })
+
+  test('reports failure when both share and clipboard throw', async () => {
+    noCanvas()
+    vi.stubGlobal('navigator', {
+      share: vi.fn().mockRejectedValue(new Error('x')),
+      clipboard: { writeText: vi.fn().mockRejectedValue(new Error('y')) },
+    })
+    expect(await shareDailyResult(base)).toBe('failed')
+  })
+
+  test('a cancelled native share does not fall through to the clipboard', async () => {
+    noCanvas()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', {
+      share: vi.fn().mockRejectedValue(Object.assign(new DOMException('cancel', 'AbortError'))),
+      clipboard: { writeText },
+    })
+    expect(await shareDailyResult(base)).toBe('failed')
+    expect(writeText).not.toHaveBeenCalled()
+  })
 })

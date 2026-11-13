@@ -38,6 +38,16 @@ test('shows the streak copy and dismisses without a remount', () => {
   vi.useRealTimers()
 })
 
+test('re-renders in the new language when the language switches', () => {
+  recordStreakMilestone(4)
+  render(<NudgeBanner />)
+  expect(screen.getByText(/4-day streak/)).toBeInTheDocument()
+  act(() => setLang('zh-Hans'))
+  expect(screen.queryByText(/4-day streak/)).toBeNull()
+  expect(screen.getByText(/连续 4 天/)).toBeInTheDocument()
+  setLang('en')
+})
+
 test('dismissing streak reveals the pending win banner', () => {
   vi.useFakeTimers()
   recordWin()
