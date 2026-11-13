@@ -364,6 +364,7 @@
   "rank.mastermind": "谋略大师",
   "rank.legend": "传奇",
   "credits.title": "积分",
+  "credits.profile": "个人资料",
   "credits.lifetime": "累计积分",
   "credits.today": "今日",
   "credits.toNext": "还差 {n} 分升级为{title}",

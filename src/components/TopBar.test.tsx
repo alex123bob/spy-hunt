@@ -43,6 +43,11 @@ test('the register link opens the modal', () => {
   expect(screen.getByRole('tab', { name: 'Register' })).toBeInTheDocument()
 })
 
+test('the profile link is reachable for a guest', () => {
+  render(<TopBar />)
+  expect(screen.getByRole('link', { name: 'Profile' })).toHaveAttribute('href', '/me')
+})
+
 test('the clan link shows only when signed in', () => {
   const { unmount } = render(<TopBar />)
   expect(screen.queryByRole('link', { name: 'Clan' })).toBeNull()

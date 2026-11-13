@@ -11,6 +11,11 @@ test('renders the hero emoji with an accessible title', () => {
   expect(el).toHaveAttribute('aria-label')
 })
 
+test('renders nothing for rank 0 (Rookie)', () => {
+  const { container } = render(<RankBadge rank={0} />)
+  expect(container).toBeEmptyDOMElement()
+})
+
 test('renders nothing without a rank', () => {
   const { container } = render(<><RankBadge rank={null} /><RankBadge /></>)
   expect(container).toBeEmptyDOMElement()

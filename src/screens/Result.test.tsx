@@ -160,16 +160,15 @@ test('words are readable from the first render', () => {
 describe('credits and ranks', () => {
   test('rank badge only for players with a rank', async () => {
     const s = finished()
-    s.players[0] = { ...s.players[0], rank: 0 }
+    s.players[0] = { ...s.players[0], rank: 2 }
+    s.players[1] = { ...s.players[1], rank: 0 }
     view(s)
     const list = screen.getByText('Everyone').closest('section')!
     expect(within(list).getAllByRole('img').filter((e) => e.className === 'rank-badge')).toHaveLength(1)
   })
 
   test('shows credits earned for the viewer when > 0', async () => {
-    const { getSession } = await import('../state/session')
-    const id = getSession().playerId
-    view({ ...finished(), credits: { [id]: 12, other: 5 } })
+    view({ ...finished(), credits: { '1': 12, '0': 5 } })
     expect(screen.getByTestId('credits-earned')).toHaveTextContent('+12 credits')
   })
 

@@ -364,6 +364,7 @@
   "rank.mastermind": "Mastermind",
   "rank.legend": "Legend",
   "credits.title": "Credits",
+  "credits.profile": "Profile",
   "credits.lifetime": "Total credits",
   "credits.today": "Today",
   "credits.toNext": "{n} to {title}",

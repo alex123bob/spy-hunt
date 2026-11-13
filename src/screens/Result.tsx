@@ -7,7 +7,6 @@ import { ClanTag } from '../components/ClanTag'
 import { HeroCard } from '../components/HeroCard'
 import { RankBadge } from '../components/RankBadge'
 import { getCredits } from '../credits/api'
-import { getSession } from '../state/session'
 import { Confetti } from '../components/Confetti'
 import { FlipCard } from '../components/FlipCard'
 import { Toast } from '../components/Toast'
@@ -33,7 +32,7 @@ export function Result({ state }: { state: Snapshot }) {
     getCredits().then((s) => { if (live) setSummary(s) }).catch(() => {})
     return () => { live = false }
   }, [])
-  const earned = state.credits?.[getSession().playerId] ?? 0
+  const earned = state.credits?.[String(state.me.seat)] ?? 0
   useEffect(() => {
     if (info.outcome === 'won') recordWin(`${state.code}:${state.game_no}`)
   }, [])
