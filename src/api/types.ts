@@ -170,7 +170,7 @@ export interface DailyResult {
   credit_parts?: CreditPart[]
 }
 
-export interface Account { email: string | null }
+export interface Account { email: string | null; preferred_lang?: Lang | null }
 
 export type Frame = 'none' | 'leaf' | 'ribbon' | 'star' | 'gold' | 'crown'
 export interface Avatar { emoji: string; color: string; frame?: Frame }

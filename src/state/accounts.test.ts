@@ -1,6 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { authHeaders, setCredentials } from '../api/client'
-import { getAccount, login, logout, register, useAccount } from './accounts'
+import { getLang, setLang } from '../i18n'
+import { getAccount, login, logout, patchMyLang, register, useAccount } from './accounts'
 import { getCachedEmail, getSession, resetSessionForTests } from './session'
 
 function reply(body: unknown, status = 200) {
@@ -122,4 +123,46 @@ test('login and register remember the email; logout forgets it', async () => {
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply({ ok: true }))
   await logout()
   expect(getCachedEmail()).toBeNull()
+})
+
+test('login applies the account preferred_lang immediately', async () => {
+  setLang('en')
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    reply({ player_id: 'p9', token: 'tok9', email: 'a@b.com', preferred_lang: 'zh-Hans' }),
+  )
+  await login('a@b.com', 'longenough')
+  expect(getLang()).toBe('zh-Hans')
+})
+
+test('login leaves the language unchanged when preferred_lang is null', async () => {
+  setLang('en')
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    reply({ player_id: 'p9', token: 'tok9', email: 'a@b.com', preferred_lang: null }),
+  )
+  await login('a@b.com', 'longenough')
+  expect(getLang()).toBe('en')
+})
+
+test('patchMyLang sends PATCH /me when a session exists', async () => {
+  setCredentials({ playerId: 'p1', token: 't1' })
+  localStorage.setItem('spy-hunt.session', JSON.stringify({ playerId: 'p1', token: 't1' }))
+  resetSessionForTests()
+  const f = vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply({ preferred_lang: 'zh-Hans' }))
+  await patchMyLang('zh-Hans')
+  expect(String(f.mock.calls[0][0])).toMatch(/\/me$/)
+  expect(JSON.parse(String(f.mock.calls[0][1]?.body))).toEqual({ lang: 'zh-Hans' })
+})
+
+test('patchMyLang is a no-op without a session', async () => {
+  const f = vi.spyOn(globalThis, 'fetch')
+  await patchMyLang('zh-Hans')
+  expect(f).not.toHaveBeenCalled()
+})
+
+test('patchMyLang swallows request errors', async () => {
+  setCredentials({ playerId: 'p1', token: 't1' })
+  localStorage.setItem('spy-hunt.session', JSON.stringify({ playerId: 'p1', token: 't1' }))
+  resetSessionForTests()
+  vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('down'))
+  await expect(patchMyLang('zh-Hans')).resolves.toBeUndefined()
 })
