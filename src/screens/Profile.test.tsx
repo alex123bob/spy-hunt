@@ -67,6 +67,6 @@ test('shows recent games and links to the detail screen', async () => {
     { room_id: 'r1', game_no: 1, finished_at: 0, winner: 'civilians', your_role: 'civilian', won: true, credits_earned: 20 },
   ])
   render(tree)
-  const link = await screen.findByRole('link', { name: new RegExp(t('profile.gameOutcome.won', { credits: 20 })) })
+  const link = await screen.findByRole('link', { name: t('profile.gameOutcome.won', { credits: 20 }) })
   expect(link).toHaveAttribute('href', '/games/r1/1')
 })
