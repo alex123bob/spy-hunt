@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useInRouterContext } from 'react-router-dom'
 import { t } from '../i18n'
 
 export function AccountMenu({ email, onLogout }: { email: string; onLogout: () => void }) {
   const [open, setOpen] = useState(false)
   const root = useRef<HTMLDivElement>(null)
-  const inRouter = useInRouterContext()
   const trigger = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -29,7 +27,6 @@ export function AccountMenu({ email, onLogout }: { email: string; onLogout: () =
       {open && (
         <div className="account-pop">
           <span className="wrap">{email}</span>
-          {inRouter && <Link className="btn secondary" to="/me" onClick={() => setOpen(false)}>{t('credits.title')}</Link>}
           <button type="button" className="btn secondary" onClick={() => { setOpen(false); onLogout() }}>{t('auth.logout')}</button>
         </div>
       )}
