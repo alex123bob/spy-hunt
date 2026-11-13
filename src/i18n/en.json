@@ -356,5 +356,17 @@
   "error.code.bad_badge": "Pick one of the badges.",
   "clan.badgeLabel": "Clan: {name}",
   "clan.nameHint": "3 to 20 characters.",
-  "clan.nameRule": "Clan names are 3 to 20 characters."
+  "clan.nameRule": "Clan names are 3 to 20 characters.",
+  "rank.rookie": "Rookie",
+  "rank.sleuth": "Sleuth",
+  "rank.hunter": "Spy Hunter",
+  "rank.senior": "Senior Hunter",
+  "rank.mastermind": "Mastermind",
+  "rank.legend": "Legend",
+  "credits.title": "Credits",
+  "credits.lifetime": "Total credits",
+  "credits.today": "Today",
+  "credits.toNext": "{n} to {title}",
+  "credits.earned": "+{n} credits",
+  "credits.max": "Top rank reached!"
 }

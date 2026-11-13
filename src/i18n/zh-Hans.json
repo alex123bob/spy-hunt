@@ -356,5 +356,17 @@
   "error.code.bad_badge": "请选择一个徽章。",
   "clan.badgeLabel": "战队：{name}",
   "clan.nameHint": "3 到 20 个字符。",
-  "clan.nameRule": "战队名称需为 3 到 20 个字符。"
+  "clan.nameRule": "战队名称需为 3 到 20 个字符。",
+  "rank.rookie": "新手",
+  "rank.sleuth": "侦探",
+  "rank.hunter": "间谍猎人",
+  "rank.senior": "资深猎人",
+  "rank.mastermind": "谋略大师",
+  "rank.legend": "传奇",
+  "credits.title": "积分",
+  "credits.lifetime": "累计积分",
+  "credits.today": "今日",
+  "credits.toNext": "还差 {n} 分升级为{title}",
+  "credits.earned": "+{n} 积分",
+  "credits.max": "已达最高等级！"
 }
