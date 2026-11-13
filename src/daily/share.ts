@@ -19,6 +19,8 @@ export interface ShareTile {
   color: '--sun' | '--sky' | '--pink'
 }
 
+export type CardFile = { model: ShareCardModel; text: string; filename: string }
+
 export interface ShareCardModel {
   title: string
   puzzle: string
@@ -94,11 +96,16 @@ function rounded(ctx: CanvasRenderingContext2D, x: number, y: number, w: number,
   ctx.roundRect(x, y, w, h, r)
 }
 
+/** Draw the daily puzzle's share card. */
+export function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): Promise<void> {
+  return drawCard(canvas, shareCardModel(r))
+}
+
 /**
- * Draw the 1080×1080 cartoon share card onto `canvas`. Pure drawing from the model;
- * `qr` is an optional pre-rendered QR image. Safe to call only in a browser.
+ * Draw a 1080×1080 cartoon share card from `m` onto `canvas` (daily or room result).
+ * Safe to call only in a browser; a no-op where canvas has no 2D context.
  */
-export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): Promise<void> {
+export async function drawCard(canvas: HTMLCanvasElement, m: ShareCardModel): Promise<void> {
   const S = 1080
   canvas.width = S
   canvas.height = S
@@ -109,7 +116,6 @@ export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): P
     // environments without canvas (e.g. jsdom) — nothing to draw
   }
   if (!ctx) return
-  const m = shareCardModel(r)
   const c = (name: string) => token(name, TOKEN_FALLBACK[name] ?? '#000')
   const ink = c('--ink')
   const font = (px: number, weight = 700) => `${weight} ${px}px 'Fredoka', 'PingFang SC', system-ui, sans-serif`
@@ -195,7 +201,9 @@ export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): P
     ctx.fillStyle = ink
     ctx.font = font(26, 600)
     ctx.fillText(tile.label, x + tW / 2, statY + 36)
-    ctx.font = font(56)
+    let px = 56
+    ctx.font = font(px)
+    while (px > 28 && ctx.measureText(tile.value).width > tW - 20) { px -= 4; ctx.font = font(px) }
     ctx.fillText(tile.value, x + tW / 2, statY + 88)
   })
 
@@ -253,29 +261,28 @@ export async function shareResult(text: string): Promise<ShareOutcome> {
 }
 
 /** Build the PNG card file, or null if canvas/image isn't available. */
-async function cardFile(r: ShareInput): Promise<File | null> {
+async function cardFile(m: ShareCardModel, filename: string): Promise<File | null> {
   if (typeof document === 'undefined') return null
   try {
     const canvas = document.createElement('canvas')
-    await drawShareCard(canvas, r)
+    await drawCard(canvas, m)
     const blob = await canvasToBlob(canvas)
-    return blob ? new File([blob], `spy-hunter-${r.number}.png`, { type: 'image/png' }) : null
+    return blob ? new File([blob], filename, { type: 'image/png' }) : null
   } catch {
     return null
   }
 }
 
 /**
- * Share the daily result. Prefers a cartoon PNG card via the native share sheet; falls back to
- * sharing/copying the plain text so it always does something useful. A user-cancelled native
- * share returns 'failed' and does not then paste to the clipboard.
+ * Share a cartoon PNG card via the native share sheet; falls back to sharing/copying the plain
+ * text so it always does something useful. A user-cancelled native share returns 'failed' and
+ * does not then paste to the clipboard.
  */
-export async function shareDailyResult(r: ShareInput): Promise<ShareOutcome> {
-  const text = shareText(r)
+export async function shareCard({ model, text, filename }: CardFile): Promise<ShareOutcome> {
   const nav = typeof navigator !== 'undefined' ? navigator : undefined
 
   if (nav?.share) {
-    const file = await cardFile(r)
+    const file = await cardFile(model, filename)
     const payload = file && (!nav.canShare || nav.canShare({ files: [file] }))
       ? { files: [file], text }
       : { text }
@@ -294,4 +301,9 @@ export async function shareDailyResult(r: ShareInput): Promise<ShareOutcome> {
   } catch {
     return 'failed'
   }
+}
+
+/** Share the daily result card. */
+export function shareDailyResult(r: ShareInput): Promise<ShareOutcome> {
+  return shareCard({ model: shareCardModel(r), text: shareText(r), filename: `spy-hunter-${r.number}.png` })
 }

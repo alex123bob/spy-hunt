@@ -2,12 +2,12 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Result } from './Result'
 import type { Role, Snapshot } from '../api/types'
-import { shareResult } from '../daily/share'
+import { shareCard } from '../daily/share'
 import { setLang } from '../i18n'
 import { recordWin } from '../state/nudges'
 import { player, snap } from '../test/fixtures'
 
-vi.mock('../daily/share', () => ({ shareResult: vi.fn() }))
+vi.mock('../daily/share', () => ({ shareCard: vi.fn(), drawCard: vi.fn() }))
 vi.mock('../state/nudges', () => ({ recordWin: vi.fn() }))
 
 const WORDS = { civilian: { en: 'piano', 'zh-Hans': '钢琴' }, spy: { en: 'organ', 'zh-Hans': '风琴' } }
@@ -32,7 +32,7 @@ const view = (s: Snapshot) => render(<MemoryRouter><Result state={s} /></MemoryR
 
 beforeEach(() => {
   setLang('en')
-  vi.mocked(shareResult).mockReset()
+  vi.mocked(shareCard).mockReset()
   vi.mocked(recordWin).mockClear()
 })
 
@@ -72,24 +72,25 @@ test('two spies use the plural heading', () => {
   expect(within(screen.getByTestId('spy-panel')).getByText('The spies')).toBeInTheDocument()
 })
 
-test('share preview shows the card text', () => {
+test('shows the image share card', () => {
   view(finished())
-  expect(screen.getByTestId('share-preview').textContent).toBe(
-    `Spy Hunt 🕵️ Civilians won in round 2\nSpy: Finn (organ) · You: civilian ✅\n${window.location.origin}/`,
-  )
+  expect(screen.getByTestId('share-card')).toBeInTheDocument()
   expect(screen.getByText('Rounds played: 2')).toBeInTheDocument()
 })
 
 test('share button reports Copied', async () => {
-  vi.mocked(shareResult).mockResolvedValue('copied')
+  vi.mocked(shareCard).mockResolvedValue('copied')
   view(finished())
   fireEvent.click(screen.getByRole('button', { name: 'Share' }))
   expect(await screen.findByText('Copied')).toBeInTheDocument()
-  expect(shareResult).toHaveBeenCalledWith(screen.getByTestId('share-preview').textContent)
+  const arg = vi.mocked(shareCard).mock.calls[0][0]
+  expect(arg.text).toBe(`Spy Hunt 🕵️ Civilians won in round 2\nSpy: Finn (organ) · You: civilian ✅\n${window.location.origin}/`)
+  expect(arg.model.verdict).toBe('We won!')
+  expect(arg.filename).toMatch(/\.png$/)
 })
 
 test('share failure shows a message instead of throwing', async () => {
-  vi.mocked(shareResult).mockResolvedValue('failed')
+  vi.mocked(shareCard).mockResolvedValue('failed')
   view(finished())
   fireEvent.click(screen.getByRole('button', { name: 'Share' }))
   expect(await screen.findByText('Could not share.')).toBeInTheDocument()

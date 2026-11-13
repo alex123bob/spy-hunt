@@ -1,4 +1,4 @@
-import { resultInfo, resultShareText } from './result'
+import { resultInfo, resultShareText, roomCardModel } from './result'
 import type { Role, Snapshot } from '../api/types'
 import { setLang } from '../i18n'
 import { player, snap } from '../test/fixtures'
@@ -92,4 +92,35 @@ test('Chinese share text uses Chinese copy', () => {
   expect(text).toContain('✅')
   expect(text).toContain('风琴')
   expect(text).not.toContain('won')
+})
+
+describe('roomCardModel', () => {
+  const opts = { url: 'https://x/', earned: 30, rankIndex: 2 }
+  test('a win reads as a win with role, rounds and credits tiles', () => {
+    const s = finished()
+    const m = roomCardModel(s, resultInfo(s, 'en'), opts)
+    expect(m.solved).toBe(true)
+    expect(m.verdict).toBe('We won!')
+    expect(m.puzzle).toBe('Civilians win')
+    expect(m.tiles.map((x) => x.value)).toEqual(['Civilian', '2', '+30'])
+    expect(m.url).toBe('https://x/')
+  })
+  test('a loss reads as outplayed', () => {
+    const s = finished({ winner: 'spies' })
+    const m = roomCardModel(s, resultInfo(s, 'en'), opts)
+    expect(m.solved).toBe(false)
+    expect(m.verdict).toBe('Got outplayed')
+    expect(m.puzzle).toBe('Spies win')
+  })
+  test('a winning spy gets the cool mascot', () => {
+    const s = finished({ me: 'spy', winner: 'spies' })
+    expect(roomCardModel(s, resultInfo(s, 'en'), opts).mascot).toBe('😎')
+  })
+  test('no rank yet falls back to the first rank; Chinese copy follows the language', () => {
+    setLang('zh-Hans')
+    const s = finished()
+    const m = roomCardModel(s, resultInfo(s, 'zh-Hans'), { url: 'u', earned: 0 })
+    expect(m.verdict).toBe('赢啦！')
+    expect(m.tiles[0].value).toBe('平民')
+  })
 })

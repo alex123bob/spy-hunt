@@ -1,5 +1,7 @@
 import type { Lang, Role, Snapshot } from '../api/types'
 import { t } from '../i18n'
+import type { ShareCardModel } from '../daily/share'
+import { rankByIndex, rankTitleKey } from './rank'
 
 export type Outcome = 'won' | 'lost' | 'ended'
 
@@ -37,4 +39,29 @@ export function resultShareText(state: Snapshot, info: ResultInfo, url: string):
   const role = info.myRole ? t(`role.${info.myRole}`).toLowerCase() : ''
   const mark = info.outcome === 'won' ? '✅' : '❌'
   return `${head}\n${t('result.cardLine', { spies, role, mark })}\n${url}`
+}
+
+/** Image share card for a finished room game — same look as the daily card, room content. */
+export function roomCardModel(
+  state: Snapshot, info: ResultInfo, opts: { url: string; earned: number; rankIndex?: number },
+): ShareCardModel {
+  const won = info.outcome === 'won'
+  const rank = opts.rankIndex ?? 0
+  return {
+    title: t('app.title'),
+    puzzle: t(state.winner === 'spies' ? 'result.sideSpies' : 'result.sideCivilians'),
+    solved: won,
+    verdict: won ? t('share.roomWon') : t('share.roomLost'),
+    mascot: won ? (info.myRole === 'spy' ? '😎' : '🕵️') : '🫥',
+    hero: rankByIndex(rank).hero,
+    rankTitle: t(rankTitleKey(rank)),
+    tiles: [
+      { label: t('share.role'), value: info.myRole ? t(`role.${info.myRole}`) : '—', color: '--sky' },
+      { label: t('share.rounds'), value: String(info.rounds), color: '--pink' },
+      { label: t('share.credits'), value: `+${opts.earned}`, color: '--sun' },
+    ],
+    badge: null,
+    scanHint: t('share.scanToRoom'),
+    url: opts.url,
+  }
 }
