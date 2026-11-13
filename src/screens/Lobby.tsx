@@ -11,6 +11,7 @@ import { LangPicker } from '../components/LangPicker'
 import { PlayerChip } from '../components/PlayerChip'
 import { QrCode } from '../components/QrCode'
 import { setLang, t, useLang } from '../i18n'
+import { patchMyLang } from '../state/accounts'
 import { setSessionLang } from '../state/session'
 
 export function Lobby({ state }: { state: Snapshot }) {
@@ -50,6 +51,7 @@ export function Lobby({ state }: { state: Snapshot }) {
     setLang(l)
     setSessionLang(l)
     void call('PATCH', '/me', { lang: l })
+    void patchMyLang(l)
   }
 
   const copy = async () => {

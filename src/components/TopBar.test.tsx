@@ -4,12 +4,12 @@ import { TopBar as Bar } from './TopBar'
 
 const TopBar = () => <MemoryRouter><Bar /></MemoryRouter>
 import { setLang } from '../i18n'
-import { logout, useAccount } from '../state/accounts'
+import { logout, patchMyLang, useAccount } from '../state/accounts'
 
 vi.mock('../state/accounts', () => ({
-  useAccount: vi.fn(), logout: vi.fn().mockResolvedValue(undefined), register: vi.fn(), login: vi.fn(),
+  useAccount: vi.fn(), logout: vi.fn().mockResolvedValue(undefined), register: vi.fn(), login: vi.fn(), patchMyLang: vi.fn(),
 }))
-vi.mock('../state/session', () => ({ setSessionLang: vi.fn() }))
+vi.mock('../state/session', () => ({ setSessionLang: vi.fn(), getSession: () => ({ lang: 'en' }) }))
 
 const reload = vi.fn()
 beforeEach(() => {
@@ -66,4 +66,10 @@ test('the clan link shows only when signed in', () => {
   render(<TopBar />)
   fireEvent.click(screen.getByRole('button', { name: 'Account' }))
   expect(screen.getByRole('link', { name: 'Clan' })).toHaveAttribute('href', '/clan')
+})
+
+test('picking a language also syncs it to the account', () => {
+  render(<TopBar />)
+  fireEvent.click(screen.getByRole('radio', { name: '简体中文' }))
+  expect(patchMyLang).toHaveBeenCalledWith('zh-Hans')
 })

@@ -98,7 +98,7 @@ export function ensureGuest(): Promise<Session> {
   if (s.playerId && s.token) return Promise.resolve(s)
   if (!inflight) {
     setCredentials(null)
-    inflight = request<Guest>('POST', '/guests')
+    inflight = request<Guest>('POST', '/guests', { lang: getSession().lang })
       .then((g) => {
         setAccountSession({ playerId: g.player_id, token: g.token })
         return getSession()

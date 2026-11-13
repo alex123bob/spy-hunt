@@ -6,11 +6,13 @@ import { Countdown } from '../components/Countdown'
 import { setLang } from '../i18n'
 import { msg, player, snap } from '../test/fixtures'
 import { ApiError, request } from '../api/client'
+import { patchMyLang } from '../state/accounts'
 
 vi.mock('../api/client', async (orig) => {
   const m = await orig<typeof import('../api/client')>()
   return { ...m, request: vi.fn().mockResolvedValue({}) }
 })
+vi.mock('../state/accounts', () => ({ patchMyLang: vi.fn() }))
 vi.mock('../state/session', () => ({ setSessionLang: vi.fn(), getSession: () => ({ name: 'x', lang: 'en' }) }))
 
 beforeEach(() => {
@@ -200,4 +202,10 @@ test('a non-400 statement error shows the mapped text, not the server text', asy
   fireEvent.click(screen.getByRole('button', { name: 'Send' }))
   expect(await screen.findByText('You are not in this room.')).toBeInTheDocument()
   expect(screen.queryByText('English server text')).toBeNull()
+})
+
+test('Table language pick also syncs to the account', () => {
+  render(<Table state={snap({ players: [player(0), player(1), player(2), player(3)] })} />)
+  fireEvent.click(screen.getByRole('radio', { name: '简体中文' }))
+  expect(patchMyLang).toHaveBeenCalledWith('zh-Hans')
 })

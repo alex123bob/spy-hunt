@@ -67,3 +67,12 @@ test('identity survives a reload when only sessionStorage works', async () => {
   vi.unstubAllGlobals()
   sessionStorage.clear()
 })
+
+test('ensureGuest tells the server the current language when creating a guest', async () => {
+  localStorage.clear()
+  localStorage.setItem('spy-hunt.session', JSON.stringify({ lang: 'zh-Hans' }))
+  resetSessionForTests()
+  const f = guestFetch()
+  await ensureGuest()
+  expect(JSON.parse(String(f.mock.calls[0][1]?.body))).toEqual({ lang: 'zh-Hans' })
+})

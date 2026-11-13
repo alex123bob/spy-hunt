@@ -11,6 +11,8 @@ vi.mock('../api/client', async (orig) => {
 import { request } from '../api/client'
 vi.mock('../bots/api', () => ({ listMyBots: vi.fn() }))
 import { listMyBots } from '../bots/api'
+vi.mock('../state/accounts', async (orig) => ({ ...(await orig<typeof import('../state/accounts')>()), patchMyLang: vi.fn() }))
+import { patchMyLang } from '../state/accounts'
 
 function snap(isHost: boolean): Snapshot {
   return {
@@ -160,4 +162,10 @@ test('a failing call shows mapped text, not the server text', async () => {
   expect(alert).toHaveTextContent('You already have a bot in this room.')
   expect(alert).not.toHaveTextContent('English server text')
   expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add' })
+})
+
+test('picking a language also syncs it to the account', () => {
+  render(<Lobby state={snap(false)} />)
+  fireEvent.click(within(screen.getByRole('radiogroup', { name: 'Your language' })).getByRole('radio', { name: '简体中文' }))
+  expect(patchMyLang).toHaveBeenCalledWith('zh-Hans')
 })

@@ -7,6 +7,7 @@ import { Countdown } from '../components/Countdown'
 import { LangPicker } from '../components/LangPicker'
 import { StatementBubble } from '../components/StatementBubble'
 import { setLang, t, useLang } from '../i18n'
+import { patchMyLang } from '../state/accounts'
 import { setSessionLang } from '../state/session'
 import { WordCard } from './WordCard'
 
@@ -45,6 +46,7 @@ export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot
     setLang(l)
     setSessionLang(l)
     void request('PATCH', `/rooms/${state.code}/me`, { lang: l }).catch(() => {})
+    void patchMyLang(l)
   }
 
   const send = async () => {
