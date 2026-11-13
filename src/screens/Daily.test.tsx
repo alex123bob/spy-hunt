@@ -31,7 +31,7 @@ const state = (stage: 'spy' | 'word' | 'done', tries = 0, wrong: number[] = []):
   streak: 3, best: 3, played_today: stage === 'done',
 })
 const result: DailyResult = {
-  solved: true, tries: 2, word_correct: true, elapsed_ms: 72000, score: 120,
+  solved: true, tries: 2, word_correct: true, elapsed_ms: 72000, score: 95,
   answer: { spy_seat: 2, spy_word: { en: 'organ', 'zh-Hans': '风琴' }, civilian_word: puzzle.civilian_word },
   stats: { players: 40, solved_pct: 62 },
   streak: 3, best: 3, played_today: true,
@@ -119,10 +119,36 @@ test('the result shows score, stats, streak and the share preview', async () => 
   render(tree)
   expect(await screen.findByText('You found the spy!')).toBeInTheDocument()
   expect(screen.getByText(/The spy was Pip/)).toBeInTheDocument()
-  expect(screen.getByText('120')).toBeInTheDocument()
+  expect(screen.getByText('95')).toBeInTheDocument()
+  expect(screen.getByText('✅ You got their word too.')).toBeInTheDocument()
+  expect(screen.getByText('60 found on try 2 + 15 speed + 20 word')).toBeInTheDocument()
   expect(screen.getByText('62% of 40 players found the spy')).toBeInTheDocument()
   expect(screen.getByText('Streak 3 🔥')).toBeInTheDocument()
   expect(screen.getByTestId('share-card')).toBeInTheDocument()
+})
+
+test('a find with a wrong word says so on the result', async () => {
+  vi.mocked(getDaily).mockResolvedValue(state('done', 2))
+  vi.mocked(getResult).mockResolvedValue({ ...result, word_correct: false, score: 75 })
+  render(tree)
+  expect(await screen.findByText("❌ That wasn't their word.")).toBeInTheDocument()
+  expect(screen.getByText('60 found on try 2 + 15 speed')).toBeInTheDocument()
+})
+
+test('a find with the word skipped says so on the result', async () => {
+  vi.mocked(getDaily).mockResolvedValue(state('done', 2))
+  vi.mocked(getResult).mockResolvedValue({ ...result, word_correct: null, score: 60 })
+  render(tree)
+  expect(await screen.findByText('You skipped the word guess.')).toBeInTheDocument()
+})
+
+test('a miss shows no word line and no breakdown', async () => {
+  vi.mocked(getDaily).mockResolvedValue(state('done', 2))
+  vi.mocked(getResult).mockResolvedValue({ ...result, solved: false, word_correct: null, score: 0 })
+  render(tree)
+  expect(await screen.findByText('The spy got away.')).toBeInTheDocument()
+  expect(screen.queryByText(/their word/)).toBeNull()
+  expect(screen.queryByText(/speed/)).toBeNull()
 })
 
 test('the share button reports copied', async () => {

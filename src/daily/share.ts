@@ -44,9 +44,10 @@ export function clock(ms: number): string {
 export function shareCardModel(r: ShareInput): ShareCardModel {
   const time = clock(r.elapsedMs)
   // a first-try find, or nailing the spy's word, earns a little ribbon
+  const word = r.solved && r.wordCorrect === true
   const badge = r.solved && r.tries === 1
-    ? t('share.firstTry')
-    : r.solved && r.wordCorrect === true
+    ? t(word ? 'share.firstTryWord' : 'share.firstTry')
+    : word
       ? t('share.wordNailed')
       : null
   return {
@@ -70,7 +71,7 @@ export function shareCardModel(r: ShareInput): ShareCardModel {
 
 /** Plain, readable, localized fallback text (for clipboard or share targets that take no image). */
 export function shareText(r: ShareInput): string {
-  const key = r.solved ? 'share.textFound' : 'share.textMissed'
+  const key = !r.solved ? 'share.textMissed' : r.wordCorrect === true ? 'share.textFoundWord' : 'share.textFound'
   return `${t(key, { n: r.number, time: clock(r.elapsedMs), streak: r.streak })}\n${r.url}`
 }
 
