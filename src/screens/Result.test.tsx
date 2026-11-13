@@ -156,3 +156,24 @@ test('words are readable from the first render', () => {
   expect(text).toContain('piano')
   expect(text).toContain('organ')
 })
+
+describe('credits and ranks', () => {
+  test('rank badge only for players with a rank', async () => {
+    const s = finished()
+    s.players[0] = { ...s.players[0], rank: 2 }
+    s.players[1] = { ...s.players[1], rank: 0 }
+    view(s)
+    const list = screen.getByText('Everyone').closest('section')!
+    expect(within(list).getAllByRole('img').filter((e) => e.className === 'rank-badge')).toHaveLength(1)
+  })
+
+  test('shows credits earned for the viewer when > 0', async () => {
+    view({ ...finished(), credits: { '1': 12, '0': 5 } })
+    expect(screen.getByTestId('credits-earned')).toHaveTextContent('+12 credits')
+  })
+
+  test('no credits line when delta is absent', () => {
+    view(finished())
+    expect(screen.queryByTestId('credits-earned')).toBeNull()
+  })
+})

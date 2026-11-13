@@ -17,6 +17,14 @@ export interface Player {
   avatar?: Avatar | null
   bot_id?: string | null
   clan?: PlayerClan | null
+  rank?: number | null
+}
+
+export interface CreditSummary {
+  credits: number
+  today: number
+  rank: { index: number; key: string; min: number }
+  next: { key: string; min: number; remaining: number } | null
 }
 
 export interface Message {
@@ -73,6 +81,8 @@ export interface Snapshot {
   last_seq: number
   server_time: number
   words?: WordsByRole
+  // per-player credit deltas from the live game_over event (keyed by player_id)
+  credits?: Record<string, number>
   // client-side extras maintained by the reducer
   locked?: number[]
   reveal?: RevealInfo | null
@@ -143,6 +153,7 @@ export interface DailyResult {
   streak: number
   best: number
   played_today: boolean
+  credits_earned?: number
 }
 
 export interface Account { email: string | null }

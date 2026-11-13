@@ -28,6 +28,7 @@ export function TopBar() {
       <Link to="/" className="topbar-logo" aria-label={t('app.title')}><Logo /></Link>
       <div className="topbar-right">
         <LangPicker compact value={lang} onChange={pickLang} />
+        <Link className="pill" to="/me">{t('credits.profile')}</Link>
         {account.email ? (
           <>
             <Link className="pill" to="/clan">{t('clan.topbar')}</Link>

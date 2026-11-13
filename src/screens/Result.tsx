@@ -4,6 +4,9 @@ import { request } from '../api/client'
 import { LANGS, type Role } from '../api/types'
 import { Avatar } from '../components/Avatar'
 import { ClanTag } from '../components/ClanTag'
+import { HeroCard } from '../components/HeroCard'
+import { RankBadge } from '../components/RankBadge'
+import { getCredits } from '../credits/api'
 import { Confetti } from '../components/Confetti'
 import { FlipCard } from '../components/FlipCard'
 import { Toast } from '../components/Toast'
@@ -12,7 +15,7 @@ import { shareResult } from '../daily/share'
 import { resultInfo, resultShareText } from '../game/result'
 import { t, useLang } from '../i18n'
 import { recordWin } from '../state/nudges'
-import type { Snapshot } from '../api/types'
+import type { CreditSummary, Snapshot } from '../api/types'
 
 export function Result({ state }: { state: Snapshot }) {
   const lang = useLang()
@@ -23,6 +26,13 @@ export function Result({ state }: { state: Snapshot }) {
   const roles: Role[] = ['civilian', 'spy']
   const info = resultInfo(state, lang)
   const step = useStaged([300, 250])
+  const [summary, setSummary] = useState<CreditSummary | null>(null)
+  useEffect(() => {
+    let live = true
+    getCredits().then((s) => { if (live) setSummary(s) }).catch(() => {})
+    return () => { live = false }
+  }, [])
+  const earned = state.credits?.[String(state.me.seat)] ?? 0
   useEffect(() => {
     if (info.outcome === 'won') recordWin(`${state.code}:${state.game_no}`)
   }, [])
@@ -89,12 +99,14 @@ export function Result({ state }: { state: Snapshot }) {
         <div className="stagger everyone">
         {state.players.map((p, i) => (
           <div key={p.seat} className="row between" style={{ '--i': i } as React.CSSProperties}>
-            <span className="wrap"><Avatar player={p} /> {p.name} <ClanTag clan={p.clan} /></span>
+            <span className="wrap"><Avatar player={p} /> {p.name} <ClanTag clan={p.clan} /><RankBadge rank={p.rank} /></span>
             <span className={`role ${p.role ?? ''}`}>{p.role ? t(`role.${p.role}`) : ''}</span>
           </div>
         ))}
         </div>
       </section>
+      {earned > 0 && <p className="center big" data-testid="credits-earned">{t('credits.earned', { n: earned })}</p>}
+      <HeroCard summary={summary} />
       <p className="muted center">{t('result.rounds', { n: info.rounds })}</p>
       {card && (
         <>

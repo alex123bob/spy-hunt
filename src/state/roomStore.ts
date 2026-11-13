@@ -149,6 +149,7 @@ function apply(s: Snapshot, type: string, d: Data): Snapshot {
         current_speaker: null,
         winner: d.winner ?? null,
         words: d.words as WordsByRole,
+        credits: (d.credits as Record<string, number> | undefined) ?? undefined,
         players: s.players.map((p) => ({ ...p, role: roles.find((r) => r.seat === p.seat)?.role ?? p.role })),
       }
     }

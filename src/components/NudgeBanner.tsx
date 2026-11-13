@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { t } from '../i18n'
+import { t, useLang } from '../i18n'
 import { useAccount } from '../state/accounts'
 import { dismiss, pendingNudge, pendingStreak, subscribeNudges, type NudgeTrigger } from '../state/nudges'
 import { useReducedMotion } from '../motion/useReducedMotion'
@@ -8,6 +8,7 @@ const SPIN_MS = 300
 
 export function NudgeBanner() {
   const account = useAccount()
+  useLang() // re-render when the language changes so the copy follows it
   const [trigger, setTrigger] = useState<NudgeTrigger | null>(() => pendingNudge())
   const [closing, setClosing] = useState(false)
   const reducedMotion = useReducedMotion()

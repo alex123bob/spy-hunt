@@ -4,14 +4,15 @@ import { Daily } from './Daily'
 import { ApiError } from '../api/client'
 import type { DailyPuzzle, DailyResult, DailyState } from '../api/types'
 import { getDaily, getResult, guessSpy, guessWord } from '../daily/api'
-import { shareResult } from '../daily/share'
+import { shareDailyResult } from '../daily/share'
 import { setLang } from '../i18n'
 import { recordStreakMilestone } from '../state/nudges'
 import { msg } from '../test/fixtures'
 
 vi.mock('../daily/api', () => ({ getDaily: vi.fn(), guessSpy: vi.fn(), guessWord: vi.fn(), getResult: vi.fn() }))
+vi.mock('../credits/api', () => ({ getCredits: vi.fn().mockRejectedValue(new Error('offline')) }))
 vi.mock('../state/nudges', () => ({ recordStreakMilestone: vi.fn() }))
-vi.mock('../daily/share', async (orig) => ({ ...(await orig<typeof import('../daily/share')>()), shareResult: vi.fn() }))
+vi.mock('../daily/share', async (orig) => ({ ...(await orig<typeof import('../daily/share')>()), shareDailyResult: vi.fn() }))
 
 const NAMES = ['Milo', 'Juno', 'Pip', 'Nova', 'Remy']
 const puzzle: DailyPuzzle = {
@@ -43,7 +44,7 @@ beforeEach(() => {
   vi.mocked(guessSpy).mockReset()
   vi.mocked(guessWord).mockReset()
   vi.mocked(getResult).mockReset().mockResolvedValue(result)
-  vi.mocked(shareResult).mockReset()
+  vi.mocked(shareDailyResult).mockReset()
   vi.mocked(recordStreakMilestone).mockClear()
 })
 
@@ -121,14 +122,14 @@ test('the result shows score, stats, streak and the share preview', async () => 
   expect(screen.getByText('120')).toBeInTheDocument()
   expect(screen.getByText('62% of 40 players found the spy')).toBeInTheDocument()
   expect(screen.getByText('Streak 3 🔥')).toBeInTheDocument()
-  expect(screen.getByTestId('share-preview')).toHaveTextContent('Spy Hunter #12')
+  expect(screen.getByTestId('share-card')).toBeInTheDocument()
 })
 
 test('the share button reports copied', async () => {
   vi.mocked(getDaily).mockResolvedValue(state('done', 2))
-  vi.mocked(shareResult).mockResolvedValue('copied')
+  vi.mocked(shareDailyResult).mockResolvedValue('copied')
   render(tree)
-  fireEvent.click(await screen.findByRole('button', { name: 'Share' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Share my card' }))
   expect(await screen.findByText('Copied')).toBeInTheDocument()
 })
 
