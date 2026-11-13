@@ -183,3 +183,12 @@
 .hero-rank-5 { background: linear-gradient(135deg, var(--sun), var(--pink), var(--lilac), var(--sky), var(--sun)); box-shadow: 0 0 0 3px var(--sun), 0 0 0 6px var(--ink), 0 8px 0 var(--ink); }
 .hero-shine::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,.6) 50%, transparent 60%); transform: translateX(-100%); animation: hero-shine 3s ease-in-out infinite; pointer-events: none; }
 @keyframes hero-shine { to { transform: translateX(100%); } }
+
+.ladder { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ladder-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--paper); border: 2.5px solid var(--ink); border-radius: 18px; }
+.ladder-row.current { background: var(--sun); box-shadow: 0 4px 0 var(--ink); transform: rotate(-1deg); }
+.ladder-hero { width: 44px; height: 44px; display: grid; place-items: center; font-size: 26px; border: 2.5px solid var(--ink); border-radius: 14px; background: var(--sky); }
+.ladder-row:nth-child(2n) .ladder-hero { background: var(--pink); }
+.ladder-row:nth-child(3n) .ladder-hero { background: var(--mint); }
+.ladder-title { flex: 1; font-family: var(--font-display); font-weight: 600; font-size: 18px; }
+.ladder-min { font-weight: 800; }
