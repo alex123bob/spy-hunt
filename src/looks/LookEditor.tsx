@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Frame, Look, LooksCatalog } from '../api/types'
 import { Avatar } from '../components/Avatar'
-import { Toast } from '../components/Toast'
+import { useFlash } from '../components/useFlash'
 import { rankTitleKey } from '../game/rank'
 import { t } from '../i18n'
 import { getLooks, saveLook } from '../state/looks'
@@ -12,7 +12,7 @@ export function LookEditor({ name }: { name: string }) {
   const [cat, setCat] = useState<LooksCatalog | null>(null)
   const [draft, setDraft] = useState<Look | null>(null)
   const [busy, setBusy] = useState(false)
-  const [note, setNote] = useState('')
+  const saved = useFlash()
 
   useEffect(() => {
     let live = true
@@ -33,9 +33,9 @@ export function LookEditor({ name }: { name: string }) {
     try {
       const next = await saveLook(draft)
       setCat(next)
-      setNote(t('looks.saved'))
+      saved.flash(t('looks.saved'))
     } catch {
-      setNote(t('looks.failed'))
+      saved.flash(t('looks.failed'))
     } finally {
       setBusy(false)
     }
@@ -67,8 +67,8 @@ export function LookEditor({ name }: { name: string }) {
           </Pick>
         ))}
       </PickGroup>
-      <button type="button" className="btn primary" disabled={busy || !!same} onClick={save}>{t('looks.save')}</button>
-      <Toast text={note} />
+      <button ref={saved.ref} type="button" className="btn primary" disabled={busy || !!same} onClick={save}>{t('looks.save')}</button>
+      {saved.node}
     </section>
   )
 }

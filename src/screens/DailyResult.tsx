@@ -4,7 +4,7 @@ import type { CreditSummary, DailyPuzzle, DailyResult as Result } from '../api/t
 import { Confetti } from '../components/Confetti'
 import { HeroCard } from '../components/HeroCard'
 import { getCredits } from '../credits/api'
-import { Toast } from '../components/Toast'
+import { useFlash } from '../components/useFlash'
 import { drawShareCard, shareDailyResult, type ShareInput } from '../daily/share'
 import { t, useLang } from '../i18n'
 import { recordStreakMilestone } from '../state/nudges'
@@ -17,7 +17,7 @@ function clock(ms: number): string {
 export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: Result }) {
   const nav = useNavigate()
   const lang = useLang()
-  const [shareState, setShareState] = useState('')
+  const shared = useFlash()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [summary, setSummary] = useState<CreditSummary | null>(null)
   useEffect(() => {
@@ -40,7 +40,7 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
 
   const share = async () => {
     const r = await shareDailyResult(input)
-    setShareState(r === 'shared' ? t('daily.shared') : r === 'copied' ? t('daily.copied') : t('daily.shareFailed'))
+    shared.flash(r === 'shared' ? t('daily.shared') : r === 'copied' ? t('daily.copied') : t('daily.shareFailed'))
   }
 
   return (
@@ -61,8 +61,8 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
       <HeroCard summary={summary} />
       {(result.credits_earned ?? 0) > 0 && <p className="center">{t('credits.earned', { n: result.credits_earned ?? 0 })}</p>}
       <canvas ref={canvasRef} className="share-card" data-testid="share-card" role="img" aria-label={t('daily.title')} />
-      <button type="button" className="btn primary" onClick={share}>{t('daily.share')}</button>
-      <Toast text={shareState} />
+      <button ref={shared.ref} type="button" className="btn primary" onClick={share}>{t('daily.share')}</button>
+      {shared.node}
       <button type="button" className="btn" onClick={() => nav('/')}>{t('daily.playReal')}</button>
       <button type="button" className="btn" onClick={() => nav('/bots')}>{t('daily.dressUp')}</button>
     </main>

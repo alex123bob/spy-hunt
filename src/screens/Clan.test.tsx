@@ -230,7 +230,8 @@ test('copy code shows copied', async () => {
   vi.mocked(getMyClan).mockResolvedValue(memberOf(season()))
   render(tree)
   fireEvent.click(await screen.findByRole('button', { name: 'Copy code' }))
-  expect(await screen.findAllByText('Copied!')).not.toHaveLength(0)
+  expect(await screen.findByRole('status')).toHaveTextContent('Copied!')
+  expect(screen.getByRole('button', { name: 'Copy code' })).toBeInTheDocument()
   expect(writeText).toHaveBeenCalledWith('ABC123')
 })
 

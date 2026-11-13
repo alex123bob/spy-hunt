@@ -9,7 +9,7 @@ import { RankBadge } from '../components/RankBadge'
 import { getCredits } from '../credits/api'
 import { Confetti } from '../components/Confetti'
 import { FlipCard } from '../components/FlipCard'
-import { Toast } from '../components/Toast'
+import { useFlash } from '../components/useFlash'
 import { useStaged } from '../motion/useStaged'
 import { drawCard, shareCard } from '../daily/share'
 import { resultInfo, resultShareText, roomCardModel } from '../game/result'
@@ -19,7 +19,7 @@ import type { CreditSummary, Snapshot } from '../api/types'
 
 export function Result({ state }: { state: Snapshot }) {
   const lang = useLang()
-  const [shareState, setShareState] = useState('')
+  const shared = useFlash()
   const isHost = state.me.is_host
   const rematch = () => void request('POST', `/rooms/${state.code}/rematch`).catch(() => {})
   const leave = () => void request('POST', `/rooms/${state.code}/leave`).catch(() => {})
@@ -50,7 +50,7 @@ export function Result({ state }: { state: Snapshot }) {
     const r = await shareCard({
       model: model(), text: resultShareText(state, info, url), filename: `spy-hunt-${state.code}-${state.game_no}.png`,
     })
-    setShareState(r === 'shared' ? t('result.shared') : r === 'copied' ? t('result.copied') : t('result.shareFailed'))
+    shared.flash(r === 'shared' ? t('result.shared') : r === 'copied' ? t('result.copied') : t('result.shareFailed'))
   }
 
   return (
@@ -120,8 +120,8 @@ export function Result({ state }: { state: Snapshot }) {
       {shareable && (
         <>
           <canvas ref={canvasRef} className="share-card" data-testid="share-card" role="img" aria-label={t('result.title')} />
-          <button type="button" className="btn" onClick={share}>{t('result.share')}</button>
-          <Toast text={shareState} />
+          <button ref={shared.ref} type="button" className="btn" onClick={share}>{t('result.share')}</button>
+          {shared.node}
         </>
       )}
       {isHost ? (
