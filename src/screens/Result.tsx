@@ -19,7 +19,7 @@ import type { CreditSummary, Snapshot } from '../api/types'
 
 export function Result({ state }: { state: Snapshot }) {
   const lang = useLang()
-  const [shareState, setShareState] = useState('')
+  const [shareState, setShareState] = useState({ text: '', n: 0 })
   const isHost = state.me.is_host
   const rematch = () => void request('POST', `/rooms/${state.code}/rematch`).catch(() => {})
   const leave = () => void request('POST', `/rooms/${state.code}/leave`).catch(() => {})
@@ -50,7 +50,7 @@ export function Result({ state }: { state: Snapshot }) {
     const r = await shareCard({
       model: model(), text: resultShareText(state, info, url), filename: `spy-hunt-${state.code}-${state.game_no}.png`,
     })
-    setShareState(r === 'shared' ? t('result.shared') : r === 'copied' ? t('result.copied') : t('result.shareFailed'))
+    setShareState((s) => ({ text: r === 'shared' ? t('result.shared') : r === 'copied' ? t('result.copied') : t('result.shareFailed'), n: s.n + 1 }))
   }
 
   return (
@@ -121,7 +121,7 @@ export function Result({ state }: { state: Snapshot }) {
         <>
           <canvas ref={canvasRef} className="share-card" data-testid="share-card" role="img" aria-label={t('result.title')} />
           <button type="button" className="btn" onClick={share}>{t('result.share')}</button>
-          <Toast text={shareState} />
+          <Toast text={shareState.text} nonce={shareState.n} />
         </>
       )}
       {isHost ? (

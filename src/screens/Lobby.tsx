@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { request } from '../api/client'
 import { errorText } from '../api/errors'
 import type { BotCard, Lang, Snapshot } from '../api/types'
@@ -6,7 +6,7 @@ import { listMyBots } from '../bots/api'
 import { Avatar } from '../components/Avatar'
 import { WhyButton } from '../components/WhyButton'
 import { Loader } from '../components/Loader'
-import { Toast } from '../components/Toast'
+import { Toast, TOAST_MS } from '../components/Toast'
 import { LangPicker } from '../components/LangPicker'
 import { PlayerChip } from '../components/PlayerChip'
 import { QrCode } from '../components/QrCode'
@@ -17,6 +17,8 @@ export function Lobby({ state }: { state: Snapshot }) {
   const lang = useLang()
   const [err, setErr] = useState('')
   const [copied, setCopied] = useState(false)
+  const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(copyTimer.current), [])
   const [myBots, setMyBots] = useState<BotCard[]>([])
   const [picking, setPicking] = useState(false)
   const code = state.code
@@ -54,7 +56,8 @@ export function Lobby({ state }: { state: Snapshot }) {
     try {
       await navigator.clipboard.writeText(link)
       setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
+      clearTimeout(copyTimer.current)
+      copyTimer.current = setTimeout(() => setCopied(false), TOAST_MS)
     } catch {
       // clipboard blocked: the link is selectable text
     }

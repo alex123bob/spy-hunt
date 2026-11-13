@@ -12,7 +12,7 @@ export function LookEditor({ name }: { name: string }) {
   const [cat, setCat] = useState<LooksCatalog | null>(null)
   const [draft, setDraft] = useState<Look | null>(null)
   const [busy, setBusy] = useState(false)
-  const [note, setNote] = useState('')
+  const [note, setNote] = useState({ text: '', n: 0 })
 
   useEffect(() => {
     let live = true
@@ -33,9 +33,9 @@ export function LookEditor({ name }: { name: string }) {
     try {
       const next = await saveLook(draft)
       setCat(next)
-      setNote(t('looks.saved'))
+      setNote((s) => ({ text: t('looks.saved'), n: s.n + 1 }))
     } catch {
-      setNote(t('looks.failed'))
+      setNote((s) => ({ text: t('looks.failed'), n: s.n + 1 }))
     } finally {
       setBusy(false)
     }
@@ -68,7 +68,7 @@ export function LookEditor({ name }: { name: string }) {
         ))}
       </PickGroup>
       <button type="button" className="btn primary" disabled={busy || !!same} onClick={save}>{t('looks.save')}</button>
-      <Toast text={note} />
+      <Toast text={note.text} nonce={note.n} />
     </section>
   )
 }

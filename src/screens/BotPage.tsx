@@ -21,7 +21,7 @@ export function BotPage() {
   const [count, setCount] = useState(0)
   const [known, setKnown] = useState(false)
   const navigate = useNavigate()
-  const [shareState, setShareState] = useState('')
+  const [shareState, setShareState] = useState({ text: '', n: 0 })
 
   useEffect(() => {
     let live = true
@@ -51,7 +51,7 @@ export function BotPage() {
 
   const share = async () => {
     const r = await shareResult(window.location.href)
-    setShareState(r === 'shared' ? t('result.shared') : r === 'copied' ? t('result.copied') : t('result.shareFailed'))
+    setShareState((s) => ({ text: r === 'shared' ? t('result.shared') : r === 'copied' ? t('result.copied') : t('result.shareFailed'), n: s.n + 1 }))
   }
 
   if (load.kind === 'loading') return <main className="screen"><Loader label={t('bots.loading')} /></main>
@@ -68,7 +68,7 @@ export function BotPage() {
     <main className="screen">
       <BotCardView bot={load.bot} float />
       <button type="button" className="btn" onClick={share}>{t('bots.copyLink')}</button>
-      <Toast text={shareState} />
+      <Toast text={shareState.text} nonce={shareState.n} />
       {known && !mine && load.bot.remixable && (count >= 3
         ? <p className="muted center">{t('bots.limit')}</p>
         : <button type="button" className="btn primary" onClick={() => navigate(`/bots?remix=${load.bot.id}`)}>{t('bots.remix')}</button>)}

@@ -7,7 +7,7 @@ import { t, useLang } from '../i18n'
 import { AuthModal } from '../components/AuthModal'
 import { EmptyState } from '../components/EmptyState'
 import { Loader } from '../components/Loader'
-import { Toast } from '../components/Toast'
+import { Toast, TOAST_MS } from '../components/Toast'
 import { useAccount } from '../state/accounts'
 import { changeBadge, createClan, getBadges, getMyClan, joinClan, leaveClan, listOpenClans } from '../state/clans'
 import { colorName, Pick, PickGroup } from '../looks/Picker'
@@ -202,7 +202,7 @@ function Member({ clan: initial, season, onLeft }: { clan: ClanInfo; season: Sea
       await navigator.clipboard.writeText(clan.code)
       setCopied(true)
       clearTimeout(copyTimer.current)
-      copyTimer.current = setTimeout(() => setCopied(false), 1500)
+      copyTimer.current = setTimeout(() => setCopied(false), TOAST_MS)
     } catch {
       // clipboard blocked: the code is selectable text
     }
