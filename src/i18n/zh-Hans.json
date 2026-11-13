@@ -422,5 +422,6 @@
   "common.back": "返回",
   "profile.recentGames": "最近的对局",
   "profile.gameOutcome.won": "获胜 · +{credits} 积分",
-  "profile.gameOutcome.lost": "落败 · +{credits} 积分"
+  "profile.gameOutcome.lost": "落败 · +{credits} 积分",
+  "profile.gameDetail.title": "对局回顾"
 }

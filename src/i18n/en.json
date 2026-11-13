@@ -422,5 +422,6 @@
   "common.back": "Back",
   "profile.recentGames": "Recent games",
   "profile.gameOutcome.won": "Won · +{credits} credits",
-  "profile.gameOutcome.lost": "Lost · +{credits} credits"
+  "profile.gameOutcome.lost": "Lost · +{credits} credits",
+  "profile.gameDetail.title": "Game recap"
 }
