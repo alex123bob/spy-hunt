@@ -81,6 +81,8 @@ export interface Snapshot {
   last_seq: number
   server_time: number
   words?: WordsByRole
+  // per-player credit deltas from the live game_over event (keyed by player_id)
+  credits?: Record<string, number>
   // client-side extras maintained by the reducer
   locked?: number[]
   reveal?: RevealInfo | null
