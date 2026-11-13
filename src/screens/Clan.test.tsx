@@ -188,11 +188,19 @@ test('the name field explains the length rule, and bad_name shows it', async () 
 })
 
 test('time left counts down while the page is open', async () => {
+  // Capture only the page's once-a-minute tick; let every other interval (e.g. the
+  // testing library's own polling) run for real so waitFor keeps working.
   const ticks: (() => void)[] = []
-  const spy = vi.spyOn(window, 'setInterval').mockImplementation(((fn: () => void) => { ticks.push(fn); return 1 }) as unknown as typeof setInterval)
+  const real = window.setInterval.bind(window)
+  const spy = vi.spyOn(window, 'setInterval').mockImplementation(((fn: () => void, ms?: number, ...rest: unknown[]) => {
+    if (ms === 60_000) { ticks.push(fn); return 1 }
+    return real(fn, ms, ...rest)
+  }) as unknown as typeof setInterval)
   vi.mocked(getMyClan).mockResolvedValue(memberOf(season()))
   render(tree)
   expect(await screen.findByText(/4d 12h left/)).toBeInTheDocument()
+  // The label can paint before React runs the effect that starts the tick; wait for it.
+  await waitFor(() => expect(ticks.length).toBeGreaterThan(0))
   vi.setSystemTime(NOW + 3 * 3_600_000)
   act(() => ticks.forEach((f) => f()))
   expect(screen.getByText(/4d 9h left/)).toBeInTheDocument()
