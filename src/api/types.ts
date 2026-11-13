@@ -20,11 +20,22 @@ export interface Player {
   rank?: number | null
 }
 
+export type CreditKind = 'played' | 'won' | 'daily' | 'found' | 'streak'
+export interface CreditPart { kind: CreditKind; n: number }
+
+export interface CreditRules {
+  game: { played: number; won: number; min_humans: number }
+  daily: { daily: number; found: number }
+  streak: { step: number; max: number }
+  daily_cap: number
+}
+
 export interface CreditSummary {
   credits: number
   today: number
   rank: { index: number; key: string; min: number }
   next: { key: string; min: number; remaining: number } | null
+  rules?: CreditRules
 }
 
 export interface Message {
@@ -83,6 +94,8 @@ export interface Snapshot {
   words?: WordsByRole
   // per-player credit deltas from the live game_over event (keyed by player_id)
   credits?: Record<string, number>
+  // what each of those deltas was made of (keyed by seat, like `credits`)
+  credit_parts?: Record<string, CreditPart[]>
   // client-side extras maintained by the reducer
   locked?: number[]
   reveal?: RevealInfo | null
@@ -154,6 +167,7 @@ export interface DailyResult {
   best: number
   played_today: boolean
   credits_earned?: number
+  credit_parts?: CreditPart[]
 }
 
 export interface Account { email: string | null }

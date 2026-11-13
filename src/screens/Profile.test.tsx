@@ -40,3 +40,20 @@ test('failed getCredits still renders the ladder with Rookie current', async () 
   expect(container.querySelector('.ladder-row[aria-current="true"]')).toBe(container.querySelectorAll('.ladder-row')[0])
   expect(container.querySelector('.hero-card')).not.toBeNull()
 })
+
+test('an info tile next to the credits opens the how-to-earn page', async () => {
+  vi.mocked(getCredits).mockResolvedValue(summary)
+  const { container } = render(tree)
+  await waitFor(() => expect(screen.getByText('40')).toBeInTheDocument())
+  expect(container.querySelector('[data-testid="earn-guide"]')).toBeNull()
+  const link = screen.getByTestId('how-to-earn')
+  expect(link).toHaveAttribute('href', '/credits/how')
+  expect(link.closest('.stats-trio')).not.toBeNull()
+})
+
+test('the how-to-earn entry is there even when /credits fails', async () => {
+  vi.mocked(getCredits).mockRejectedValue(new Error('boom'))
+  render(tree)
+  await waitFor(() => expect(getCredits).toHaveBeenCalled())
+  expect(screen.getByTestId('how-to-earn')).toBeInTheDocument()
+})

@@ -395,5 +395,21 @@
   "clan.badgeColor": "徽章颜色",
   "clan.changeBadge": "更换徽章",
   "clan.saveBadge": "保存徽章",
-  "clan.cancel": "取消"
+  "credits.kind.played": "完成一局",
+  "credits.kind.won": "你的阵营获胜",
+  "credits.kind.daily": "完成每日谜题",
+  "credits.kind.found": "找出间谍",
+  "credits.kind.streak": "连续奖励",
+  "credits.howTitle": "如何获得积分",
+  "credits.how.played": "与至少 {n} 名真人玩家完成一局",
+  "credits.how.won": "你的阵营赢得本局",
+  "credits.how.daily": "完成每日谜题",
+  "credits.how.found": "在每日谜题中找出间谍",
+  "credits.how.streak": "每日连续：每连续一天 +{step}",
+  "credits.how.streakAmt": "最多 +{n}",
+  "credits.how.cap": "每天最多可获得 {n} 积分。积分不会消耗，只会增加。",
+  "credits.how.bots": "机器人不算作真人玩家；重复完成已结束的对局或每日谜题不会再得分。",
+  "credits.ranksTitle": "等级",
+  "credits.howLink": "如何获得",
+  "common.back": "返回"
 }
