@@ -58,6 +58,15 @@ Guest play needs no signup. The corner link ("Register / log in") opens a small 
 
 The daily streak is computed by the server from your finished puzzles, so it follows you across devices. There is no email verification and no password reset in this version.
 
+## Credits and ranks
+
+Every player (guests included) has a lifetime **credits** total that follows their account. You earn credits from the same play the clans use — a finished real game (+10), winning your side (+10), finishing the daily (+10), finding the daily spy (+10) — plus a daily-streak bonus (`5 × streak`, capped at 50) when you solve the daily. Credits are capped at 500 a day; this cap is separate from the clans' 100-a-day cap, so earning credits never changes clan-season scoring.
+
+Your credits set your **rank**, a fixed ladder of six: Rookie (0), Sleuth (250), Spy Hunter (750), Senior Hunter (2,000), Mastermind (5,000), Legend (12,000). Each rank has its own hero mascot and a fancier card frame. Your hero card shows on the daily share card, the end-of-game result screen, and your profile at `/me` (linked from the account menu), which also shows the full ladder and your progress to the next rank. A small rank badge sits next to your name in rooms, beside your clan badge.
+
+- **Where credits live:** a per-player ledger on the server (`player_credits`, with a denormalized `player_total_credits` running total), written by the same award hooks as clan points so the two never drift. Rank is derived from the total on read, so thresholds can be tuned without a migration.
+- **Rollout:** credits start at zero and are earned forward — existing players are not backfilled from past clan points in this version.
+
 ## Clans
 
 Signed-in players see a **Clan** link in the top bar (`/clan`). You can start a clan (a name and a badge), join one with its 6-character invite code, or pick one from the list of open clans. One clan per account, and up to 30 members.
