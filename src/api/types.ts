@@ -17,6 +17,14 @@ export interface Player {
   avatar?: Avatar | null
   bot_id?: string | null
   clan?: PlayerClan | null
+  rank?: number | null
+}
+
+export interface CreditSummary {
+  credits: number
+  today: number
+  rank: { index: number; key: string; min: number }
+  next: { key: string; min: number; remaining: number } | null
 }
 
 export interface Message {
