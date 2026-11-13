@@ -9,10 +9,8 @@ const EDGE = 8 // keep this far from the screen edges
  * <body> so no card clips it, and nudged sideways to stay on screen. The tail keeps pointing
  * at the anchor. Closes on an outside tap, Escape, scroll, or after `ms`.
  */
-export function Bubble({ anchor, text, onClose, ms = 3000, live = false }: {
+export function Bubble({ anchor, text, onClose, ms = 3000 }: {
   anchor: RefObject<HTMLElement | null>; text: string; onClose: () => void; ms?: number
-  /** announce to screen readers (confirmations), instead of a plain tooltip */
-  live?: boolean
 }) {
   const ref = useRef<HTMLSpanElement>(null)
   const [pos, setPos] = useState<{ left: number; top: number; tail: number; below: boolean } | null>(null)
@@ -53,8 +51,7 @@ export function Bubble({ anchor, text, onClose, ms = 3000, live = false }: {
 
   return createPortal(
     <span
-      ref={ref} role={live ? 'status' : 'tooltip'} aria-live={live ? 'polite' : undefined}
-      className={`hint-bubble${pos?.below ? ' below' : ''}`}
+      ref={ref} role="tooltip" className={`hint-bubble${pos?.below ? ' below' : ''}`}
       style={pos
         ? { left: pos.left, top: pos.top, '--tail': `${pos.tail}px` } as React.CSSProperties
         : { left: 0, top: 0, visibility: 'hidden' }}

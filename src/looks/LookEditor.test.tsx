@@ -29,7 +29,7 @@ test('starts on the first free options and saves the picked look', async () => {
   expect(screen.getByTestId('look-preview').querySelector('.avatar')).toHaveClass('frame-leaf')
   fireEvent.click(screen.getByRole('button', { name: 'Save look' }))
   await waitFor(() => expect(saveLook).toHaveBeenCalledWith({ emoji: '🐱', color: '#4cd08a', frame: 'leaf' }))
-  expect(await screen.findByRole('status')).toHaveTextContent('Look saved')
+  expect(await screen.findByText('Look saved')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Save look' })).toBeDisabled()
 })
 

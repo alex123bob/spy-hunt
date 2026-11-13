@@ -6,7 +6,7 @@ import { listMyBots } from '../bots/api'
 import { Avatar } from '../components/Avatar'
 import { WhyButton } from '../components/WhyButton'
 import { Loader } from '../components/Loader'
-import { useFlash } from '../components/useFlash'
+import { Toast } from '../components/Toast'
 import { LangPicker } from '../components/LangPicker'
 import { PlayerChip } from '../components/PlayerChip'
 import { QrCode } from '../components/QrCode'
@@ -16,7 +16,7 @@ import { setSessionLang } from '../state/session'
 export function Lobby({ state }: { state: Snapshot }) {
   const lang = useLang()
   const [err, setErr] = useState('')
-  const copied = useFlash()
+  const [copied, setCopied] = useState(false)
   const [myBots, setMyBots] = useState<BotCard[]>([])
   const [picking, setPicking] = useState(false)
   const code = state.code
@@ -53,7 +53,8 @@ export function Lobby({ state }: { state: Snapshot }) {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(link)
-      copied.flash(t('lobby.copied'))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
     } catch {
       // clipboard blocked: the link is selectable text
     }
@@ -67,9 +68,9 @@ export function Lobby({ state }: { state: Snapshot }) {
           <p className="muted">{t('lobby.title')}</p>
           <p className="lobby-code" aria-label={code}>{code}</p>
         </div>
-        <button ref={copied.ref} type="button" className="pill" onClick={copy}>{t('lobby.copy')}</button>
+        <button type="button" className="pill" onClick={copy}>{copied ? t('lobby.copied') : t('lobby.copy')}</button>
       </header>
-      {copied.node}
+      <Toast text={copied ? t('lobby.copied') : ''} />
       <section>
         <p className="muted">{t('lobby.yourLang')}</p>
         <LangPicker value={lang} onChange={pickLang} label={t('lobby.yourLang')} />

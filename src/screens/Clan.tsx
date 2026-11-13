@@ -7,7 +7,7 @@ import { t, useLang } from '../i18n'
 import { AuthModal } from '../components/AuthModal'
 import { EmptyState } from '../components/EmptyState'
 import { Loader } from '../components/Loader'
-import { useFlash } from '../components/useFlash'
+import { Toast } from '../components/Toast'
 import { useAccount } from '../state/accounts'
 import { changeBadge, createClan, getBadges, getMyClan, joinClan, leaveClan, listOpenClans } from '../state/clans'
 import { colorName, Pick, PickGroup } from '../looks/Picker'
@@ -177,7 +177,9 @@ function Member({ clan: initial, season, onLeft }: { clan: ClanInfo; season: Sea
   const [editing, setEditing] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [leaving, setLeaving] = useState(false)
-  const copied = useFlash()
+  const [copied, setCopied] = useState(false)
+  const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(copyTimer.current), [])
   const [error, setError] = useState<string | null>(null)
   useTick()
   const wk = season?.this_week
@@ -198,7 +200,9 @@ function Member({ clan: initial, season, onLeft }: { clan: ClanInfo; season: Sea
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(clan.code)
-      copied.flash(t('clan.copied'))
+      setCopied(true)
+      clearTimeout(copyTimer.current)
+      copyTimer.current = setTimeout(() => setCopied(false), 1500)
     } catch {
       // clipboard blocked: the code is selectable text
     }
@@ -223,9 +227,9 @@ function Member({ clan: initial, season, onLeft }: { clan: ClanInfo; season: Sea
           <strong className="code">{clan.code}</strong>
           <p className="muted">{t('clan.memberCount', { n: clan.members, max: MAX_MEMBERS })}</p>
         </div>
-        <button ref={copied.ref} type="button" className="pill clan-copy" onClick={copy}>{t('clan.copy')}</button>
+        <button type="button" className="pill clan-copy" onClick={copy}>{copied ? t('clan.copied') : t('clan.copy')}</button>
       </div>
-      {copied.node}
+      <Toast text={copied ? t('clan.copied') : ''} />
       {wk && (
         <section className="card clan-card">
           <h2>{t('clan.thisWeek')}</h2>
