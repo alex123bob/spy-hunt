@@ -4,11 +4,11 @@ import { Clan } from './Clan'
 import type { MyClan, Season } from '../api/types'
 import { setLang } from '../i18n'
 import { useAccount } from '../state/accounts'
-import { createClan, getBadges, getMyClan, joinClan, leaveClan, listOpenClans } from '../state/clans'
+import { changeBadge, createClan, getBadges, getMyClan, joinClan, leaveClan, listOpenClans } from '../state/clans'
 
 vi.mock('../state/accounts', () => ({ useAccount: vi.fn() }))
 vi.mock('../state/clans', () => ({
-  getMyClan: vi.fn(), getBadges: vi.fn(), createClan: vi.fn(), joinClan: vi.fn(),
+  getMyClan: vi.fn(), getBadges: vi.fn(), createClan: vi.fn(), changeBadge: vi.fn(), joinClan: vi.fn(),
   leaveClan: vi.fn(), listOpenClans: vi.fn(),
 }))
 
@@ -43,7 +43,7 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(NOW)
   vi.mocked(useAccount).mockReturnValue({ email: 'a@b.com' })
-  vi.mocked(getBadges).mockResolvedValue(BADGES)
+  vi.mocked(getBadges).mockResolvedValue({ badges: BADGES, emojis: ['🦊', '🐺', '🦉', '🦇'], colors: ['#ff6b6b', '#4cd08a'] })
   vi.mocked(getMyClan).mockReset().mockResolvedValue({ clan: null })
   vi.mocked(listOpenClans).mockReset().mockResolvedValue([
     { id: 'o1', name: 'Owls', badge: BADGES[1], code: 'OWL111', members: 4 },
@@ -69,14 +69,16 @@ test('no-clan user sees create form, join by code and the open list', async () =
   expect(screen.getByText('4/30 members')).toBeInTheDocument()
 })
 
-test('creating a clan sends name and badge index, then shows the clan', async () => {
+test('creating a clan sends the built badge, then shows the clan', async () => {
   vi.mocked(createClan).mockResolvedValue(memberOf(season()).clan!)
   render(tree)
   fireEvent.change(await screen.findByLabelText('Clan name'), { target: { value: 'Foxes' } })
-  fireEvent.click(screen.getByRole('radio', { name: '🐺' }))
+  fireEvent.click(await screen.findByRole('radio', { name: '🦇' }))
+  fireEvent.click(screen.getByRole('radio', { name: 'Green' }))
+  expect(screen.getByTestId('badge-preview')).toHaveTextContent('🦇')
   vi.mocked(getMyClan).mockResolvedValue(memberOf(season()))
   fireEvent.click(screen.getByRole('button', { name: 'Create clan' }))
-  await waitFor(() => expect(createClan).toHaveBeenCalledWith('Foxes', 1))
+  await waitFor(() => expect(createClan).toHaveBeenCalledWith('Foxes', { emoji: '🦇', color: '#4cd08a' }))
   expect(await screen.findByRole('heading', { name: /Foxes/ })).toBeInTheDocument()
 })
 
@@ -230,4 +232,22 @@ test('copy code shows copied', async () => {
   fireEvent.click(await screen.findByRole('button', { name: 'Copy code' }))
   expect(await screen.findAllByText('Copied!')).not.toHaveLength(0)
   expect(writeText).toHaveBeenCalledWith('ABC123')
+})
+
+test('the leader can change the badge; members cannot', async () => {
+  const mine = memberOf(season())
+  vi.mocked(getMyClan).mockResolvedValue(mine)
+  vi.mocked(changeBadge).mockResolvedValue({ ...mine.clan!, badge: { emoji: '🦉', color: '#4cd08a' } })
+  const { unmount } = render(tree)
+  fireEvent.click(await screen.findByRole('button', { name: 'Change badge' }))
+  fireEvent.click(await screen.findByRole('radio', { name: '🦉' }))
+  fireEvent.click(screen.getByRole('radio', { name: 'Green' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Save badge' }))
+  await waitFor(() => expect(changeBadge).toHaveBeenCalledWith({ emoji: '🦉', color: '#4cd08a' }))
+  await waitFor(() => expect(screen.queryByRole('button', { name: 'Save badge' })).toBeNull())
+  unmount()
+  vi.mocked(getMyClan).mockResolvedValue({ ...mine, clan: { ...mine.clan!, is_leader: false } })
+  render(tree)
+  expect(await screen.findByRole('heading', { name: /Foxes/ })).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Change badge' })).toBeNull()
 })

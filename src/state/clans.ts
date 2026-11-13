@@ -1,5 +1,5 @@
 import { request } from '../api/client'
-import type { ClanBadge, ClanInfo, MyClan } from '../api/types'
+import type { BadgeCatalog, ClanBadge, ClanInfo, MyClan } from '../api/types'
 import { ensureGuest } from './session'
 
 export async function getMyClan(): Promise<MyClan> {
@@ -7,11 +7,15 @@ export async function getMyClan(): Promise<MyClan> {
   return request<MyClan>('GET', '/clans/mine')
 }
 
-export async function getBadges(): Promise<ClanBadge[]> {
-  return (await request<{ badges: ClanBadge[] }>('GET', '/clans/badges')).badges
+export async function getBadges(): Promise<BadgeCatalog> {
+  return request<BadgeCatalog>('GET', '/clans/badges')
 }
 
-export async function createClan(name: string, badge: number): Promise<ClanInfo> {
+export async function changeBadge(badge: ClanBadge): Promise<ClanInfo> {
+  return request<ClanInfo>('PUT', '/clans/badge', { badge })
+}
+
+export async function createClan(name: string, badge: ClanBadge): Promise<ClanInfo> {
   return request<ClanInfo>('POST', '/clans', { name, badge })
 }
 

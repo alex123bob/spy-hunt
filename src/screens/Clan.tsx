@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { ClanBadge, ClanInfo, MyClan, Season } from '../api/types'
+import type { BadgeCatalog, ClanBadge, ClanInfo, MyClan, Season } from '../api/types'
 import { ApiError } from '../api/client'
 import { errorText } from '../api/errors'
 import { t, useLang } from '../i18n'
@@ -9,14 +9,42 @@ import { EmptyState } from '../components/EmptyState'
 import { Loader } from '../components/Loader'
 import { Toast } from '../components/Toast'
 import { useAccount } from '../state/accounts'
-import { createClan, getBadges, getMyClan, joinClan, leaveClan, listOpenClans } from '../state/clans'
+import { changeBadge, createClan, getBadges, getMyClan, joinClan, leaveClan, listOpenClans } from '../state/clans'
+import { colorName, Pick, PickGroup } from '../looks/Picker'
 
 const MAX_MEMBERS = 30
-// Same order as the server's list (clans.BADGES); used only if that request fails.
-const FALLBACK_BADGES: ClanBadge[] = [
-  ['🦊', '#ff6b6b'], ['🐺', '#ffa94d'], ['🦉', '#4cd08a'], ['🐉', '#38c9d6'], ['🦁', '#5b8cff'], ['🐙', '#b07cff'],
-  ['🦅', '#ff6b6b'], ['🐝', '#ffa94d'], ['🌵', '#4cd08a'], ['🚀', '#38c9d6'], ['⚡', '#5b8cff'], ['🔥', '#b07cff'],
-].map(([emoji, color]) => ({ emoji, color }))
+// A subset of the server's palette (looks.CLAN_EMOJIS × COLORS); used only if that request fails.
+const FALLBACK_CATALOG: BadgeCatalog = {
+  badges: [],
+  emojis: ['🦊', '🐺', '🦉', '🐉', '🦁', '🐙', '🦅', '🐝', '🌵', '🚀', '⚡', '🔥'],
+  colors: ['#ff6b6b', '#ffa94d', '#4cd08a', '#38c9d6', '#5b8cff', '#b07cff'],
+}
+
+/** Emoji × colour badge builder with a live preview. */
+function BadgeBuilder({ catalog, value, onChange }: { catalog: BadgeCatalog; value: ClanBadge; onChange: (b: ClanBadge) => void }) {
+  return (
+    <div className="badge-builder">
+      <div className="badge-preview" data-testid="badge-preview"><Badge badge={value} big /></div>
+      <PickGroup label={t('clan.badge')}>
+        {catalog.emojis.map((e) => (
+          <Pick key={e} on={value.emoji === e} label={e} className="clan-pick" onPick={() => onChange({ ...value, emoji: e })}>{e}</Pick>
+        ))}
+      </PickGroup>
+      <PickGroup label={t('clan.badgeColor')}>
+        {catalog.colors.map((c) => (
+          <Pick key={c} on={value.color === c} label={colorName(c)} className="swatch" style={{ background: c }}
+            onPick={() => onChange({ ...value, color: c })}>{value.color === c ? '✓' : ''}</Pick>
+        ))}
+      </PickGroup>
+    </div>
+  )
+}
+
+function useBadgeCatalog(): BadgeCatalog | null {
+  const [cat, setCat] = useState<BadgeCatalog | null>(null)
+  useEffect(() => { getBadges().then(setCat, () => setCat(FALLBACK_CATALOG)) }, [])
+  return cat
+}
 
 type Load = { kind: 'loading' } | { kind: 'error' } | { kind: 'ok'; data: MyClan }
 
@@ -45,18 +73,20 @@ function timeLeft(endsAt: number): string {
 }
 
 function NoClan({ onDone }: { onDone: () => void }) {
-  const [badges, setBadges] = useState<ClanBadge[]>([])
+  const catalog = useBadgeCatalog()
   const [open, setOpen] = useState<ClanInfo[] | null>(null)
   const [name, setName] = useState('')
-  const [badge, setBadge] = useState(0)
+  const [badge, setBadge] = useState<ClanBadge | null>(null)
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    getBadges().then(setBadges, () => setBadges(FALLBACK_BADGES))
     listOpenClans().then(setOpen, () => setOpen([]))
   }, [])
+  useEffect(() => {
+    if (catalog && !badge) setBadge({ emoji: catalog.emojis[0], color: catalog.colors[0] })
+  }, [catalog])
 
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true)
@@ -74,22 +104,15 @@ function NoClan({ onDone }: { onDone: () => void }) {
     <>
       <p className="muted">{t('clan.pitch')}</p>
       {error && <p role="alert" className="error">{error}</p>}
-      <form className="card clan-card" onSubmit={(e) => { e.preventDefault(); run(() => createClan(name.trim(), badge)) }}>
+      <form className="card clan-card" onSubmit={(e) => { e.preventDefault(); if (badge) run(() => createClan(name.trim(), badge)) }}>
         <h2>{t('clan.createTitle')}</h2>
         <label>
           <span>{t('clan.name')}</span>
           <input value={name} maxLength={20} aria-describedby="clan-name-hint" onChange={(e) => setName(e.target.value)} />
         </label>
         <span id="clan-name-hint" className="muted small">{t('clan.nameHint')}</span>
-        <div role="radiogroup" aria-label={t('clan.badge')} className="picker badges">
-          {badges.map((b, i) => (
-            <button key={i} type="button" role="radio" aria-checked={badge === i} aria-label={b.emoji}
-              className={`btn chip clan-pick${badge === i ? ' primary' : ''}`} onClick={() => setBadge(i)}>
-              <Badge badge={b} />
-            </button>
-          ))}
-        </div>
-        <button type="submit" className="btn primary" disabled={busy || name.trim().length < 3}>{t('clan.create')}</button>
+        {catalog && badge && <BadgeBuilder catalog={catalog} value={badge} onChange={setBadge} />}
+        <button type="submit" className="btn primary" disabled={busy || !badge || name.trim().length < 3}>{t('clan.create')}</button>
       </form>
       <form className="card clan-card" onSubmit={(e) => { e.preventDefault(); run(() => joinClan(code)) }}>
         <h2>{t('clan.joinTitle')}</h2>
@@ -121,7 +144,37 @@ function NoClan({ onDone }: { onDone: () => void }) {
   )
 }
 
-function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | null | undefined; onLeft: () => void }) {
+function EditBadge({ clan, onSaved, onCancel }: { clan: ClanInfo; onSaved: (c: ClanInfo) => void; onCancel: () => void }) {
+  const catalog = useBadgeCatalog()
+  const [badge, setBadge] = useState<ClanBadge>(clan.badge)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const save = async () => {
+    setBusy(true)
+    try {
+      onSaved(await changeBadge(badge))
+    } catch (e) {
+      setError(errorText(e))
+      setBusy(false)
+    }
+  }
+  if (!catalog) return <Loader label={t('bots.loading')} />
+  return (
+    <section className="card clan-card">
+      {error && <p role="alert" className="error">{error}</p>}
+      <BadgeBuilder catalog={catalog} value={badge} onChange={setBadge} />
+      <div className="row">
+        <button type="button" className="btn primary" disabled={busy} onClick={save}>{t('clan.saveBadge')}</button>
+        <button type="button" className="btn ghost" onClick={onCancel}>{t('clan.cancel')}</button>
+      </div>
+    </section>
+  )
+}
+
+function Member({ clan: initial, season, onLeft }: { clan: ClanInfo; season: Season | null | undefined; onLeft: () => void }) {
+  const [clan, setClan] = useState(initial)
+  useEffect(() => setClan(initial), [initial])
+  const [editing, setEditing] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -162,7 +215,12 @@ function Member({ clan, season, onLeft }: { clan: ClanInfo; season: Season | nul
       <header className="clan-crest">
         <Badge badge={clan.badge} big />
         <h1 className="clan-title">{clan.name}</h1>
+        {clan.is_leader && !editing && (
+          <button type="button" className="pill" onClick={() => setEditing(true)}>{t('clan.changeBadge')}</button>
+        )}
       </header>
+      {editing && <EditBadge clan={clan} onCancel={() => setEditing(false)}
+        onSaved={(c) => { setClan({ ...clan, ...c }); setEditing(false) }} />}
       <div className="ticket clan-invite">
         <div>
           <p className="muted">{t('clan.inviteCode')}</p>
