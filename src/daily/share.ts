@@ -1,5 +1,6 @@
 import QRCode from 'qrcode'
 import { t } from '../i18n'
+import { rankByIndex, rankTitleKey } from '../game/rank'
 
 export interface ShareInput {
   number: number
@@ -9,6 +10,7 @@ export interface ShareInput {
   wordCorrect: boolean | null
   streak: number
   url: string
+  rankIndex?: number
 }
 
 export interface ShareTile {
@@ -23,6 +25,8 @@ export interface ShareCardModel {
   solved: boolean
   verdict: string
   mascot: string
+  hero: string
+  rankTitle: string
   tiles: ShareTile[]
   badge: string | null
   scanHint: string
@@ -48,6 +52,8 @@ export function shareCardModel(r: ShareInput): ShareCardModel {
     puzzle: t('share.puzzle', { n: r.number }),
     solved: r.solved,
     verdict: r.solved ? t('share.found') : t('share.missed'),
+    hero: rankByIndex(r.rankIndex ?? 0).hero,
+    rankTitle: t(rankTitleKey(r.rankIndex ?? 0)),
     mascot: r.solved ? '🕵️' : '🫥',
     tiles: [
       { label: t('share.time'), value: time, color: '--sky' },
@@ -141,8 +147,18 @@ export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): P
   ctx.fillStyle = c('--tomato')
   ctx.fillText(m.puzzle.toUpperCase(), S / 2, 278)
 
+  // hero + rank title band
+  const hW = 520, hH = 70, hX = (S - hW) / 2, hY = 308
+  ctx.fillStyle = ink
+  rounded(ctx, hX + 5, hY + 6, hW, hH, hH / 2); ctx.fill()
+  ctx.fillStyle = c('--sun'); ctx.lineWidth = 6; ctx.strokeStyle = ink
+  rounded(ctx, hX, hY, hW, hH, hH / 2); ctx.fill(); ctx.stroke()
+  ctx.fillStyle = ink
+  ctx.font = font(38)
+  ctx.fillText(`${m.hero} ${m.rankTitle}`, S / 2, hY + hH / 2 + 3)
+
   // verdict pill
-  const vW = 620, vH = 118, vX = (S - vW) / 2, vY = 330
+  const vW = 620, vH = 104, vX = (S - vW) / 2, vY = 404
   ctx.fillStyle = ink
   rounded(ctx, vX + 7, vY + 9, vW, vH, vH / 2); ctx.fill()
   ctx.fillStyle = m.solved ? c('--mint') : c('--pink')
@@ -153,10 +169,10 @@ export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): P
   ctx.fillText(`${m.mascot} ${m.verdict}`, S / 2, vY + vH / 2 + 4)
 
   // badge ribbon (optional)
-  let statY = 560
+  let statY = 580
   if (m.badge) {
     ctx.save()
-    ctx.translate(S / 2, 520)
+    ctx.translate(S / 2, 540)
     ctx.rotate(-0.04)
     ctx.font = font(34, 600)
     const bw = ctx.measureText(m.badge).width + 60
@@ -165,11 +181,11 @@ export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): P
     ctx.fillStyle = ink
     ctx.fillText(m.badge, 0, 2)
     ctx.restore()
-    statY = 610
+    statY = 622
   }
 
   // three stat tiles
-  const gap = 28, tW = (620 - 2 * gap) / 3, tH = 150, tX0 = (S - 620) / 2
+  const gap = 28, tW = (620 - 2 * gap) / 3, tH = 130, tX0 = (S - 620) / 2
   m.tiles.forEach((tile, i) => {
     const x = tX0 + i * (tW + gap)
     ctx.fillStyle = ink
@@ -178,9 +194,9 @@ export async function drawShareCard(canvas: HTMLCanvasElement, r: ShareInput): P
     rounded(ctx, x, statY, tW, tH, 22); ctx.fill(); ctx.stroke()
     ctx.fillStyle = ink
     ctx.font = font(26, 600)
-    ctx.fillText(tile.label, x + tW / 2, statY + 42)
+    ctx.fillText(tile.label, x + tW / 2, statY + 38)
     ctx.font = font(58)
-    ctx.fillText(tile.value, x + tW / 2, statY + 100)
+    ctx.fillText(tile.value, x + tW / 2, statY + 90)
   })
 
   // QR + hint at the bottom

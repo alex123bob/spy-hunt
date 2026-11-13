@@ -151,6 +151,7 @@ export interface DailyResult {
   streak: number
   best: number
   played_today: boolean
+  credits_earned?: number
 }
 
 export interface Account { email: string | null }

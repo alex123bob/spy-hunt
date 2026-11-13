@@ -104,3 +104,14 @@ describe('shareResult', () => {
     expect(writeText).not.toHaveBeenCalled()
   })
 })
+
+describe('shareCardModel hero', () => {
+  test('rank index picks the hero and localized title', () => {
+    const m = shareCardModel({ ...base, rankIndex: 3 })
+    expect(m.hero).toBe('🦉')
+    expect(m.rankTitle).toBe('Senior Hunter')
+  })
+  test('defaults to Rookie', () => {
+    expect(shareCardModel(base).hero).toBe('🐣')
+  })
+})

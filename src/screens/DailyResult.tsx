@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { DailyPuzzle, DailyResult as Result } from '../api/types'
+import type { CreditSummary, DailyPuzzle, DailyResult as Result } from '../api/types'
 import { Confetti } from '../components/Confetti'
+import { HeroCard } from '../components/HeroCard'
+import { getCredits } from '../credits/api'
 import { Toast } from '../components/Toast'
 import { drawShareCard, shareDailyResult, type ShareInput } from '../daily/share'
 import { t, useLang } from '../i18n'
@@ -17,18 +19,24 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
   const lang = useLang()
   const [shareState, setShareState] = useState('')
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [summary, setSummary] = useState<CreditSummary | null>(null)
+  useEffect(() => {
+    let live = true
+    getCredits().then((s) => { if (live) setSummary(s) }).catch(() => {})
+    return () => { live = false }
+  }, [])
   useEffect(() => recordStreakMilestone(result.streak), [])
   const spy = puzzle.players.find((p) => p.seat === result.answer.spy_seat)?.name ?? ''
   const input: ShareInput = {
     number: puzzle.number, tries: result.tries, solved: result.solved, elapsedMs: result.elapsed_ms,
-    wordCorrect: result.word_correct, streak: result.streak,
+    wordCorrect: result.word_correct, streak: result.streak, rankIndex: summary?.rank.index,
     url: `${window.location.origin}${import.meta.env.BASE_URL}daily`,
   }
 
   // redraw the preview when the result or language changes
   useEffect(() => {
     if (canvasRef.current) void drawShareCard(canvasRef.current, input)
-  }, [lang, result])
+  }, [lang, result, summary])
 
   const share = async () => {
     const r = await shareDailyResult(input)
@@ -50,6 +58,8 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
       </section>
       <p className="muted center">{t('daily.stats', { pct: result.stats.solved_pct, n: result.stats.players })}</p>
       <div className="streak-row"><p>{t('daily.streak', { n: result.streak })}</p></div>
+      <HeroCard summary={summary} />
+      {(result.credits_earned ?? 0) > 0 && <p className="center">{t('credits.earned', { n: result.credits_earned ?? 0 })}</p>}
       <canvas ref={canvasRef} className="share-card" data-testid="share-card" role="img" aria-label={t('daily.title')} />
       <button type="button" className="btn primary" onClick={share}>{t('daily.share')}</button>
       <Toast text={shareState} />

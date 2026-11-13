@@ -10,6 +10,7 @@ import { recordStreakMilestone } from '../state/nudges'
 import { msg } from '../test/fixtures'
 
 vi.mock('../daily/api', () => ({ getDaily: vi.fn(), guessSpy: vi.fn(), guessWord: vi.fn(), getResult: vi.fn() }))
+vi.mock('../credits/api', () => ({ getCredits: vi.fn().mockRejectedValue(new Error('offline')) }))
 vi.mock('../state/nudges', () => ({ recordStreakMilestone: vi.fn() }))
 vi.mock('../daily/share', async (orig) => ({ ...(await orig<typeof import('../daily/share')>()), shareDailyResult: vi.fn() }))
 
