@@ -165,3 +165,20 @@
 .match-reveal .role { border: 2px solid currentColor; border-radius: 8px; padding: 1px 8px; font-size: 13px; text-transform: uppercase; display: inline-block; transform: rotate(-4deg); }
 .winner-banner { margin: 4px 0 0; padding: 10px 12px; text-align: center; background: var(--sun); color: var(--ink); border: 2.5px solid var(--ink); border-radius: 16px; box-shadow: 0 3px 0 var(--ink); font: 700 18px/1.2 var(--font-display); }
 .match-round h3.round-pill { margin: 0; }
+
+/* HeroCard */
+.hero-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--paper); border: 3px solid var(--ink); border-radius: 20px; box-shadow: 0 4px 0 var(--ink); position: relative; overflow: hidden; }
+.hero-emoji { font-size: 48px; line-height: 1; }
+.hero-body { flex: 1; min-width: 0; }
+.hero-title { font-family: var(--font-display); font-size: 1.25rem; color: var(--ink); }
+.hero-credits, .hero-next { font-family: var(--font-body); font-size: 0.9rem; color: var(--ink); }
+.hero-progress { height: 12px; margin: 6px 0 4px; background: #fff; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; }
+.hero-progress-fill { height: 100%; background: var(--mint); }
+.hero-max { font-weight: 800; }
+.hero-rank-1 { border-style: dotted; }
+.hero-rank-2 { border-color: var(--ink); background: var(--sun); }
+.hero-rank-3 { background: var(--sun); box-shadow: 0 0 0 3px var(--paper), 0 0 0 6px var(--ink), 0 8px 0 var(--ink); }
+.hero-rank-4 { background: linear-gradient(135deg, var(--lilac), var(--sky), var(--pink), var(--lilac)); box-shadow: 0 0 0 3px var(--paper), 0 0 0 6px var(--ink), 0 8px 0 var(--ink); }
+.hero-rank-5 { background: linear-gradient(135deg, var(--sun), var(--pink), var(--lilac), var(--sky), var(--sun)); box-shadow: 0 0 0 3px var(--sun), 0 0 0 6px var(--ink), 0 8px 0 var(--ink); }
+.hero-shine::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,.6) 50%, transparent 60%); transform: translateX(-100%); animation: hero-shine 3s ease-in-out infinite; pointer-events: none; }
+@keyframes hero-shine { to { transform: translateX(100%); } }
