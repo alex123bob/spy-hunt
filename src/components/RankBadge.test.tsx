@@ -4,11 +4,10 @@ import { setLang } from '../i18n'
 
 beforeEach(() => setLang('en'))
 
-test('renders the hero emoji with an accessible title', () => {
+test('renders the hero emoji, named by its rank title', () => {
   render(<RankBadge rank={2} />)
-  const el = screen.getByRole('img')
+  const el = screen.getByRole('button', { name: 'Spy Hunter' })
   expect(el).toHaveTextContent('🕵️')
-  expect(el).toHaveAttribute('aria-label')
 })
 
 test('renders nothing for rank 0 (Rookie)', () => {

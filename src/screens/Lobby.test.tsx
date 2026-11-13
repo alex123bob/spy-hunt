@@ -98,6 +98,7 @@ test('Add my bot is disabled once my bot is in the room, and room bots are not o
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
   render(<Lobby state={withBots(false, [botP(3, 'b1', 'Rex')])} />)
   expect(await screen.findByRole('button', { name: 'Add my bot' })).toBeDisabled()
+  expect(screen.getByText('Your bot is already in this room.')).toBeInTheDocument()
 })
 
 test('the picker offers each of my bots when none is in the room', async () => {

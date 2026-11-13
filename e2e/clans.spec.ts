@@ -41,7 +41,7 @@ test('two players form a clan and see the badge in a room', async ({ browser }) 
   await b.getByLabel('Your name').fill('Ben')
   await b.getByRole('button', { name: 'Join room' }).click()
   await expect(a.getByText('Ben')).toBeVisible()
-  await expect(a.getByRole('img', { name: `Clan: ${clanName}` })).toHaveCount(2)
+  await expect(a.getByRole('button', { name: `Clan: ${clanName}` })).toHaveCount(2)
 
   await b.goto('/clan')
   await expect(b.getByTestId('clan-member').first()).toContainText(/Ann|Ben/)

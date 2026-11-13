@@ -105,6 +105,7 @@ export function Lobby({ state }: { state: Snapshot }) {
             <button type="button" className="btn" disabled={full || ownBotIn} onClick={() => setPicking((v) => !v)}>
               {t('lobby.addMyBot')}
             </button>
+            {(full || ownBotIn) && <p className="muted small">{t(full ? 'lobby.full' : 'lobby.ownBotIn')}</p>}
             {picking && !full && !ownBotIn && (
               <div className="bot-picker">
                 {myBots.map((b) => (
@@ -129,6 +130,7 @@ export function Lobby({ state }: { state: Snapshot }) {
               {t('lobby.removeBot')}
             </button>
           </div>
+          {full && <p className="muted small">{t('lobby.full')}</p>}
         </section>
       )}
       <section className="card center">

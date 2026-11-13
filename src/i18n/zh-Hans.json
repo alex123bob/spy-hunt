@@ -30,6 +30,8 @@
   "lobby.removeBot": "移除机器人",
   "lobby.addMyBot": "添加我的机器人",
   "lobby.removeMine": "移除",
+  "lobby.full": "房间已满。",
+  "lobby.ownBotIn": "你的机器人已经在房间里了。",
   "lobby.start": "开始游戏",
   "lobby.waitingHost": "等待房主开始…",
   "lobby.yourLang": "你的语言",

@@ -142,7 +142,7 @@ test('the everyone list shows a clan badge', () => {
   const s = finished()
   s.players[1] = { ...s.players[1], clan: { name: 'Foxes', emoji: '🦊', color: '#ff6b6b' } }
   view(s)
-  expect(screen.getByRole('img', { name: 'Clan: Foxes' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Clan: Foxes' })).toBeInTheDocument()
 })
 
 test('shows which side won under the personal line', () => {
@@ -165,7 +165,7 @@ describe('credits and ranks', () => {
     s.players[1] = { ...s.players[1], rank: 0 }
     view(s)
     const list = screen.getByText('Everyone').closest('section')!
-    expect(within(list).getAllByRole('img').filter((e) => e.className === 'rank-badge')).toHaveLength(1)
+    expect(within(list).getAllByRole('button', { name: 'Spy Hunter' })).toHaveLength(1)
   })
 
   test('shows credits earned for the viewer when > 0', async () => {
