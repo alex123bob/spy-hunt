@@ -258,3 +258,25 @@ export interface GameDetail {
   words: WordsByRole
   roles: GameRoleEntry[]
 }
+
+export interface ReplayStatement {
+  seat: number | null
+  stage: number
+  kind: 'statement' | 'skipped' | 'host'
+  text: string | null
+  lang: Lang | null
+  translations: Partial<Record<Lang, string>>
+}
+export interface ReplayRound {
+  round: number
+  statements: ReplayStatement[]
+  votes: { voter: number; target: number | null; stage: number }[]
+  eliminated: number | null
+}
+export interface ReplayPlayer { seat: number; name: string; is_bot: boolean; role: Role; is_you: boolean }
+export interface GameReplay {
+  players: ReplayPlayer[]
+  rounds: ReplayRound[]
+  words: WordsByRole
+  winner: 'civilians' | 'spies' | null
+}
