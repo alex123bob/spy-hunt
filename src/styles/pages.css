@@ -244,3 +244,18 @@
 .recap-credits { justify-content: flex-start; }
 .recap-credits .credit-chip { animation: none; font-size: 14px; }
 .recap-link { align-self: flex-start; min-height: 44px; display: inline-flex; align-items: center; color: var(--ink); font-weight: 700; }
+
+/* GameRow: one expandable entry in Recent games */
+.game-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.game-row { background: var(--paper); border: 2.5px solid var(--ink); border-radius: 16px; box-shadow: 0 3px 0 var(--ink); min-width: 0; }
+.game-row-toggle { all: unset; box-sizing: border-box; width: 100%; min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; padding: 8px 12px; cursor: pointer; color: var(--ink); }
+.game-row-toggle:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: 14px; }
+.game-badge { font: 700 14px var(--font-display); border: 2px solid var(--ink); border-radius: var(--radius-pill); padding: 2px 10px; background: var(--paper); }
+.game-badge.badge-won { background: var(--mint); }
+.game-badge.badge-none { background: var(--sun); }
+.game-meta { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; font-size: 14px; }
+.game-meta .role { font-size: 13px; text-transform: uppercase; }
+.game-chevron { margin-left: auto; }
+.game-row-panel { padding: 4px 12px 12px; border-top: 2px dashed var(--muted); padding-top: 10px; min-width: 0; }
+.game-row-error { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.game-row-error p { margin: 0; }

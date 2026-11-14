@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { CreditSummary, GameSummary } from '../api/types'
 import { HeroCard } from '../components/HeroCard'
+import { GameRow } from '../components/GameRow'
 import { LookEditor } from '../looks/LookEditor'
 import { getCredits } from '../credits/api'
 import { getMyGames } from '../games/api'
@@ -44,14 +45,7 @@ export function Profile() {
         <section className="recent-games">
           <h3 className="center">{t('profile.recentGames')}</h3>
           <ol className="game-list">
-            {games.map((gm) => (
-              <li key={`${gm.room_id}-${gm.game_no}`}>
-                <Link to={`/games/${gm.room_id}/${gm.game_no}`}>
-                  {t(`arena.role.${gm.your_role}`)} · {t(`profile.gameOutcome.${gm.won === null ? 'none' : gm.won ? 'won' : 'lost'}`, { credits: gm.credits_earned })}
-                </Link>
-                {' '}<span className="muted">{new Date(gm.finished_at).toLocaleDateString()}</span>
-              </li>
-            ))}
+            {games.map((gm) => <GameRow key={`${gm.room_id}-${gm.game_no}`} game={gm} />)}
           </ol>
         </section>
       )}
