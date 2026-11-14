@@ -257,3 +257,10 @@ label:has(> input.toggle), label.toggle { flex-direction: row; align-items: cent
 .hint-bubble.below { animation-name: hint-bubble-in-below; }
 @keyframes hint-bubble-in-below { from { opacity: 0; transform: translateY(-4px) scale(.94); } }
 @media (prefers-reduced-motion: reduce) { .hint-bubble { animation: none; } }
+
+.langmenu { position: relative; display: inline-block; }
+.langmenu-btn { min-height: 44px; cursor: pointer; }
+.langmenu-btn:focus-visible, .langmenu-opt:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.langmenu-list { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; width: max-content; min-width: 100%; display: flex; flex-direction: column; gap: 4px; padding: 8px; background: var(--paper); border: 2.5px solid var(--ink); border-radius: 18px; box-shadow: 0 4px 0 var(--ink); animation: pop .2s var(--ease-spring); }
+.langmenu-opt { min-height: 44px; padding: 8px 14px; text-align: left; font: 600 15px/1.2 var(--font-display); color: var(--ink); background: transparent; border: 2px solid transparent; border-radius: 12px; cursor: pointer; }
+.langmenu-opt[aria-selected="true"] { background: var(--sun); border-color: var(--ink); }
