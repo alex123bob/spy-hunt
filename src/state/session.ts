@@ -40,12 +40,20 @@ function readStore(): Partial<Session> {
 
 function writeStore(value: unknown): void {
   const json = JSON.stringify(value)
+  // Write to every store that accepts it, and clear the key from any store
+  // that rejects the write. Otherwise a stale value left in one store (e.g. an
+  // unwritable-but-nonempty localStorage on mobile) would shadow the fresh
+  // value that readStore finds in another, since readStore returns the first
+  // store that holds anything.
   for (const st of stores()) {
     try {
       st.setItem(KEY, json)
-      return
     } catch {
-      // try the next storage
+      try {
+        st.removeItem(KEY)
+      } catch {
+        // nothing more we can do with this store
+      }
     }
   }
 }

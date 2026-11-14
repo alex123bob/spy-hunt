@@ -1,4 +1,4 @@
-import { ensureGuest, getSession, resetSessionForTests } from './session'
+import { ensureGuest, getSession, resetSessionForTests, setAccountSession } from './session'
 import { setCredentials } from '../api/client'
 
 beforeEach(() => {
@@ -64,6 +64,26 @@ test('identity survives a reload when only sessionStorage works', async () => {
   expect(getSession().playerId).toBe(first.playerId)
   await ensureGuest()
   expect(f).toHaveBeenCalledTimes(1)
+  vi.unstubAllGlobals()
+  sessionStorage.clear()
+})
+
+test('a fresh login overrides a stale identity in an unwritable localStorage', async () => {
+  // Mobile case: localStorage still holds an OLD session and refuses new
+  // writes, but can be cleared. The fresh token must win on the next reload,
+  // not the stale localStorage value.
+  sessionStorage.clear()
+  let ls: string | null = JSON.stringify({ playerId: 'old-pid', token: 'old-token' })
+  vi.stubGlobal('localStorage', {
+    getItem: (k: string) => (k === 'spy-hunt.session' ? ls : null),
+    setItem() { throw new Error('blocked') },
+    removeItem: (k: string) => { if (k === 'spy-hunt.session') ls = null },
+  })
+  resetSessionForTests() // app loads with the stale localStorage value in hand
+  setAccountSession({ playerId: 'new-pid', token: 'new-token' })
+  resetSessionForTests() // auto-reload after login: in-memory copy is gone
+  expect(getSession().playerId).toBe('new-pid')
+  expect(getSession().token).toBe('new-token')
   vi.unstubAllGlobals()
   sessionStorage.clear()
 })
