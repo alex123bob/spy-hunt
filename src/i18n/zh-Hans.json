@@ -35,6 +35,7 @@
   "lobby.start": "开始游戏",
   "lobby.waitingHost": "等待房主开始…",
   "lobby.yourLang": "你的语言",
+  "lang.menuLabel": "语言",
   "room.loading": "加载中…",
   "room.notFound": "找不到房间",
   "room.notFoundBody": "这个房间码没有对应的房间,请检查链接。",

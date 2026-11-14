@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Lang } from '../api/types'
-import { LangPicker } from './LangPicker'
+import { LangMenu } from './LangMenu'
 import { Logo } from './Logo'
 import { AccountMenu } from './AccountMenu'
 import { AuthModal } from './AuthModal'
@@ -28,7 +28,7 @@ export function TopBar() {
     <header className="topbar">
       <Link to="/" className="topbar-logo" aria-label={t('app.title')}><Logo /></Link>
       <div className="topbar-right">
-        <LangPicker compact value={lang} onChange={pickLang} />
+        <LangMenu variant="short" label={t('lang.menuLabel')} value={lang} onChange={pickLang} />
         <AccountMenu email={account.email} onLogout={signOut} onSignIn={() => setOpen(true)} />
       </div>
       {open && <AuthModal onClose={() => setOpen(false)} />}

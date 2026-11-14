@@ -35,6 +35,7 @@
   "lobby.start": "Start game",
   "lobby.waitingHost": "Waiting for the host to start…",
   "lobby.yourLang": "Your language",
+  "lang.menuLabel": "Language",
   "room.loading": "Loading…",
   "room.notFound": "Room not found",
   "room.notFoundBody": "That code does not match any room. Check the link and try again.",

@@ -4,7 +4,7 @@ import { errorText } from '../api/errors'
 import type { Snapshot } from '../api/types'
 import { Avatar } from '../components/Avatar'
 import { Countdown } from '../components/Countdown'
-import { LangPicker } from '../components/LangPicker'
+import { LangMenu } from '../components/LangMenu'
 import { StatementBubble } from '../components/StatementBubble'
 import { setLang, t, useLang } from '../i18n'
 import { patchMyLang } from '../state/accounts'
@@ -68,7 +68,7 @@ export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot
     <main className="screen table" data-testid="screen-Table">
       <header className="row between">
         <span className="pill">{t('table.round', { n: state.round })}</span>
-        <LangPicker compact value={lang} onChange={pickLang} label={t('lobby.yourLang')} />
+        <LangMenu variant="short" label={t('lang.menuLabel')} value={lang} onChange={pickLang} />
       </header>
       <WordCard word={state.me.my_word} />
       <section className="feed" aria-live="polite">
