@@ -1,4 +1,4 @@
-import { ensureGuest, getSession, resetSessionForTests, setAccountSession, setSessionLang } from './session'
+import { ensureGuest, forgetGuest, getSession, resetSessionForTests, setAccountSession, setSessionLang } from './session'
 import { setCredentials } from '../api/client'
 
 beforeEach(() => {
@@ -107,6 +107,43 @@ test('a fresh login wins when localStorage is frozen against both writes and rem
   expect(getSession().playerId).toBe('new-pid')
   expect(getSession().token).toBe('new-token')
   expect(getSession().lang).toBe('zh-Hans')
+  vi.unstubAllGlobals()
+  sessionStorage.clear()
+})
+
+test('forgetGuest removes the session key from storage and keeps lang and name', () => {
+  localStorage.clear()
+  sessionStorage.clear()
+  resetSessionForTests()
+  setAccountSession({ playerId: 'p1', token: 't1' })
+  setSessionLang('zh-Hans')
+  forgetGuest()
+  // The session key still exists (it now holds only preferences), but carries
+  // no identity, and the old token is physically gone from every store.
+  for (const raw of [localStorage.getItem('spy-hunt.session'), sessionStorage.getItem('spy-hunt.session')]) {
+    if (raw) expect(raw).not.toContain('t1')
+  }
+  resetSessionForTests()
+  expect(getSession().token).toBe('')
+  expect(getSession().playerId).toBe('')
+  expect(getSession().lang).toBe('zh-Hans')
+})
+
+test('forgetGuest drops the token when a store rejects writes but allows deletes', () => {
+  // Quota-full edge: setItem fails (no room for the new blob) but removeItem
+  // succeeds (frees space). The overwrite path alone would leave the old token
+  // sitting in that store; the explicit remove is what clears it.
+  sessionStorage.clear()
+  const ls = new Map<string, string>()
+  ls.set('spy-hunt.session', JSON.stringify({ playerId: 'p1', token: 't1' }))
+  vi.stubGlobal('localStorage', {
+    getItem: (k: string) => ls.get(k) ?? null,
+    setItem() { throw new Error('quota') },
+    removeItem: (k: string) => { ls.delete(k) },
+  })
+  resetSessionForTests()
+  forgetGuest()
+  expect(ls.has('spy-hunt.session')).toBe(false)
   vi.unstubAllGlobals()
   sessionStorage.clear()
 })
