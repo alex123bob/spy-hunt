@@ -34,7 +34,7 @@ export function GameRow({ game }: { game: GameSummary }) {
   const panelId = `game-${game.room_id}-${game.game_no}`
   return (
     <li className={`game-row${open ? ' open' : ''}`}>
-      <button type="button" className="game-row-toggle" aria-expanded={open} aria-controls={panelId} onClick={toggle}>
+      <button type="button" className="game-row-toggle" aria-expanded={open} aria-controls={open ? panelId : undefined} onClick={toggle}>
         <span className={`game-badge badge-${outcome}`}>{t(`profile.gameOutcome.${outcome}`, { credits: game.credits_earned })}</span>
         <span className="game-meta">
           <span className={`role ${game.your_role}`}>{t(`arena.role.${game.your_role}`)}</span>

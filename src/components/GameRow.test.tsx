@@ -36,6 +36,16 @@ test('is collapsed by default and makes no request', () => {
   expect(getMyGameDetail).not.toHaveBeenCalled()
 })
 
+test('aria-controls only points at the panel while it exists', async () => {
+  const { container } = renderRow()
+  expect(toggle()).not.toHaveAttribute('aria-controls')
+  fireEvent.click(toggle())
+  const id = toggle().getAttribute('aria-controls')
+  expect(id).toBeTruthy()
+  expect(container.querySelector(`#${id}`)).not.toBeNull()
+  await screen.findByRole('link', { name: t('profile.game.fullRecap') })
+})
+
 test('opening fetches once and shows the recap; reopening does not refetch', async () => {
   renderRow()
   fireEvent.click(toggle())
