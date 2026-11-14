@@ -50,7 +50,7 @@ test('error codes, colour names and lobby hints exist in both languages', () => 
   const keys = [
     ...['bad_name', 'bad_avatar', 'bad_outfit', 'bot_limit', 'not_found', 'bot_in_room', 'room_full', 'not_lobby', 'not_allowed', 'not_host', 'not_member', 'need_players', 'rate_limited', 'unauthorized'].map((c) => `error.code.${c}`),
     ...['ff6b6b', 'ffa94d', '4cd08a', '38c9d6', '5b8cff', 'b07cff'].map((c) => `bots.color.${c}`),
-    'lobby.fillHint', 'lobby.needMore', 'lobby.addBotRow', 'lobby.randomBot', 'lobby.myBotsHeading',
+    'lobby.fillHint', 'lobby.needMore', 'lobby.addBotRow', 'lobby.randomBot', 'lobby.myBotsHeading', 'lobby.roomPrefix', 'lobby.fullBadge',
   ]
   for (const k of keys) {
     expect(en).toHaveProperty([k])

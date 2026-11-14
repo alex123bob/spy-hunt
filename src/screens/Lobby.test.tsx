@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, within, waitFor, cleanup } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { Lobby } from './Lobby'
 import { setLang, getLang } from '../i18n'
 import type { Snapshot } from '../api/types'
@@ -54,10 +54,32 @@ test('invite link text equals origin/r/CODE', () => {
 test('bots are labelled and switching language updates strings immediately', () => {
   render(<Lobby state={snap(true)} />)
   expect(screen.getByText('Bot')).toBeInTheDocument()
-  fireEvent.click(within(screen.getByRole('radiogroup', { name: 'Your language' })).getByRole('radio', { name: '简体中文' }))
-  expect(getLang()).toBe('zh-Hans')
+  act(() => setLang('zh-Hans'))
   expect(screen.getByRole('button', { name: '开始游戏' })).toBeInTheDocument()
-  expect(request).toHaveBeenCalledWith('PATCH', '/rooms/ABCD/me', { lang: 'zh-Hans' })
+})
+
+test('there is no Your language section', () => {
+  render(<Lobby state={snap(true)} />)
+  expect(screen.queryByText('Your language')).toBeNull()
+  expect(screen.queryByRole('radiogroup')).toBeNull()
+})
+
+test('the host picks the room language from the players card header', () => {
+  render(<Lobby state={snap(true)} />)
+  const btn = screen.getByRole('button', { name: 'Room language' })
+  expect(btn).toHaveTextContent('Room English')
+  fireEvent.click(btn)
+  fireEvent.click(screen.getByRole('option', { name: '简体中文' }))
+  expect(request).toHaveBeenCalledWith('PATCH', '/rooms/ABCD/settings', { main_lang: 'zh-Hans' })
+  expect(request).not.toHaveBeenCalledWith('PATCH', '/rooms/ABCD/me', expect.anything())
+  expect(patchMyLang).not.toHaveBeenCalled()
+  expect(getLang()).toBe('en')
+})
+
+test('a non-host sees the room language as text, not a button', () => {
+  render(<Lobby state={snap(false)} />)
+  expect(screen.queryByRole('button', { name: 'Room language' })).toBeNull()
+  expect(screen.getByText('Room English')).toBeInTheDocument()
 })
 
 function withBots(isHost: boolean, extra: Snapshot['players']): Snapshot {
@@ -67,69 +89,85 @@ function withBots(isHost: boolean, extra: Snapshot['players']): Snapshot {
 const botP = (seat: number, bot_id: string, name: string) =>
   ({ seat, name, lang: 'en', is_bot: true, alive: true, connected: true, is_host: false, bot_id, avatar: { emoji: '🐙', color: '#abc' } }) as Snapshot['players'][number]
 
-test('a member with bots sees Add my bot; with none, no button', async () => {
-  vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
-  const { unmount } = render(<Lobby state={snap(false)} />)
-  expect(await screen.findByRole('button', { name: 'Add my bot' })).toBeEnabled()
-  unmount()
-  vi.mocked(listMyBots).mockResolvedValue([])
-  render(<Lobby state={snap(false)} />)
-  await waitFor(() => expect(listMyBots).toHaveBeenCalledTimes(2))
-  expect(screen.queryByRole('button', { name: 'Add my bot' })).toBeNull()
-})
+const full = (isHost: boolean): Snapshot => {
+  const s = snap(isHost)
+  return { ...s, config: { ...s.config, max_players: 3 } }
+}
 
-test('listMyBots failing leaves the lobby usable with no alert', async () => {
-  vi.mocked(listMyBots).mockRejectedValue(new Error('boom'))
-  render(<Lobby state={snap(true)} />)
+test('a full room shows the Full badge and no add row', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
+  render(<Lobby state={full(true)} />)
   await waitFor(() => expect(listMyBots).toHaveBeenCalled())
-  expect(screen.getByRole('button', { name: 'Start game' })).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Add bot' })).toBeInTheDocument()
-  expect(screen.queryByRole('alert')).toBeNull()
+  expect(screen.getByText('Players (3/3)')).toBeInTheDocument()
+  expect(screen.getByText('Full')).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: /Add a bot/ })).toBeNull()
 })
 
-test('picking a bot posts add with its id and closes the list', async () => {
-  vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex'), mine('b2', 'Sue')])
-  render(<Lobby state={snap(false)} />)
-  fireEvent.click(await screen.findByRole('button', { name: 'Add my bot' }))
-  fireEvent.click(screen.getByRole('button', { name: /Rex/ }))
-  expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add', bot_id: 'b1' })
-  await waitFor(() => expect(screen.queryByRole('button', { name: /Sue/ })).toBeNull())
+test('a room with space shows no Full badge', () => {
+  render(<Lobby state={snap(true)} />)
+  expect(screen.queryByText('Full')).toBeNull()
 })
 
-test('Add my bot is disabled once my bot is in the room, and room bots are not offered', async () => {
-  vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
-  render(<Lobby state={withBots(false, [botP(3, 'b1', 'Rex')])} />)
-  const btn = await screen.findByRole('button', { name: 'Add my bot' })
-  expect(btn).toHaveAttribute('aria-disabled', 'true')
-  fireEvent.click(btn)
-  expect(screen.getByRole('tooltip')).toHaveTextContent('is already in this room.')
-  expect(screen.queryByRole('button', { name: 'Rex' })).toBeNull()
+test('the host adds a random bot from the add menu', async () => {
+  render(<Lobby state={snap(true)} />)
+  fireEvent.click(screen.getByRole('button', { name: /Add a bot/ }))
+  fireEvent.click(screen.getByRole('menuitem', { name: /Random bot/ }))
+  expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add' })
+  await waitFor(() => expect(screen.queryByRole('menu')).toBeNull())
 })
 
-test('the picker offers each of my bots when none is in the room', async () => {
+test('picking one of my bots posts add with its id', async () => {
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex'), mine('b2', 'Sue')])
   render(<Lobby state={withBots(false, [botP(3, 'b9', 'Other')])} />)
-  fireEvent.click(await screen.findByRole('button', { name: 'Add my bot' }))
-  expect(screen.getByRole('button', { name: /Rex/ })).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: /Sue/ })).toBeInTheDocument()
+  fireEvent.click(await screen.findByRole('button', { name: /Add a bot/ }))
+  expect(screen.queryByRole('menuitem', { name: /Random bot/ })).toBeNull()
+  expect(screen.getByRole('menuitem', { name: /Sue/ })).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('menuitem', { name: /Rex/ }))
+  expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add', bot_id: 'b1' })
+})
+
+test('with my bot seated, the add menu explains why and offers no bots', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex'), mine('b2', 'Sue')])
+  render(<Lobby state={withBots(false, [botP(3, 'b1', 'Rex')])} />)
+  fireEvent.click(await screen.findByRole('button', { name: /Add a bot/ }))
+  expect(screen.getByText('Your bot Rex is already in this room. Remove it to add a different one.')).toBeInTheDocument()
+  expect(screen.queryAllByRole('menuitem')).toHaveLength(0)
+})
+
+test('a non-host without bots has no add row', async () => {
+  render(<Lobby state={snap(false)} />)
+  await waitFor(() => expect(listMyBots).toHaveBeenCalled())
+  expect(screen.queryByRole('button', { name: /Add a bot/ })).toBeNull()
 })
 
 test('only my bot chip has Remove, posting remove with the seat', async () => {
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
   render(<Lobby state={withBots(false, [botP(4, 'b1', 'Rex'), botP(5, 'b9', 'Other')])} />)
-  const rm = await screen.findAllByRole('button', { name: 'Remove' })
+  const rm = await screen.findAllByRole('button', { name: /Remove/ })
   expect(rm).toHaveLength(1)
   fireEvent.click(rm[0])
   expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'remove', seat: 4 })
 })
 
-test('the host can remove any bot by seat, a non-host only their own', async () => {
-  vi.mocked(listMyBots).mockResolvedValue([])
+test('the host can remove any bot by seat', async () => {
   render(<Lobby state={withBots(true, [botP(4, 'b9', 'Other')])} />)
-  const rm = await screen.findAllByRole('button', { name: 'Remove' })
+  const rm = await screen.findAllByRole('button', { name: /Remove/ })
   expect(rm).toHaveLength(2)
   fireEvent.click(rm[1])
   expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'remove', seat: 4 })
+})
+
+test('there is no global Remove bot button', () => {
+  render(<Lobby state={snap(true)} />)
+  expect(screen.queryByRole('button', { name: 'Remove bot' })).toBeNull()
+  expect(screen.queryByRole('button', { name: 'Add bot' })).toBeNull()
+})
+
+test('per-seat Remove buttons are touch-sized and show a cross', () => {
+  render(<Lobby state={snap(true)} />)
+  const rm = screen.getByRole('button', { name: /Remove/ })
+  expect(rm).toHaveClass('remove-btn')
+  expect(rm).toHaveTextContent('✕ Remove')
 })
 
 test('a bot player shows its avatar emoji', () => {
@@ -157,15 +195,10 @@ test('fill hint shows when bots will be added, needMore without bot fill, nothin
 test('a failing call shows mapped text, not the server text', async () => {
   vi.mocked(request).mockRejectedValueOnce(new ApiError(409, 'bot_in_room', 'English server text'))
   render(<Lobby state={snap(true)} />)
-  fireEvent.click(screen.getByRole('button', { name: 'Add bot' }))
+  fireEvent.click(screen.getByRole('button', { name: /Add a bot/ }))
+  fireEvent.click(screen.getByRole('menuitem', { name: /Random bot/ }))
   const alert = await screen.findByRole('alert')
   expect(alert).toHaveTextContent('You already have a bot in this room.')
   expect(alert).not.toHaveTextContent('English server text')
   expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add' })
-})
-
-test('picking a language also syncs it to the account', () => {
-  render(<Lobby state={snap(false)} />)
-  fireEvent.click(within(screen.getByRole('radiogroup', { name: 'Your language' })).getByRole('radio', { name: '简体中文' }))
-  expect(patchMyLang).toHaveBeenCalledWith('zh-Hans')
 })

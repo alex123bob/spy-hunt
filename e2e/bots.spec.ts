@@ -34,7 +34,8 @@ test('a player dresses up a bot, shares its page, and plays it in a room', async
   await owner.getByLabel('Your name').fill('Hosty')
   await owner.getByRole('button', { name: 'Create room' }).click()
   await owner.waitForURL(/\/r\/[A-Z0-9]+$/)
-  await owner.getByRole('button', { name: 'Add my bot' }).click()
+  await owner.getByRole('button', { name: 'Add a bot' }).click()
+  await owner.getByRole('menuitem', { name: /Mochi/ }).click()
   const row = owner.locator('li, div').filter({ hasText: 'Mochi' }).filter({ hasText: 'Bot' }).first()
   await expect(row).toBeVisible()
 

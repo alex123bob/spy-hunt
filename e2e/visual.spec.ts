@@ -11,7 +11,7 @@ async function open(browser: Browser, vp: keyof typeof VIEWPORTS, reduced = fals
 }
 
 async function setLang(page: Page, lang: Lang) {
-  await page.getByRole('button', { name: 'Language' }).click()
+  await page.getByRole('button', { name: /^(Language|语言)$/ }).click()
   await page.getByRole('option', { name: LANGS[lang] }).click()
 }
 

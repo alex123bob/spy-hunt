@@ -1,31 +1,26 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { request } from '../api/client'
 import { errorText } from '../api/errors'
-import type { BotCard, Lang, Snapshot } from '../api/types'
+import type { BotCard, Snapshot } from '../api/types'
 import { listMyBots } from '../bots/api'
-import { Avatar } from '../components/Avatar'
-import { WhyButton } from '../components/WhyButton'
+import { AddBotMenu } from '../components/AddBotMenu'
+import { LangMenu } from '../components/LangMenu'
 import { Loader } from '../components/Loader'
 import { Toast, TOAST_MS } from '../components/Toast'
-import { LangPicker } from '../components/LangPicker'
 import { PlayerChip } from '../components/PlayerChip'
 import { QrCode } from '../components/QrCode'
-import { setLang, t, useLang } from '../i18n'
-import { patchMyLang } from '../state/accounts'
-import { setSessionLang } from '../state/session'
+import { t, useLang } from '../i18n'
 
 export function Lobby({ state }: { state: Snapshot }) {
-  const lang = useLang()
+  useLang() // re-render on language change
   const [err, setErr] = useState('')
   const [copied, setCopied] = useState(false)
   const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   useEffect(() => () => clearTimeout(copyTimer.current), [])
   const [myBots, setMyBots] = useState<BotCard[]>([])
-  const [picking, setPicking] = useState(false)
   const code = state.code
   const link = `${window.location.origin}${import.meta.env.BASE_URL}r/${code}`
   const isHost = state.me.is_host
-  const bots = state.players.filter((p) => p.is_bot).length
   const short = state.players.length < state.config.min_players
   const full = state.players.length >= state.config.max_players
 
@@ -36,7 +31,8 @@ export function Lobby({ state }: { state: Snapshot }) {
   }, [])
 
   const myIds = new Set(myBots.map((b) => b.id))
-  const ownBotIn = state.players.some((p) => p.bot_id && myIds.has(p.bot_id))
+  const seatedMine = state.players.find((p) => p.bot_id && myIds.has(p.bot_id))
+  const ownBotIn = (seatedMine && myBots.find((b) => b.id === seatedMine.bot_id)) || null
 
   const call = async (method: string, path: string, body?: unknown) => {
     try {
@@ -45,13 +41,6 @@ export function Lobby({ state }: { state: Snapshot }) {
     } catch (e) {
       setErr(errorText(e))
     }
-  }
-
-  const pickLang = (l: Lang) => {
-    setLang(l)
-    setSessionLang(l)
-    void call('PATCH', '/me', { lang: l })
-    void patchMyLang(l)
   }
 
   const copy = async () => {
@@ -76,19 +65,26 @@ export function Lobby({ state }: { state: Snapshot }) {
         <button type="button" className="pill" onClick={copy}>{copied ? t('lobby.copied') : t('lobby.copy')}</button>
       </header>
       <Toast text={copied ? t('lobby.copied') : ''} />
-      <section>
-        <p className="muted">{t('lobby.yourLang')}</p>
-        <LangPicker value={lang} onChange={pickLang} label={t('lobby.yourLang')} />
-      </section>
       <section className="card">
-        <p className="muted">{t('lobby.players')} ({state.players.length}/{state.config.max_players})</p>
+        <div className="cardhead">
+          <div className="row cardhead-title">
+            <p className="muted">{t('lobby.players')} ({state.players.length}/{state.config.max_players})</p>
+            {full && <span className="full-badge">{t('lobby.fullBadge')}</span>}
+          </div>
+          {isHost ? (
+            <LangMenu variant="room" prefix={t('lobby.roomPrefix')} label={t('lobby.mainLang')} value={state.main_lang}
+              onChange={(l) => call('PATCH', '/settings', { main_lang: l })} />
+          ) : (
+            <span className="roomlang ro">{t('lobby.roomPrefix')} {t(`lang.${state.main_lang}`)}</span>
+          )}
+        </div>
         <div className="seats stagger">
           {state.players.map((p, i) => (
             <div key={p.seat} className="row between seat" style={{ '--i': i } as CSSProperties}>
               <div className="grow"><PlayerChip player={p} isMe={p.seat === state.me.seat} /></div>
               {p.is_bot && (isHost || (p.bot_id && myIds.has(p.bot_id))) && (
-                <button type="button" className="btn ghost small" onClick={() => call('POST', '/bots', { action: 'remove', seat: p.seat })}>
-                  {t('lobby.removeMine')}
+                <button type="button" className="btn ghost small remove-btn" onClick={() => call('POST', '/bots', { action: 'remove', seat: p.seat })}>
+                  <span aria-hidden>✕ </span>{t('lobby.removeMine')}
                 </button>
               )}
             </div>
@@ -106,37 +102,11 @@ export function Lobby({ state }: { state: Snapshot }) {
               : t('lobby.needMore', { min: state.config.min_players })}
           </p>
         )}
-        {myBots.length > 0 && (
-          <>
-            <WhyButton why={full ? t('lobby.full') : ownBotIn && t('lobby.ownBotIn')} onClick={() => setPicking((v) => !v)}>
-              {t('lobby.addMyBot')}
-            </WhyButton>
-            {picking && !full && !ownBotIn && (
-              <div className="bot-picker">
-                {myBots.map((b) => (
-                  <button key={b.id} type="button" className="card bot-card" onClick={() => { setPicking(false); void call('POST', '/bots', { action: 'add', bot_id: b.id }) }}>
-                    <Avatar player={b} /> <span className="wrap">{b.name}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </>
+        {!full && (
+          <AddBotMenu isHost={isHost} myBots={myBots} ownBotIn={ownBotIn}
+            onAdd={(botId) => call('POST', '/bots', botId === undefined ? { action: 'add' } : { action: 'add', bot_id: botId })} />
         )}
       </section>
-      {isHost && (
-        <section className="card room-controls">
-          <p className="muted">{t('lobby.mainLang')}</p>
-          <LangPicker label={t('lobby.mainLang')} value={state.main_lang} onChange={(l) => call('PATCH', '/settings', { main_lang: l })} />
-          <div className="row bot-btns">
-            <WhyButton why={full && t('lobby.full')} onClick={() => call('POST', '/bots', { action: 'add' })}>
-              {t('lobby.addBot')}
-            </WhyButton>
-            <button type="button" className="btn" disabled={bots === 0} onClick={() => call('POST', '/bots', { action: 'remove' })}>
-              {t('lobby.removeBot')}
-            </button>
-          </div>
-        </section>
-      )}
       <section className="card center">
         <p className="muted">{t('lobby.invite')}</p>
         <QrCode text={link} />
