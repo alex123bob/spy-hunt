@@ -3,10 +3,10 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { GameDetail } from './GameDetail'
 import { ApiError } from '../api/client'
 import type { GameDetail as Detail } from '../api/types'
-import { getMyGameDetail } from '../games/api'
+import { getMyGameDetail, getMyGameReplay } from '../games/api'
 import { setLang, t } from '../i18n'
 
-vi.mock('../games/api', () => ({ getMyGameDetail: vi.fn() }))
+vi.mock('../games/api', () => ({ getMyGameDetail: vi.fn(), getMyGameReplay: vi.fn() }))
 
 const detail = (): Detail => ({
   finished_at: 0, winner: 'civilians', lang: 'en',
@@ -26,6 +26,7 @@ const tree = (
 beforeEach(() => {
   setLang('en')
   vi.mocked(getMyGameDetail).mockReset().mockResolvedValue(detail())
+  vi.mocked(getMyGameReplay).mockReset().mockRejectedValue(new ApiError(404, 'not_found'))
 })
 
 test('renders every seat, the words, and the winner banner on success', async () => {
@@ -85,4 +86,42 @@ test('hides the words line when the game had no word pair', async () => {
   const { container } = render(tree)
   await screen.findByText('Ann:')
   expect(container.textContent).not.toContain('Civilians:')
+})
+
+test('shows a replay section with statements and votes when a replay exists', async () => {
+  vi.mocked(getMyGameReplay).mockResolvedValue({
+    players: [{ seat: 0, name: 'Alice', is_bot: false, role: 'civilian', is_you: true }],
+    rounds: [{
+      round: 1,
+      statements: [{ seat: 0, stage: 0, kind: 'statement', text: 'hi there', lang: 'en', translations: {} }],
+      votes: [{ voter: 0, target: null, stage: 0 }],
+      eliminated: null,
+    }],
+    words: { civilian: { en: 'tea' }, spy: { en: 'coffee' } },
+    winner: 'civilians',
+  })
+  render(tree)
+  expect(await screen.findByText('hi there')).toBeTruthy()
+})
+
+test('renders without a replay section when no replay exists (404)', async () => {
+  render(tree)
+  expect(await screen.findByText('Ann:')).toBeTruthy()
+  expect(screen.queryByText('hi there')).toBeNull()
+})
+
+test('renders a host statement (null seat) without crashing', async () => {
+  vi.mocked(getMyGameReplay).mockResolvedValue({
+    players: [{ seat: 0, name: 'Alice', is_bot: false, role: 'civilian', is_you: true }],
+    rounds: [{
+      round: 1,
+      statements: [{ seat: null, stage: 0, kind: 'host', text: 'round begins', lang: 'en', translations: {} }],
+      votes: [],
+      eliminated: null,
+    }],
+    words: { civilian: { en: 'tea' }, spy: { en: 'coffee' } },
+    winner: 'civilians',
+  })
+  render(tree)
+  expect(await screen.findByText('round begins')).toBeTruthy()
 })

@@ -428,6 +428,7 @@
   "profile.gameOutcome.none": "Draw · +{credits} credits",
   "profile.gameDetail.notFound": "Game not found",
   "profile.gameDetail.error": "Could not load this game.",
+  "profile.gameDetail.replayTitle": "Replay",
   "profile.game.you": "You",
   "profile.game.bot": "Bot",
   "profile.game.words": "Words",

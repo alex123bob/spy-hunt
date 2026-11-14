@@ -428,6 +428,7 @@
   "profile.gameOutcome.none": "未分胜负 · +{credits} 积分",
   "profile.gameDetail.notFound": "找不到这局游戏",
   "profile.gameDetail.error": "无法加载这局游戏。",
+  "profile.gameDetail.replayTitle": "回放",
   "profile.game.you": "你",
   "profile.game.bot": "机器人",
   "profile.game.words": "词语",
