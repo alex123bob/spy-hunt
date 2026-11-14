@@ -52,6 +52,8 @@ export function getAccount(): Promise<Account> {
         const r = await request<Account>('GET', '/me')
         const email = typeof r?.email === 'string' ? r.email : null
         setCachedEmail(email)
+        // accounts made before language persistence have none: adopt this device's language once
+        if (r && r.preferred_lang === null) void patchMyLang(getSession().lang)
         return { email }
       } catch (e) {
         // a transient failure keeps what we last knew; only a rejected token means signed out

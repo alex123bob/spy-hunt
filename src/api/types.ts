@@ -237,7 +237,7 @@ export interface GameSummary {
   finished_at: number
   winner: 'civilians' | 'spies' | null
   your_role: Role
-  won: boolean
+  won: boolean | null
   credits_earned: number
 }
 

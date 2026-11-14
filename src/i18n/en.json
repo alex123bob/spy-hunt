@@ -423,5 +423,8 @@
   "profile.recentGames": "Recent games",
   "profile.gameOutcome.won": "Won · +{credits} credits",
   "profile.gameOutcome.lost": "Lost · +{credits} credits",
-  "profile.gameDetail.title": "Game recap"
+  "profile.gameDetail.title": "Game recap",
+  "profile.gameOutcome.none": "Draw · +{credits} credits",
+  "profile.gameDetail.notFound": "Game not found",
+  "profile.gameDetail.error": "Could not load this game."
 }

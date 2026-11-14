@@ -40,7 +40,6 @@ export function Profile() {
             <span>{t('credits.howLink')}</span>
         </Link>
       </section>
-      <LookEditor name={t('credits.profile')} />
       {games && games.length > 0 && (
         <section className="recent-games">
           <h3 className="center">{t('profile.recentGames')}</h3>
@@ -48,7 +47,7 @@ export function Profile() {
             {games.map((gm) => (
               <li key={`${gm.room_id}-${gm.game_no}`}>
                 <Link to={`/games/${gm.room_id}/${gm.game_no}`}>
-                  {t(`arena.role.${gm.your_role}`)} · {t(`profile.gameOutcome.${gm.won ? 'won' : 'lost'}`, { credits: gm.credits_earned })}
+                  {t(`arena.role.${gm.your_role}`)} · {t(`profile.gameOutcome.${gm.won === null ? 'none' : gm.won ? 'won' : 'lost'}`, { credits: gm.credits_earned })}
                 </Link>
                 {' '}<span className="muted">{new Date(gm.finished_at).toLocaleDateString()}</span>
               </li>
@@ -56,6 +55,7 @@ export function Profile() {
           </ol>
         </section>
       )}
+      <LookEditor name={t('credits.profile')} />
       <h3 className="center">{t('credits.ranksTitle')}</h3>
       <ol className="ladder">
         {RANKS.map((r, i) => (
