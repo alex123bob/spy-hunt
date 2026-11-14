@@ -69,7 +69,7 @@ export function GameDetail() {
   }
   const hasWords = !!(words.civilian || words.spy)
 
-  const replay = replayLoad.kind === 'ok' ? replayLoad.replay : null
+  const replay = replayLoad.kind === 'ok' && replayLoad.replay.rounds.length > 0 ? replayLoad.replay : null
   const bySeat = new Map(replay?.players.map((p) => [p.seat, p]) ?? [])
   const name = (seat: number | null) => (seat === null ? '' : bySeat.get(seat)?.name ?? String(seat))
 

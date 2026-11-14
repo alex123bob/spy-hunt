@@ -125,3 +125,69 @@ test('renders a host statement (null seat) without crashing', async () => {
   render(tree)
   expect(await screen.findByText('round begins')).toBeTruthy()
 })
+
+test('hides the replay heading when the replay has no rounds', async () => {
+  vi.mocked(getMyGameReplay).mockResolvedValue({
+    players: [{ seat: 0, name: 'Alice', is_bot: false, role: 'civilian', is_you: true }],
+    rounds: [],
+    words: { civilian: { en: 'tea' }, spy: { en: 'coffee' } },
+    winner: 'civilians',
+  })
+  render(tree)
+  await screen.findByText('Ann:')
+  expect(screen.queryByText(t('profile.gameDetail.replayTitle'))).toBeNull()
+})
+
+test('renders a skipped statement using the skipped wording, not the raw bubble', async () => {
+  vi.mocked(getMyGameReplay).mockResolvedValue({
+    players: [{ seat: 0, name: 'Alice', is_bot: false, role: 'civilian', is_you: true }],
+    rounds: [{
+      round: 1,
+      statements: [{ seat: 0, stage: 0, kind: 'skipped', text: null, lang: null, translations: {} }],
+      votes: [],
+      eliminated: null,
+    }],
+    words: { civilian: { en: 'tea' }, spy: { en: 'coffee' } },
+    winner: 'civilians',
+  })
+  render(tree)
+  expect(await screen.findByText(t('table.skipped', { name: 'Alice' }))).toBeInTheDocument()
+})
+
+test('shows a translation line when the statement language differs from the viewer', async () => {
+  vi.mocked(getMyGameReplay).mockResolvedValue({
+    players: [{ seat: 0, name: 'Alice', is_bot: false, role: 'civilian', is_you: true }],
+    rounds: [{
+      round: 1,
+      statements: [{ seat: 0, stage: 0, kind: 'statement', text: 'hello', lang: 'en', translations: { 'zh-Hans': '你好' } }],
+      votes: [],
+      eliminated: null,
+    }],
+    words: { civilian: { en: 'tea' }, spy: { en: 'coffee' } },
+    winner: 'civilians',
+  })
+  setLang('zh-Hans')
+  render(tree)
+  expect(await screen.findByText('你好')).toBeInTheDocument()
+})
+
+test('labels a stage-1 round as a tiebreak and resolves voter/target names in vote chips', async () => {
+  vi.mocked(getMyGameReplay).mockResolvedValue({
+    players: [
+      { seat: 0, name: 'Alice', is_bot: false, role: 'civilian', is_you: true },
+      { seat: 1, name: 'Bob', is_bot: false, role: 'spy', is_you: false },
+    ],
+    rounds: [{
+      round: 1,
+      statements: [],
+      votes: [{ voter: 0, target: 1, stage: 1 }],
+      eliminated: 1,
+    }],
+    words: { civilian: { en: 'tea' }, spy: { en: 'coffee' } },
+    winner: 'civilians',
+  })
+  render(tree)
+  expect(await screen.findByText(t('arena.match.tiebreak'))).toBeInTheDocument()
+  expect(screen.getByText(t('arena.match.vote', { voter: 'Alice', target: 'Bob' }))).toBeInTheDocument()
+  expect(screen.getByText(t('arena.match.out', { name: 'Bob' }))).toBeInTheDocument()
+})
