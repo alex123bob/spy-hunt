@@ -419,5 +419,9 @@
   "credits.how.bots": "Bots don't count as real players, and replaying a game or daily you already finished earns nothing new.",
   "credits.ranksTitle": "Ranks",
   "credits.howLink": "How to earn",
-  "common.back": "Back"
+  "common.back": "Back",
+  "profile.recentGames": "Recent games",
+  "profile.gameOutcome.won": "Won · +{credits} credits",
+  "profile.gameOutcome.lost": "Lost · +{credits} credits",
+  "profile.gameDetail.title": "Game recap"
 }

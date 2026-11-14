@@ -419,5 +419,9 @@
   "credits.how.bots": "机器人不算作真人玩家；重复完成已结束的对局或每日谜题不会再得分。",
   "credits.ranksTitle": "等级",
   "credits.howLink": "如何获得",
-  "common.back": "返回"
+  "common.back": "返回",
+  "profile.recentGames": "最近的对局",
+  "profile.gameOutcome.won": "获胜 · +{credits} 积分",
+  "profile.gameOutcome.lost": "落败 · +{credits} 积分",
+  "profile.gameDetail.title": "对局回顾"
 }

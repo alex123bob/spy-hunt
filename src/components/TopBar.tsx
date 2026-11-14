@@ -6,7 +6,7 @@ import { Logo } from './Logo'
 import { AccountMenu } from './AccountMenu'
 import { AuthModal } from './AuthModal'
 import { setLang, t, useLang } from '../i18n'
-import { logout, useAccount } from '../state/accounts'
+import { logout, patchMyLang, useAccount } from '../state/accounts'
 import { setSessionLang } from '../state/session'
 
 export function TopBar() {
@@ -17,6 +17,7 @@ export function TopBar() {
   const pickLang = (l: Lang) => {
     setLang(l)
     setSessionLang(l)
+    void patchMyLang(l)
   }
   const signOut = async () => {
     await logout()

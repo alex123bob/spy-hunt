@@ -170,7 +170,7 @@ export interface DailyResult {
   credit_parts?: CreditPart[]
 }
 
-export interface Account { email: string | null }
+export interface Account { email: string | null; preferred_lang?: Lang | null }
 
 export type Frame = 'none' | 'leaf' | 'ribbon' | 'star' | 'gold' | 'crown'
 export interface Avatar { emoji: string; color: string; frame?: Frame }
@@ -230,3 +230,31 @@ export interface Season {
   members: { name: string; points: number; is_leader: boolean }[]
 }
 export interface MyClan { clan: ClanInfo | null; season?: Season | null }
+
+export interface GameSummary {
+  room_id: string
+  game_no: number
+  finished_at: number
+  winner: 'civilians' | 'spies' | null
+  your_role: Role
+  won: boolean
+  credits_earned: number
+}
+
+export interface GameRoleEntry {
+  seat: number
+  role: Role
+  is_bot: boolean
+  name: string
+  is_you: boolean
+  credits_earned?: number
+  credit_parts?: CreditPart[]
+}
+
+export interface GameDetail {
+  finished_at: number
+  winner: 'civilians' | 'spies' | null
+  lang: Lang
+  words: WordsByRole
+  roles: GameRoleEntry[]
+}

@@ -5,6 +5,7 @@ import { Clan } from './screens/Clan'
 import { Bots } from './screens/Bots'
 import { Daily } from './screens/Daily'
 import { Landing } from './screens/Landing'
+import { GameDetail } from './screens/GameDetail'
 import { MatchPage } from './screens/MatchPage'
 import { HowToEarn } from './screens/HowToEarn'
 import { Profile } from './screens/Profile'
@@ -25,6 +26,7 @@ export function AppRoutes() {
       <Route path="/credits/how" element={<HowToEarn />} />
       <Route path="/clan" element={<Clan />} />
       <Route path="/match/:id" element={<MatchPage />} />
+      <Route path="/games/:roomId/:gameNo" element={<GameDetail />} />
       <Route path="*" element={<Landing />} />
     </Routes>
   )
