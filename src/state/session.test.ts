@@ -1,4 +1,4 @@
-import { ensureGuest, getSession, resetSessionForTests, setAccountSession } from './session'
+import { ensureGuest, getSession, resetSessionForTests, setAccountSession, setSessionLang } from './session'
 import { setCredentials } from '../api/client'
 
 beforeEach(() => {
@@ -84,6 +84,29 @@ test('a fresh login overrides a stale identity in an unwritable localStorage', a
   resetSessionForTests() // auto-reload after login: in-memory copy is gone
   expect(getSession().playerId).toBe('new-pid')
   expect(getSession().token).toBe('new-token')
+  vi.unstubAllGlobals()
+  sessionStorage.clear()
+})
+
+test('a fresh login wins when localStorage is frozen against both writes and removes', async () => {
+  // The real device case: localStorage holds a stale blob and rejects BOTH
+  // setItem and removeItem, while still serving the old value on read. The
+  // stale value can neither be overwritten nor deleted, so reads must instead
+  // pick the fresher value that a working sessionStorage holds.
+  sessionStorage.clear()
+  const stale = JSON.stringify({ playerId: 'old-pid', token: 'old-token', lang: 'en' })
+  vi.stubGlobal('localStorage', {
+    getItem: (k: string) => (k === 'spy-hunt.session' ? stale : null),
+    setItem() { throw new Error('frozen') },
+    removeItem() { throw new Error('frozen') },
+  })
+  resetSessionForTests()
+  setAccountSession({ playerId: 'new-pid', token: 'new-token' })
+  setSessionLang('zh-Hans')
+  resetSessionForTests() // reload
+  expect(getSession().playerId).toBe('new-pid')
+  expect(getSession().token).toBe('new-token')
+  expect(getSession().lang).toBe('zh-Hans')
   vi.unstubAllGlobals()
   sessionStorage.clear()
 })

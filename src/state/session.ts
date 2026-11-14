@@ -13,6 +13,15 @@ export interface Session {
 const KEY = 'spy-hunt.session'
 let memory: Partial<Session> | null = null
 
+// Monotonic write stamp. Date.now() is enough: a write made in a later page
+// life always outranks the value a frozen store kept from an earlier one. The
+// counter guards against two writes within the same millisecond.
+let lastV = 0
+function nextVersion(): number {
+  lastV = Math.max(lastV + 1, Date.now())
+  return lastV
+}
+
 // localStorage first; sessionStorage keeps the identity across reloads when it is blocked
 const stores = (): Storage[] => {
   const out: Storage[] = []
@@ -27,24 +36,41 @@ const stores = (): Storage[] => {
 }
 
 function readStore(): Partial<Session> {
+  // Pick the freshest entry across stores by its write stamp `v`, not just the
+  // first store that holds anything. On a device whose localStorage is frozen
+  // with a stale value it can neither overwrite nor delete, a working
+  // sessionStorage still carries a higher `v`, so the fresh value wins.
+  let best: (Partial<Session> & { v?: number }) | null = null
+  let bestV = -Infinity
   for (const st of stores()) {
     try {
       const raw = st.getItem(KEY)
-      if (raw) return JSON.parse(raw) as Partial<Session>
+      if (!raw) continue
+      const parsed = JSON.parse(raw) as Partial<Session> & { v?: number }
+      const v = typeof parsed.v === 'number' ? parsed.v : 0
+      if (best === null || v > bestV) {
+        best = parsed
+        bestV = v
+      }
     } catch {
       // try the next storage
     }
   }
-  return {}
+  if (best === null) return {}
+  // Seed the in-process version so the next write outranks whatever we just
+  // read, then drop the stamp so it never leaks into the Session shape.
+  if (typeof best.v === 'number') lastV = Math.max(lastV, best.v)
+  const { v: _v, ...session } = best
+  return session
 }
 
-function writeStore(value: unknown): void {
-  const json = JSON.stringify(value)
-  // Write to every store that accepts it, and clear the key from any store
-  // that rejects the write. Otherwise a stale value left in one store (e.g. an
-  // unwritable-but-nonempty localStorage on mobile) would shadow the fresh
-  // value that readStore finds in another, since readStore returns the first
-  // store that holds anything.
+function writeStore(value: Partial<Session>): void {
+  // Stamp each write with a monotonic version so readStore can pick the
+  // freshest entry even when a store is frozen with an older value it can
+  // neither overwrite nor delete. Clear the key from any store that rejects
+  // the write, as a best effort when the store is writable at all.
+  const stamped = { ...value, v: nextVersion() }
+  const json = JSON.stringify(stamped)
   for (const st of stores()) {
     try {
       st.setItem(KEY, json)

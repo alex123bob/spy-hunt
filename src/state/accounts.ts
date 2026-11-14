@@ -58,6 +58,9 @@ export function getAccount(): Promise<Account> {
       } catch (e) {
         // a transient failure keeps what we last knew; only a rejected token means signed out
         if (e instanceof ApiError && e.status === 401) {
+          // The token is definitively dead: drop it so it is not re-sent on
+          // every load, letting ensureGuest mint a fresh identity next time.
+          forgetGuest()
           setCachedEmail(null)
           return { email: null }
         }

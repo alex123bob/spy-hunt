@@ -64,6 +64,18 @@ test('getAccount returns the server body, or {email:null} on failure', async () 
   expect(await getAccount()).toEqual({ email: null })
 })
 
+test('a 401 from /me forgets the rejected token so it is not re-sent', async () => {
+  // A dead token (e.g. the server's sessions were cleared, or a stale token
+  // from a frozen store) must be dropped, not re-sent forever.
+  setCredentials({ playerId: 'p1', token: 'dead' })
+  localStorage.setItem('spy-hunt.session', JSON.stringify({ playerId: 'p1', token: 'dead' }))
+  resetSessionForTests()
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply({ error: 'unauthorized' }, 401))
+  expect(await getAccount()).toEqual({ email: null })
+  expect(authHeaders()).toEqual({})
+  expect(getSession().token).toBe('')
+})
+
 test('useAccount does not fetch without a session', () => {
   const f = vi.spyOn(globalThis, 'fetch')
   const { result } = renderHook(() => useAccount())
