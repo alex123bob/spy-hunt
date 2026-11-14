@@ -6,6 +6,7 @@ import { RANKS } from '../game/rank'
 import { t } from '../i18n'
 import { getMyGames } from '../games/api'
 
+vi.mock('../looks/LookEditor', () => ({ LookEditor: () => <div data-testid="look-editor" /> }))
 vi.mock('../games/api', () => ({ getMyGames: vi.fn() }))
 beforeEach(() => { vi.mocked(getMyGames).mockResolvedValue([]) })
 vi.mock('../credits/api', () => ({ getCredits: vi.fn() }))
@@ -82,4 +83,28 @@ test('each recent game row shows the role you played', async () => {
   const rows = container.querySelectorAll('.game-list li')
   expect(rows[0].textContent).toContain(t('arena.role.spy'))
   expect(rows[1].textContent).toContain(t('arena.role.civilian'))
+})
+
+test('recent games sit between the stats and the look editor', async () => {
+  vi.mocked(getCredits).mockResolvedValue(summary)
+  vi.mocked(getMyGames).mockResolvedValue([
+    { room_id: 'r1', game_no: 1, finished_at: 0, winner: 'spies', your_role: 'spy', won: true, credits_earned: 20 },
+  ])
+  const { container } = render(tree)
+  await waitFor(() => expect(container.querySelector('.recent-games')).not.toBeNull())
+  const trio = container.querySelector('.stats-trio') as Element
+  const recent = container.querySelector('.recent-games') as Element
+  expect(trio.nextElementSibling).toBe(recent)
+  expect(recent.nextElementSibling).toBe(screen.getByTestId('look-editor'))
+})
+
+test('a game with no winner shows a neutral outcome, not Lost', async () => {
+  vi.mocked(getCredits).mockResolvedValue(summary)
+  vi.mocked(getMyGames).mockResolvedValue([
+    { room_id: 'r1', game_no: 1, finished_at: 0, winner: null, your_role: 'civilian', won: null, credits_earned: 0 },
+  ])
+  const { container } = render(tree)
+  await waitFor(() => expect(container.querySelectorAll('.game-list li')).toHaveLength(1))
+  expect(container.querySelector('.game-list')?.textContent).not.toContain('Lost')
+  expect(container.querySelector('.game-list')?.textContent).toContain(t('profile.gameOutcome.none', { credits: 0 }))
 })

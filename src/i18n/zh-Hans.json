@@ -423,5 +423,8 @@
   "profile.recentGames": "最近的对局",
   "profile.gameOutcome.won": "获胜 · +{credits} 积分",
   "profile.gameOutcome.lost": "落败 · +{credits} 积分",
-  "profile.gameDetail.title": "对局回顾"
+  "profile.gameDetail.title": "对局回顾",
+  "profile.gameOutcome.none": "未分胜负 · +{credits} 积分",
+  "profile.gameDetail.notFound": "找不到这局游戏",
+  "profile.gameDetail.error": "无法加载这局游戏。"
 }

@@ -166,3 +166,25 @@ test('patchMyLang swallows request errors', async () => {
   vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('down'))
   await expect(patchMyLang('zh-Hans')).resolves.toBeUndefined()
 })
+
+test('getAccount backfills the server language once when the account has none', async () => {
+  setCredentials({ playerId: 'p1', token: 't1' })
+  localStorage.setItem('spy-hunt.session', JSON.stringify({ playerId: 'p1', token: 't1', lang: 'zh-Hans' }))
+  resetSessionForTests()
+  const f = vi.spyOn(globalThis, 'fetch').mockImplementation((_u, init) =>
+    Promise.resolve(reply(init?.method === 'PATCH' ? { ok: true } : { email: null, preferred_lang: null })))
+  await getAccount()
+  await vi.waitFor(() => {
+    const patch = f.mock.calls.find(([, i]) => i?.method === 'PATCH')
+    expect(JSON.parse(String(patch?.[1]?.body))).toEqual({ lang: 'zh-Hans' })
+  })
+})
+
+test('getAccount does not touch the server language when the account already has one', async () => {
+  setCredentials({ playerId: 'p1', token: 't1' })
+  localStorage.setItem('spy-hunt.session', JSON.stringify({ playerId: 'p1', token: 't1', lang: 'zh-Hans' }))
+  resetSessionForTests()
+  const f = vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply({ email: null, preferred_lang: 'en' }))
+  await getAccount()
+  expect(f.mock.calls.some(([, i]) => i?.method === 'PATCH')).toBe(false)
+})

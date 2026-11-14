@@ -76,3 +76,23 @@ test('ensureGuest tells the server the current language when creating a guest', 
   await ensureGuest()
   expect(JSON.parse(String(f.mock.calls[0][1]?.body))).toEqual({ lang: 'zh-Hans' })
 })
+
+test('a language picked while the guest request is in flight is sent to the account afterwards', async () => {
+  localStorage.clear()
+  resetSessionForTests()
+  const { setSessionLang } = await import('./session')
+  let release: (r: Response) => void = () => {}
+  const f = vi.spyOn(globalThis, 'fetch').mockImplementation((_u, init) => {
+    if (init?.method === 'POST') return new Promise<Response>((res) => { release = res })
+    return Promise.resolve(new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } }))
+  })
+  const p = ensureGuest()
+  setSessionLang('zh-Hans')
+  release(new Response(JSON.stringify({ player_id: 'p1', token: 't1' }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+  await p
+  await vi.waitFor(() => {
+    const patch = f.mock.calls.find(([, i]) => i?.method === 'PATCH')
+    expect(patch).toBeTruthy()
+    expect(JSON.parse(String(patch?.[1]?.body))).toEqual({ lang: 'zh-Hans' })
+  })
+})

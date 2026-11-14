@@ -40,7 +40,7 @@ test('renders every seat, the words, and the winner banner on success', async ()
 test('shows a not-found state for an unknown game', async () => {
   vi.mocked(getMyGameDetail).mockRejectedValue(new ApiError(404, 'not_found'))
   render(tree)
-  expect(await screen.findByText(t('arena.match.notFound'))).toBeInTheDocument()
+  expect(await screen.findByText(t('profile.gameDetail.notFound'))).toBeInTheDocument()
 })
 
 test('shows an error state with retry for other failures', async () => {
@@ -48,4 +48,41 @@ test('shows an error state with retry for other failures', async () => {
   render(tree)
   fireEvent.click(await screen.findByRole('button', { name: t('room.retry') }))
   expect(await screen.findByText('Ann:')).toBeInTheDocument()
+})
+
+test('uses recap-specific copy, not the arena match wording, for not-found and error', async () => {
+  vi.mocked(getMyGameDetail).mockRejectedValue(new ApiError(404, 'not_found'))
+  const { unmount } = render(tree)
+  expect(await screen.findByText(t('profile.gameDetail.notFound'))).toBeInTheDocument()
+  unmount()
+  vi.mocked(getMyGameDetail).mockRejectedValue(new ApiError(500, 'boom'))
+  render(tree)
+  expect(await screen.findByText(t('profile.gameDetail.error'))).toBeInTheDocument()
+})
+
+test('a non-numeric game number is not found without calling the server', async () => {
+  render(
+    <MemoryRouter initialEntries={['/games/r1/abc']}>
+      <Routes><Route path="/games/:roomId/:gameNo" element={<GameDetail />} /></Routes>
+    </MemoryRouter>,
+  )
+  expect(await screen.findByText(t('profile.gameDetail.notFound'))).toBeInTheDocument()
+  expect(getMyGameDetail).not.toHaveBeenCalled()
+})
+
+test('shows the words in the viewer language when the game has it', async () => {
+  vi.mocked(getMyGameDetail).mockResolvedValue({
+    ...detail(), lang: 'en',
+    words: { civilian: { en: 'apple', 'zh-Hans': '苹果' }, spy: { en: 'pear', 'zh-Hans': '梨' } },
+  })
+  setLang('zh-Hans')
+  render(tree)
+  expect(await screen.findByText(t('arena.match.words', { civilian: '苹果', spy: '梨' }))).toBeInTheDocument()
+})
+
+test('hides the words line when the game had no word pair', async () => {
+  vi.mocked(getMyGameDetail).mockResolvedValue({ ...detail(), words: {} as never })
+  const { container } = render(tree)
+  await screen.findByText('Ann:')
+  expect(container.textContent).not.toContain('Civilians:')
 })
