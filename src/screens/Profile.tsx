@@ -48,8 +48,9 @@ export function Profile() {
             {games.map((gm) => (
               <li key={`${gm.room_id}-${gm.game_no}`}>
                 <Link to={`/games/${gm.room_id}/${gm.game_no}`}>
-                  {t(`profile.gameOutcome.${gm.won ? 'won' : 'lost'}`, { credits: gm.credits_earned })}
+                  {t(`arena.role.${gm.your_role}`)} · {t(`profile.gameOutcome.${gm.won ? 'won' : 'lost'}`, { credits: gm.credits_earned })}
                 </Link>
+                {' '}<span className="muted">{new Date(gm.finished_at).toLocaleDateString()}</span>
               </li>
             ))}
           </ol>

@@ -67,6 +67,19 @@ test('shows recent games and links to the detail screen', async () => {
     { room_id: 'r1', game_no: 1, finished_at: 0, winner: 'civilians', your_role: 'civilian', won: true, credits_earned: 20 },
   ])
   render(tree)
-  const link = await screen.findByRole('link', { name: t('profile.gameOutcome.won', { credits: 20 }) })
+  const link = await screen.findByRole('link', { name: (n) => n.endsWith(t('profile.gameOutcome.won', { credits: 20 })) })
   expect(link).toHaveAttribute('href', '/games/r1/1')
+})
+
+test('each recent game row shows the role you played', async () => {
+  vi.mocked(getCredits).mockResolvedValue(summary)
+  vi.mocked(getMyGames).mockResolvedValue([
+    { room_id: 'r1', game_no: 1, finished_at: 1_794_398_400_000, winner: 'spies', your_role: 'spy', won: true, credits_earned: 20 },
+    { room_id: 'r2', game_no: 2, finished_at: 1_794_398_500_000, winner: 'spies', your_role: 'civilian', won: false, credits_earned: 10 },
+  ])
+  const { container } = render(tree)
+  await waitFor(() => expect(container.querySelectorAll('.game-list li')).toHaveLength(2))
+  const rows = container.querySelectorAll('.game-list li')
+  expect(rows[0].textContent).toContain(t('arena.role.spy'))
+  expect(rows[1].textContent).toContain(t('arena.role.civilian'))
 })
