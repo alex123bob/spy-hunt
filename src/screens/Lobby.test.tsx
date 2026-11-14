@@ -137,7 +137,7 @@ test('the host adds a random bot from the add menu', async () => {
   fireEvent.click(screen.getByRole('button', { name: /Add a bot/ }))
   fireEvent.click(screen.getByRole('menuitem', { name: /Random bot/ }))
   expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add' })
-  await waitFor(() => expect(screen.queryByRole('menu')).toBeNull())
+  expect(screen.getByRole('menu')).toBeInTheDocument()
 })
 
 test('picking one of my bots posts add with its id', async () => {

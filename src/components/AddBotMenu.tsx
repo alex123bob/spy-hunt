@@ -28,7 +28,7 @@ export function AddBotMenu({ isHost, myBots, ownBotIn, onAdd }:
 
   if (!isHost && myBots.length === 0) return null
 
-  const pick = (botId?: string) => { setOpen(false); if (botId === undefined) onAdd(); else onAdd(botId); trigger.current?.focus() }
+  const pick = (botId?: string) => { if (botId === undefined) onAdd(); else onAdd(botId) }
   const showNote = myBots.length > 0 && ownBotIn !== null
   const showMine = myBots.length > 0 && ownBotIn === null
 

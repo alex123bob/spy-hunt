@@ -21,14 +21,14 @@ test('non-host with no bots renders nothing', () => {
   expect(container).toBeEmptyDOMElement()
 })
 
-test('non-host lists bots; picking calls onAdd and closes', () => {
+test('non-host lists bots; picking calls onAdd and keeps the menu open', () => {
   const onAdd = vi.fn()
   render(<AddBotMenu isHost={false} myBots={[bot('b1', 'Pixel'), bot('b2', 'Zed')]} ownBotIn={null} onAdd={onAdd} />)
   fireEvent.click(row())
   expect(screen.queryByRole('menuitem', { name: 'Random bot' })).toBeNull()
   fireEvent.click(screen.getByRole('menuitem', { name: /Pixel/ }))
   expect(onAdd).toHaveBeenCalledWith('b1')
-  expect(screen.queryByRole('menu')).toBeNull()
+  expect(screen.getByRole('menu')).toBeInTheDocument()
 })
 
 test('ownBotIn shows message instead of bot rows; host keeps Random', () => {
