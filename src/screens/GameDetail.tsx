@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
-import type { GameDetail as Detail, GameReplay, Message } from '../api/types'
+import type { GameDetail as Detail, GameReplay } from '../api/types'
 import { CreditBurst } from '../components/CreditBurst'
 import { EmptyState } from '../components/EmptyState'
 import { Loader } from '../components/Loader'
@@ -75,6 +75,19 @@ export function GameDetail() {
 
   return (
     <main className="screen match">
+      <section className="card match-reveal">
+        <h3>{t('profile.gameDetail.title')}</h3>
+        {detail.roles.map((r) => (
+          <p key={r.seat} className={`reveal-line wrap${r.is_you ? ' is-you' : ''}`}>
+            <span>{r.name}:</span> <span className={`role ${r.role}`}>{t(`arena.role.${r.role}`)}</span>
+          </p>
+        ))}
+        {hasWords && <p>{t('arena.match.words', words)}</p>}
+        {detail.winner && <p className="winner-banner">{t(`arena.match.winner.${detail.winner}`)}</p>}
+      </section>
+      {detail.roles.filter((r) => r.is_you).map((r) => (
+        <CreditBurst key={r.seat} total={r.credits_earned ?? 0} parts={r.credit_parts} />
+      ))}
       {replay && (
         <>
           <h2 className="center">{t('profile.gameDetail.replayTitle')}</h2>
@@ -90,10 +103,10 @@ export function GameDetail() {
                       <StatementBubble
                         key={`${s.seat}-${s.stage}-${i}`}
                         message={{
-                          id: r.round * 1000 + i, round: r.round, stage: s.stage, seat: s.seat,
+                          id: r.round * 1000 + st * 100 + i, round: r.round, stage: s.stage, seat: s.seat,
                           kind: s.kind, text: s.text, lang: s.lang, translations: s.translations,
                           created_at: 0,
-                        } as Message}
+                        }}
                         name={name(s.seat)}
                         viewerLang={viewerLang}
                       />
@@ -115,19 +128,6 @@ export function GameDetail() {
           })}
         </>
       )}
-      <section className="card match-reveal">
-        <h3>{t('profile.gameDetail.title')}</h3>
-        {detail.roles.map((r) => (
-          <p key={r.seat} className={`reveal-line wrap${r.is_you ? ' is-you' : ''}`}>
-            <span>{r.name}:</span> <span className={`role ${r.role}`}>{t(`arena.role.${r.role}`)}</span>
-          </p>
-        ))}
-        {hasWords && <p>{t('arena.match.words', words)}</p>}
-        {detail.winner && <p className="winner-banner">{t(`arena.match.winner.${detail.winner}`)}</p>}
-      </section>
-      {detail.roles.filter((r) => r.is_you).map((r) => (
-        <CreditBurst key={r.seat} total={r.credits_earned ?? 0} parts={r.credit_parts} />
-      ))}
       <Link to="/me" className="btn center">{t('bots.home')}</Link>
     </main>
   )

@@ -104,6 +104,26 @@ test('shows a replay section with statements and votes when a replay exists', as
   expect(await screen.findByText('hi there')).toBeTruthy()
 })
 
+test('places the replay section below the reveal, not above', async () => {
+  vi.mocked(getMyGameReplay).mockResolvedValue({
+    players: [{ seat: 0, name: 'Alice', is_bot: false, role: 'civilian', is_you: true }],
+    rounds: [{
+      round: 1,
+      statements: [{ seat: 0, stage: 0, kind: 'statement', text: 'hi there', lang: 'en', translations: {} }],
+      votes: [],
+      eliminated: null,
+    }],
+    words: { civilian: { en: 'tea' }, spy: { en: 'coffee' } },
+    winner: 'civilians',
+  })
+  const { container } = render(tree)
+  await screen.findByText('hi there')
+  const revealIndex = Array.from(container.querySelectorAll('h3, h2')).findIndex((el) => el.textContent === t('profile.gameDetail.title'))
+  const replayIndex = Array.from(container.querySelectorAll('h3, h2')).findIndex((el) => el.textContent === t('profile.gameDetail.replayTitle'))
+  expect(revealIndex).toBeGreaterThanOrEqual(0)
+  expect(replayIndex).toBeGreaterThan(revealIndex)
+})
+
 test('renders without a replay section when no replay exists (404)', async () => {
   render(tree)
   expect(await screen.findByText('Ann:')).toBeTruthy()
