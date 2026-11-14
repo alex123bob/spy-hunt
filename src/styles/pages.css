@@ -232,3 +232,15 @@
 .stats-trio .earn-link:hover { transform: translateY(-3px) rotate(-2deg); }
 .earn-link-icon { width: 30px; height: 30px; display: grid; place-items: center; background: var(--paper); border: 2.5px solid var(--ink); border-radius: 50%; font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 700; font-size: 18px; line-height: 1; }
 .how-to-earn .back-btn { width: auto; align-self: flex-start; min-height: 40px; padding: 4px 14px; box-shadow: 0 3px 0 var(--ink); }
+
+/* GameRecap: the expanded detail of a past game (Profile > Recent games) */
+.game-recap { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.game-recap p { margin: 0; overflow-wrap: anywhere; }
+.recap-seats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.recap-seat { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
+.recap-seat.is-you .recap-name { text-decoration: underline; text-decoration-thickness: 2px; }
+.recap-name { min-width: 0; overflow-wrap: anywhere; font-weight: 700; }
+.game-recap .role { border: 2px solid currentColor; border-radius: 8px; padding: 1px 8px; font-size: 13px; text-transform: uppercase; }
+.recap-credits { justify-content: flex-start; }
+.recap-credits .credit-chip { animation: none; font-size: 14px; }
+.recap-link { align-self: flex-start; min-height: 44px; display: inline-flex; align-items: center; color: var(--ink); font-weight: 700; }
