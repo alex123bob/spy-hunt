@@ -102,7 +102,7 @@ test('Add my bot is disabled once my bot is in the room, and room bots are not o
   const btn = await screen.findByRole('button', { name: 'Add my bot' })
   expect(btn).toHaveAttribute('aria-disabled', 'true')
   fireEvent.click(btn)
-  expect(screen.getByRole('tooltip')).toHaveTextContent('Your bot is already in this room.')
+  expect(screen.getByRole('tooltip')).toHaveTextContent('is already in this room.')
   expect(screen.queryByRole('button', { name: 'Rex' })).toBeNull()
 })
 
