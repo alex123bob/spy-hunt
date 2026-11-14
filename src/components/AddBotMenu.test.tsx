@@ -34,9 +34,27 @@ test('non-host lists bots; picking calls onAdd and closes', () => {
 test('ownBotIn shows message instead of bot rows; host keeps Random', () => {
   render(<AddBotMenu isHost myBots={[bot('b1', 'Pixel')]} ownBotIn={bot('b1', 'Pixel')} onAdd={vi.fn()} />)
   fireEvent.click(row())
-  expect(screen.getByText('Your bot Pixel is already in this room. Remove it to add a different one.')).toBeInTheDocument()
+  const note = screen.getByText('Your bot Pixel is already in this room. Remove it to add a different one.')
+  expect(note).toBeInTheDocument()
+  expect(note.closest('[role="menu"]')).toBeNull()
+  expect(row()).toHaveAttribute('aria-describedby', note.id)
   expect(screen.queryByRole('menuitem', { name: /Pixel/ })).toBeNull()
   expect(screen.getByRole('menuitem', { name: 'Random bot' })).toBeInTheDocument()
+})
+
+test('non-host with a bot already in sees the note and zero menuitems', () => {
+  render(<AddBotMenu isHost={false} myBots={[bot('b1', 'Pixel')]} ownBotIn={bot('b1', 'Pixel')} onAdd={vi.fn()} />)
+  fireEvent.click(row())
+  expect(screen.getByText('Your bot Pixel is already in this room. Remove it to add a different one.')).toBeInTheDocument()
+  expect(screen.queryAllByRole('menuitem')).toHaveLength(0)
+})
+
+test('the Your bots heading sits outside the menu; the row shows an arrow', () => {
+  render(<AddBotMenu isHost={false} myBots={[bot('b1', 'Pixel')]} ownBotIn={null} onAdd={vi.fn()} />)
+  expect(row()).toHaveTextContent('+ Add a bot ▾')
+  fireEvent.click(row())
+  expect(screen.getByText('Your bots').closest('[role="menu"]')).toBeNull()
+  expect(screen.getByRole('menu', { name: 'Your bots' })).toBeInTheDocument()
 })
 
 test('Esc closes and refocuses row', () => {

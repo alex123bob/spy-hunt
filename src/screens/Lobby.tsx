@@ -12,7 +12,7 @@ import { QrCode } from '../components/QrCode'
 import { t, useLang } from '../i18n'
 
 export function Lobby({ state }: { state: Snapshot }) {
-  useLang() // re-render on language change
+  const lang = useLang()
   const [err, setErr] = useState('')
   const [copied, setCopied] = useState(false)
   const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -23,6 +23,14 @@ export function Lobby({ state }: { state: Snapshot }) {
   const isHost = state.me.is_host
   const short = state.players.length < state.config.min_players
   const full = state.players.length >= state.config.max_players
+  const me = state.players.find((p) => p.seat === state.me.seat)
+  const myLang = me?.lang
+
+  // The top bar changes the UI language; keep my seat's language (secret word, translations) in step.
+  useEffect(() => {
+    if (myLang === undefined || lang === myLang) return
+    request('PATCH', `/rooms/${code}/me`, { lang }).catch(() => {})
+  }, [lang, myLang, code])
 
   useEffect(() => {
     let live = true
@@ -67,7 +75,7 @@ export function Lobby({ state }: { state: Snapshot }) {
       <Toast text={copied ? t('lobby.copied') : ''} />
       <section className="card">
         <div className="cardhead">
-          <div className="row cardhead-title">
+          <div className="cardhead-title">
             <p className="muted">{t('lobby.players')} ({state.players.length}/{state.config.max_players})</p>
             {full && <span className="full-badge">{t('lobby.fullBadge')}</span>}
           </div>

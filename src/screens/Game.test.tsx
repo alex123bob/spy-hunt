@@ -206,7 +206,7 @@ test('a non-400 statement error shows the mapped text, not the server text', asy
 
 test('Table language pick also syncs to the account', () => {
   render(<Table state={snap({ players: [player(0), player(1), player(2), player(3)] })} />)
-  fireEvent.click(screen.getByRole('button', { name: 'Language' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Language: English' }))
   fireEvent.click(screen.getByRole('option', { name: '简体中文' }))
   expect(patchMyLang).toHaveBeenCalledWith('zh-Hans')
 })

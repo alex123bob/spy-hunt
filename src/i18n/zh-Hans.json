@@ -31,7 +31,7 @@
   "lobby.addBotRow": "添加机器人",
   "lobby.randomBot": "随机机器人",
   "lobby.myBotsHeading": "我的机器人",
-  "lobby.roomPrefix": "房间",
+  "lobby.roomPrefix": "房间：",
   "lobby.fullBadge": "已满",
   "lobby.start": "开始游戏",
   "lobby.waitingHost": "等待房主开始…",

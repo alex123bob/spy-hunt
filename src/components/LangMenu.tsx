@@ -27,12 +27,12 @@ export function LangMenu({ value, onChange, label, variant = 'short', prefix = '
   return (
     <div className="langmenu" ref={root}>
       <button type="button" className="pill langmenu-btn" ref={trigger} aria-haspopup="listbox" aria-expanded={open}
-        aria-label={label} onClick={() => setOpen(o => !o)}>{text} ▾</button>
+        aria-label={`${label}: ${t(`lang.${value}`)}`} onClick={() => setOpen(o => !o)}>{text} ▾</button>
       {open && (
         <div className="langmenu-list" role="listbox" aria-label={label}>
           {LANGS.map(code => (
             <button key={code} type="button" role="option" className="langmenu-opt" aria-selected={code === value}
-              onClick={() => { setOpen(false); onChange(code); trigger.current?.focus() }}>
+              onClick={() => { setOpen(false); if (code !== value) onChange(code); trigger.current?.focus() }}>
               {t(`lang.${code}`)}{code === value ? ' ✓' : ''}
             </button>
           ))}

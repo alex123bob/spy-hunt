@@ -20,9 +20,9 @@ beforeEach(() => {
   Object.defineProperty(window, 'location', { value: { ...window.location, reload }, writable: true })
 })
 
-test('shows the language picker and, in the menu, the register link for a guest', () => {
+test('shows the language menu and, in the menu, the register link for a guest', () => {
   render(<TopBar />)
-  expect(screen.getByRole('button', { name: 'Language' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Language: English' })).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Account' }))
   expect(screen.getByRole('button', { name: 'Register / log in' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Log out' })).toBeNull()
@@ -45,7 +45,7 @@ test('the register link opens the modal', () => {
   expect(screen.getByRole('tab', { name: 'Register' })).toBeInTheDocument()
 })
 
-test('the top bar holds only the language picker and the menu', () => {
+test('the top bar holds only the language menu and the menu', () => {
   render(<TopBar />)
   expect(screen.queryByRole('link', { name: 'Profile' })).toBeNull()
   expect(screen.queryByRole('link', { name: 'Clan' })).toBeNull()
@@ -70,7 +70,7 @@ test('the clan link shows only when signed in', () => {
 
 test('picking a language also syncs it to the account', () => {
   render(<TopBar />)
-  fireEvent.click(screen.getByRole('button', { name: 'Language' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Language: English' }))
   fireEvent.click(screen.getByRole('option', { name: '简体中文' }))
   expect(patchMyLang).toHaveBeenCalledWith('zh-Hans')
 })

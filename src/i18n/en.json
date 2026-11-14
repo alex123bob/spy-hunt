@@ -31,7 +31,7 @@
   "lobby.addBotRow": "Add a bot",
   "lobby.randomBot": "Random bot",
   "lobby.myBotsHeading": "Your bots",
-  "lobby.roomPrefix": "Room",
+  "lobby.roomPrefix": "Room:",
   "lobby.fullBadge": "Full",
   "lobby.start": "Start game",
   "lobby.waitingHost": "Waiting for the host to start…",

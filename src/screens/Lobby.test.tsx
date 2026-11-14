@@ -58,6 +58,19 @@ test('bots are labelled and switching language updates strings immediately', () 
   expect(screen.getByRole('button', { name: '开始游戏' })).toBeInTheDocument()
 })
 
+test('a top-bar language change in the lobby syncs my seat language', () => {
+  render(<Lobby state={snap(false)} />)
+  act(() => setLang('zh-Hans'))
+  expect(request).toHaveBeenCalledWith('PATCH', '/rooms/ABCD/me', { lang: 'zh-Hans' })
+  expect(request).toHaveBeenCalledTimes(1)
+  expect(patchMyLang).not.toHaveBeenCalled()
+})
+
+test('nothing is sent when my language already matches my seat', () => {
+  render(<Lobby state={snap(false)} />)
+  expect(request).not.toHaveBeenCalledWith('PATCH', '/rooms/ABCD/me', expect.anything())
+})
+
 test('there is no Your language section', () => {
   render(<Lobby state={snap(true)} />)
   expect(screen.queryByText('Your language')).toBeNull()
@@ -66,8 +79,8 @@ test('there is no Your language section', () => {
 
 test('the host picks the room language from the players card header', () => {
   render(<Lobby state={snap(true)} />)
-  const btn = screen.getByRole('button', { name: 'Room language' })
-  expect(btn).toHaveTextContent('Room English')
+  const btn = screen.getByRole('button', { name: 'Room language: English' })
+  expect(btn).toHaveTextContent('Room: English')
   fireEvent.click(btn)
   fireEvent.click(screen.getByRole('option', { name: '简体中文' }))
   expect(request).toHaveBeenCalledWith('PATCH', '/rooms/ABCD/settings', { main_lang: 'zh-Hans' })
@@ -78,8 +91,19 @@ test('the host picks the room language from the players card header', () => {
 
 test('a non-host sees the room language as text, not a button', () => {
   render(<Lobby state={snap(false)} />)
-  expect(screen.queryByRole('button', { name: 'Room language' })).toBeNull()
-  expect(screen.getByText('Room English')).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: /^Room language/ })).toBeNull()
+  expect(screen.getByText('Room: English')).toBeInTheDocument()
+})
+
+test('when listMyBots fails, the host still gets Random bot and no alert', async () => {
+  vi.mocked(listMyBots).mockRejectedValue(new Error('offline'))
+  render(<Lobby state={snap(true)} />)
+  await waitFor(() => expect(listMyBots).toHaveBeenCalled())
+  fireEvent.click(screen.getByRole('button', { name: /Add a bot/ }))
+  const items = screen.getAllByRole('menuitem')
+  expect(items).toHaveLength(1)
+  expect(items[0]).toHaveTextContent('Random bot')
+  expect(screen.queryByRole('alert')).toBeNull()
 })
 
 function withBots(isHost: boolean, extra: Snapshot['players']): Snapshot {
