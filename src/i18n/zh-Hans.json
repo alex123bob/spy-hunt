@@ -427,5 +427,16 @@
   "profile.gameDetail.title": "对局回顾",
   "profile.gameOutcome.none": "未分胜负 · +{credits} 积分",
   "profile.gameDetail.notFound": "找不到这局游戏",
-  "profile.gameDetail.error": "无法加载这局游戏。"
+  "profile.gameDetail.error": "无法加载这局游戏。",
+  "profile.game.you": "你",
+  "profile.game.bot": "机器人",
+  "profile.game.words": "词语",
+  "profile.game.yourWord": "你的词",
+  "profile.game.credits": "积分",
+  "profile.game.fullRecap": "完整战报",
+  "profile.game.winner.civilians": "平民获胜",
+  "profile.game.winner.spies": "卧底获胜",
+  "profile.game.winner.none": "无胜者",
+  "profile.game.loading": "加载中…",
+  "profile.game.error": "无法加载这局游戏。"
 }

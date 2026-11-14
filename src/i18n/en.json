@@ -427,5 +427,16 @@
   "profile.gameDetail.title": "Game recap",
   "profile.gameOutcome.none": "Draw · +{credits} credits",
   "profile.gameDetail.notFound": "Game not found",
-  "profile.gameDetail.error": "Could not load this game."
+  "profile.gameDetail.error": "Could not load this game.",
+  "profile.game.you": "You",
+  "profile.game.bot": "Bot",
+  "profile.game.words": "Words",
+  "profile.game.yourWord": "your word",
+  "profile.game.credits": "Credits",
+  "profile.game.fullRecap": "Full recap",
+  "profile.game.winner.civilians": "Civilians won",
+  "profile.game.winner.spies": "Spies won",
+  "profile.game.winner.none": "No winner",
+  "profile.game.loading": "Loading…",
+  "profile.game.error": "Could not load this game."
 }

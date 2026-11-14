@@ -1,19 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
-import type { GameDetail as Detail, Role, WordsByRole } from '../api/types'
+import type { GameDetail as Detail } from '../api/types'
 import { CreditBurst } from '../components/CreditBurst'
 import { EmptyState } from '../components/EmptyState'
 import { Loader } from '../components/Loader'
 import { getMyGameDetail } from '../games/api'
+import { wordFor } from '../games/words'
 import { t, useLang } from '../i18n'
 
 type Load = { kind: 'loading' } | { kind: 'ok'; detail: Detail } | { kind: 'notFound' } | { kind: 'error' }
-
-function wordFor(words: WordsByRole, role: Role, prefer: Detail['lang'], fallback: Detail['lang']): string {
-  const w = words[role] ?? {}
-  return w[prefer] ?? w[fallback] ?? Object.values(w)[0] ?? ''
-}
 
 export function GameDetail() {
   const { roomId = '', gameNo = '' } = useParams()
