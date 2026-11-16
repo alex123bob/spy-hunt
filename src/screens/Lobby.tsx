@@ -62,7 +62,10 @@ export function Lobby({ state }: { state: Snapshot }) {
     }
   }
 
-  const empty = Math.max(0, state.config.min_players - state.players.length)
+  // Same gate AddBotMenu applies internally; the first open seat hosts the add-bot CTA.
+  const canAddBot = (isHost || myBots.length > 0) && !full
+  // Past min_players there are no placeholder seats, but the CTA must stay reachable: one extra slot.
+  const seatSlots = Math.max(state.config.min_players - state.players.length, canAddBot ? 1 : 0)
   return (
     <main className={`screen lobby${isHost ? ' has-dock' : ''}`}>
       <header className="ticket lobby-head">
@@ -97,10 +100,17 @@ export function Lobby({ state }: { state: Snapshot }) {
               )}
             </div>
           ))}
-          {Array.from({ length: empty }, (_, k) => (
-            <div key={`e${k}`} className="seat empty" aria-hidden style={{ '--i': state.players.length + k } as CSSProperties}>
-              {t('lobby.emptySeat')}
-            </div>
+          {Array.from({ length: seatSlots }, (_, k) => (
+            k === 0 && canAddBot ? (
+              <div key="e0" className="seat seat-cta" style={{ '--i': state.players.length } as CSSProperties}>
+                <AddBotMenu isHost={isHost} myBots={myBots} ownBotIn={ownBotIn}
+                  onAdd={(botId) => call('POST', '/bots', botId === undefined ? { action: 'add' } : { action: 'add', bot_id: botId })} />
+              </div>
+            ) : (
+              <div key={`e${k}`} className="seat empty" aria-hidden style={{ '--i': state.players.length + k } as CSSProperties}>
+                {t('lobby.emptySeat')}
+              </div>
+            )
           ))}
         </div>
         {short && (
@@ -109,10 +119,6 @@ export function Lobby({ state }: { state: Snapshot }) {
               ? t('lobby.fillHint', { min: state.config.min_players, n: state.config.min_players - state.players.length })
               : t('lobby.needMore', { min: state.config.min_players })}
           </p>
-        )}
-        {!full && (
-          <AddBotMenu isHost={isHost} myBots={myBots} ownBotIn={ownBotIn}
-            onAdd={(botId) => call('POST', '/bots', botId === undefined ? { action: 'add' } : { action: 'add', bot_id: botId })} />
         )}
       </section>
       <section className="card center">
