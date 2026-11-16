@@ -8,6 +8,7 @@ import { EmptyState } from '../components/EmptyState'
 import { Loader } from '../components/Loader'
 import { Toast } from '../components/Toast'
 import { shareResult } from '../daily/share'
+import { shareToast } from '../daily/shareToast'
 import { t, useLang } from '../i18n'
 import { getSession } from '../state/session'
 
@@ -51,7 +52,7 @@ export function BotPage() {
 
   const share = async () => {
     const r = await shareResult(window.location.href)
-    setShareState((s) => ({ text: r === 'shared' ? t('result.shared') : r === 'copied' ? t('result.copied') : t('result.shareFailed'), n: s.n + 1 }))
+    setShareState((s) => ({ text: shareToast(r, { shared: 'result.shared', copied: 'result.copied', failed: 'result.shareFailed' }), n: s.n + 1 }))
   }
 
   if (load.kind === 'loading') return <main className="screen"><Loader label={t('bots.loading')} /></main>

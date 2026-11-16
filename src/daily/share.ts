@@ -239,7 +239,7 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
 }
 
-export type ShareOutcome = 'shared' | 'copied' | 'failed'
+export type ShareOutcome = 'shared' | 'copied' | 'failed' | 'cancelled'
 
 const isCancel = (e: unknown): boolean => e instanceof DOMException && e.name === 'AbortError'
 
@@ -276,8 +276,8 @@ async function cardFile(m: ShareCardModel, filename: string): Promise<File | nul
 
 /**
  * Share a cartoon PNG card via the native share sheet; falls back to sharing/copying the plain
- * text so it always does something useful. A user-cancelled native share returns 'failed' and
- * does not then paste to the clipboard.
+ * text so it always does something useful. A user-cancelled native share returns 'cancelled'
+ * (callers show nothing) and does not then paste to the clipboard.
  */
 export async function shareCard({ model, text, filename }: CardFile): Promise<ShareOutcome> {
   const nav = typeof navigator !== 'undefined' ? navigator : undefined
@@ -291,7 +291,7 @@ export async function shareCard({ model, text, filename }: CardFile): Promise<Sh
       await nav.share(payload)
       return 'shared'
     } catch (e) {
-      if (isCancel(e)) return 'failed' // user dismissed the sheet; don't surprise them with a copy
+      if (isCancel(e)) return 'cancelled' // user dismissed the sheet; don't surprise them with a copy
       // otherwise fall through to the clipboard
     }
   }

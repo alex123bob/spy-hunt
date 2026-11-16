@@ -315,3 +315,13 @@ test('Invite when the native share is cancelled or fails shows an error toast, n
   fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
   expect(await screen.findByText('Could not share.')).toBeInTheDocument()
 })
+
+test('cancelling the native share shows no toast at all', async () => {
+  vi.mocked(shareCard).mockResolvedValue('cancelled')
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+  await waitFor(() => expect(shareCard).toHaveBeenCalled())
+  await act(async () => {})
+  expect(screen.queryByRole('status')).toBeNull()
+  expect(screen.queryByText('Could not share.')).toBeNull()
+})

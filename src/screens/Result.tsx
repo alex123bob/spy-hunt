@@ -13,6 +13,7 @@ import { FlipCard } from '../components/FlipCard'
 import { Toast } from '../components/Toast'
 import { useStaged } from '../motion/useStaged'
 import { drawCard, shareCard } from '../daily/share'
+import { shareToast } from '../daily/shareToast'
 import { resultInfo, resultShareText, roomCardModel } from '../game/result'
 import { t, useLang } from '../i18n'
 import { recordWin } from '../state/nudges'
@@ -51,7 +52,7 @@ export function Result({ state }: { state: Snapshot }) {
     const r = await shareCard({
       model: model(), text: resultShareText(state, info, url), filename: `spy-hunt-${state.code}-${state.game_no}.png`,
     })
-    setShareState((s) => ({ text: r === 'shared' ? t('result.shared') : r === 'copied' ? t('result.copied') : t('result.shareFailed'), n: s.n + 1 }))
+    setShareState((s) => ({ text: shareToast(r, { shared: 'result.shared', copied: 'result.copied', failed: 'result.shareFailed' }), n: s.n + 1 }))
   }
 
   return (

@@ -8,6 +8,7 @@ import { getCredits } from '../credits/api'
 import { Toast } from '../components/Toast'
 import { scoreParts } from '../daily/score'
 import { drawShareCard, shareDailyResult, type ShareInput } from '../daily/share'
+import { shareToast } from '../daily/shareToast'
 import { t, useLang } from '../i18n'
 import { recordStreakMilestone } from '../state/nudges'
 
@@ -43,7 +44,7 @@ export function DailyResult({ puzzle, result }: { puzzle: DailyPuzzle; result: R
 
   const share = async () => {
     const r = await shareDailyResult(input)
-    setShareState((s) => ({ text: r === 'shared' ? t('daily.shared') : r === 'copied' ? t('daily.copied') : t('daily.shareFailed'), n: s.n + 1 }))
+    setShareState((s) => ({ text: shareToast(r, { shared: 'daily.shared', copied: 'daily.copied', failed: 'daily.shareFailed' }), n: s.n + 1 }))
   }
 
   return (

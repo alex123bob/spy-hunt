@@ -4,6 +4,7 @@ import { errorText } from '../api/errors'
 import type { BotCard, Snapshot } from '../api/types'
 import { listMyBots } from '../bots/api'
 import { shareCard } from '../daily/share'
+import { shareToast } from '../daily/shareToast'
 import { lobbyInviteCardModel } from '../game/lobbyShare'
 import { AddBotMenu } from '../components/AddBotMenu'
 import { LangMenu } from '../components/LangMenu'
@@ -58,7 +59,7 @@ export function Lobby({ state }: { state: Snapshot }) {
       text: t('lobby.shareText', { code }) + `\n${link}`,
       filename: `spy-hunt-room-${code}.png`,
     })
-    setShareState((s) => ({ text: r === 'shared' ? t('lobby.shared') : r === 'copied' ? t('lobby.copied') : t('lobby.shareFailed'), n: s.n + 1 }))
+    setShareState((s) => ({ text: shareToast(r, { shared: 'lobby.shared', copied: 'lobby.copied', failed: 'lobby.shareFailed' }), n: s.n + 1 }))
   }
 
   // Same gate AddBotMenu applies internally; the first open seat hosts the add-bot CTA.
