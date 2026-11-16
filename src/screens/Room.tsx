@@ -39,6 +39,7 @@ export function Room() {
   const [attempt, setAttempt] = useState(0)
   const gen = useRef(0)
   const failedStreams = useRef(0)
+  const nameInputRef = useRef<HTMLInputElement>(null)
 
   const load = useCallback(async (retried = false, myGen = ++gen.current): Promise<void> => {
     const stale = () => myGen !== gen.current
@@ -120,13 +121,14 @@ export function Room() {
         <div className="ticket need-name-code"><span className="lobby-code">{code}</span></div>
         <label>
           <span className="muted">{t('landing.name')}</span>
-          <input value={nameInput} maxLength={16} onChange={(e) => setNameInput(e.target.value)} />
+          <input ref={nameInputRef} value={nameInput} maxLength={16} onChange={(e) => setNameInput(e.target.value)} />
         </label>
         <button
           type="button"
           className="btn primary"
           disabled={!nameInput.trim()}
           onClick={() => {
+            nameInputRef.current?.blur()
             saveName(nameInput.trim())
             setAttempt((a) => a + 1)
           }}
