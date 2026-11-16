@@ -144,6 +144,29 @@ test('Top bots card navigates to /top', () => {
   expect(screen.getByTestId('loc')).toHaveTextContent('/top')
 })
 
+test('creating a room blurs the name input', () => {
+  renderLanding()
+  const input = screen.getByLabelText('Your name')
+  input.focus()
+  fireEvent.change(input, { target: { value: 'Ann' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Create room' }))
+  expect(input).not.toHaveFocus()
+})
+
+test('joining with a code blurs the code input', () => {
+  // join() navigates synchronously on success, unmounting Landing, so the input would
+  // also lose focus on unmount with no explicit blur call. Spy on blur() itself so the
+  // assertion actually exercises the fix rather than the unmount.
+  renderLanding()
+  fireEvent.change(screen.getByLabelText('Your name'), { target: { value: 'Ann' } })
+  const code = screen.getByLabelText('Room code') as HTMLInputElement
+  code.focus()
+  fireEvent.change(code, { target: { value: 'ABCD' } })
+  const blurSpy = vi.spyOn(code, 'blur')
+  fireEvent.click(screen.getByRole('button', { name: 'Join room' }))
+  expect(blurSpy).toHaveBeenCalled()
+})
+
 test('without a guest session it never asks for recaps and shows no badge', async () => {
   vi.mocked(getSession).mockReturnValue({ playerId: '', token: '', lang: 'en', name: '' } as ReturnType<typeof getSession>)
   vi.mocked(getRecaps).mockResolvedValue({ recaps: [], unseen: 5 })
