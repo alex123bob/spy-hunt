@@ -107,6 +107,24 @@ describe('return-to-room banner', () => {
     expect(screen.getByTestId('loc')).toHaveTextContent('/r/ABC')
   })
 
+  test('leaving a game in progress asks first and warns about the bot handover', async () => {
+    setMyRoom({ code: 'ABC', status: 'playing' })
+    renderLanding()
+    fireEvent.click(screen.getByRole('button', { name: 'Leave room' }))
+    expect(leaveRoom).not.toHaveBeenCalled()
+    expect(await screen.findByText(/hands your seat to a bot/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Leave and continue' }))
+    await waitFor(() => expect(leaveRoom).toHaveBeenCalledWith('ABC'))
+  })
+
+  test('leaving a lobby needs no confirmation', async () => {
+    setMyRoom({ code: 'ABC', status: 'lobby' })
+    renderLanding()
+    fireEvent.click(screen.getByRole('button', { name: 'Leave room' }))
+    await waitFor(() => expect(leaveRoom).toHaveBeenCalledWith('ABC'))
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
   test('offers Leave room, which leaves that room', async () => {
     setMyRoom({ code: 'ABC', status: 'lobby' })
     renderLanding()

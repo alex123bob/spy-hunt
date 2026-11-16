@@ -22,6 +22,7 @@ export function Landing() {
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const [blocked, setBlocked] = useState<BlockingRoom | null>(null)
+  const [confirmLeave, setConfirmLeave] = useState(false)
   const [unseen, setUnseen] = useState(0)
   // null until the server answers, so the card never flashes a status it hasn't confirmed
   const [daily, setDaily] = useState<{ streak: number; played: boolean } | null>(null)
@@ -145,7 +146,11 @@ export function Landing() {
             <button type="button" className="btn primary" onClick={() => nav(`/r/${myRoom.code}`)}>
               {t('room.return')}
             </button>
-            <button type="button" className="btn secondary" onClick={() => void leaveRoom(myRoom.code).catch(() => {})}>
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={() => (myRoom.status === 'playing' ? setConfirmLeave(true) : void leaveRoom(myRoom.code).catch(() => {}))}
+            >
               {t('room.leave')}
             </button>
           </div>
@@ -169,6 +174,18 @@ export function Landing() {
           {t('landing.join')}
         </button>
       </div>
+      {confirmLeave && myRoom && (
+        <AlreadyInRoomSheet
+          code={myRoom.code}
+          status={myRoom.status}
+          onReturn={() => nav(`/r/${myRoom.code}`)}
+          onLeaveAndContinue={() => {
+            setConfirmLeave(false)
+            void leaveRoom(myRoom.code).catch(() => {})
+          }}
+          onClose={() => setConfirmLeave(false)}
+        />
+      )}
       {blocked && (
         <AlreadyInRoomSheet
           code={blocked.code}
