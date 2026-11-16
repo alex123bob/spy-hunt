@@ -204,6 +204,15 @@ test('a non-400 statement error shows the mapped text, not the server text', asy
   expect(screen.queryByText('English server text')).toBeNull()
 })
 
+test('sending a statement blurs the input (prevents mobile zoom persistence)', () => {
+  render(<Table state={snap({ current_speaker: 1 })} />)
+  const input = screen.getByPlaceholderText('Describe your word…')
+  input.focus()
+  fireEvent.change(input, { target: { value: 'hi' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+  expect(input).not.toHaveFocus()
+})
+
 test('Table language pick also syncs to the account', () => {
   render(<Table state={snap({ players: [player(0), player(1), player(2), player(3)] })} />)
   fireEvent.click(screen.getByRole('button', { name: 'Language: English' }))
