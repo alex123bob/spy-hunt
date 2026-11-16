@@ -7,12 +7,14 @@ import { t, useLang } from '../i18n'
 import { getDailyStreak } from '../daily/api'
 import { recordPageLoadVisit, recordStreakMilestone } from '../state/nudges'
 import { ensureGuest, getSession, setName as saveName } from '../state/session'
+import { leaveRoom, useMyRoom } from '../state/myRoom'
 
 const MASCOTS = [['🦊', 'sky'], ['🐸', 'pink'], ['🕵️', 'sun'], ['🐼', 'mint'], ['🐙', 'lilac']] as const
 
 export function Landing() {
   const nav = useNavigate()
   const lang = useLang()
+  const myRoom = useMyRoom()
   const [name, setName] = useState(getSession().name)
   const [code, setCode] = useState('')
   const [err, setErr] = useState('')
@@ -117,6 +119,19 @@ export function Landing() {
           <strong>{t('top.card')}</strong>
         </button>
       </div>
+      {myRoom && (
+        <div className="room-banner">
+          <strong>{t('landing.inRoom', { code: myRoom.code })}</strong>
+          <div className="actions">
+            <button type="button" className="btn primary" onClick={() => nav(`/r/${myRoom.code}`)}>
+              {t('room.return')}
+            </button>
+            <button type="button" className="btn secondary" onClick={() => void leaveRoom(myRoom.code).catch(() => {})}>
+              {t('room.leave')}
+            </button>
+          </div>
+        </div>
+      )}
       <label className="field-label">
         <span className="muted">{t('landing.name')}</span>
         <input ref={nameRef} className="field" value={name} maxLength={16} onChange={(e) => setName(e.target.value)} autoComplete="nickname" />

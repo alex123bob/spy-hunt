@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Landing } from './Landing'
 import { setLang } from '../i18n'
 import { getSession } from '../state/session'
+import { leaveRoom, setMyRoom } from '../state/myRoom'
 import { getRecaps } from '../bots/api'
 import { getDailyStreak } from '../daily/api'
 import { recordPageLoadVisit, recordStreakMilestone } from '../state/nudges'
@@ -31,6 +32,35 @@ function renderLanding() {
     </MemoryRouter>,
   )
 }
+
+vi.mock('../state/myRoom', async () => {
+  const actual = await vi.importActual<typeof import('../state/myRoom')>('../state/myRoom')
+  return { ...actual, leaveRoom: vi.fn().mockResolvedValue(undefined), refreshMyRoom: vi.fn().mockResolvedValue(undefined) }
+})
+
+describe('return-to-room banner', () => {
+  afterEach(() => setMyRoom(null))
+
+  test('shows nothing when the player is in no room', () => {
+    renderLanding()
+    expect(screen.queryByText(/You're in room/)).toBeNull()
+  })
+
+  test('offers Return, which opens the room', async () => {
+    setMyRoom({ code: 'ABC', status: 'lobby' })
+    renderLanding()
+    expect(screen.getByText(/You're in room ABC/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Return' }))
+    expect(screen.getByTestId('loc')).toHaveTextContent('/r/ABC')
+  })
+
+  test('offers Leave room, which leaves that room', async () => {
+    setMyRoom({ code: 'ABC', status: 'lobby' })
+    renderLanding()
+    fireEvent.click(screen.getByRole('button', { name: 'Leave room' }))
+    await waitFor(() => expect(leaveRoom).toHaveBeenCalledWith('ABC'))
+  })
+})
 
 beforeEach(() => {
   setLang('en')

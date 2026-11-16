@@ -447,5 +447,9 @@
   "profile.game.winner.spies": "Spies won",
   "profile.game.winner.none": "No winner",
   "profile.game.loading": "Loading…",
-  "profile.game.error": "Could not load this game."
+  "profile.game.error": "Could not load this game.",
+  "room.chip": "In room {code}",
+  "room.return": "Return",
+  "room.leave": "Leave room",
+  "landing.inRoom": "You're in room {code}"
 }

@@ -447,5 +447,9 @@
   "profile.game.winner.spies": "卧底获胜",
   "profile.game.winner.none": "无胜者",
   "profile.game.loading": "加载中…",
-  "profile.game.error": "无法加载这局游戏。"
+  "profile.game.error": "无法加载这局游戏。",
+  "room.chip": "在房间 {code}",
+  "room.return": "返回",
+  "room.leave": "离开房间",
+  "landing.inRoom": "你在房间 {code} 中"
 }

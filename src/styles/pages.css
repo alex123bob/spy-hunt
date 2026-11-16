@@ -259,3 +259,9 @@
 .game-row-panel { padding: 4px 12px 12px; border-top: 2px dashed var(--muted); padding-top: 10px; min-width: 0; }
 .game-row-error { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .game-row-error p { margin: 0; }
+
+/* return-to-room: Landing banner and the floating chip (z-index 8 < sheet backdrop 10) */
+.room-banner { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 10px 12px; background: var(--paper); border: 2.5px solid var(--ink); border-radius: 18px; box-shadow: 0 3px 0 var(--ink); }
+.room-banner strong { font-weight: 700; }
+.room-banner .actions { display: flex; gap: 8px; }
+.room-chip { position: fixed; right: var(--gutter); top: calc(64px + env(safe-area-inset-top)); z-index: 8; max-width: calc(100% - 2 * var(--gutter)); padding: 6px 12px; background: var(--sun, #ffd54a); color: var(--ink); border: 2.5px solid var(--ink); border-radius: 999px; box-shadow: 0 3px 0 var(--ink); font-weight: 700; font-size: 14px; text-decoration: none; }
