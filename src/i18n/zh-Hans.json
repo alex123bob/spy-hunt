@@ -451,5 +451,9 @@
   "room.chip": "在房间 {code}",
   "room.return": "返回",
   "room.leave": "离开房间",
-  "landing.inRoom": "你在房间 {code} 中"
+  "landing.inRoom": "你在房间 {code} 中",
+  "room.blocked.title": "你已经在一个房间里了",
+  "room.blocked.body": "请先结束或离开房间 {code}。",
+  "room.blocked.playingWarn": "离开进行中的游戏后，你的座位会交给机器人。",
+  "room.blocked.leave": "离开并继续"
 }

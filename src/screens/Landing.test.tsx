@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Landing } from './Landing'
+import { ApiError, request } from '../api/client'
 import { setLang } from '../i18n'
 import { getSession } from '../state/session'
 import { leaveRoom, setMyRoom } from '../state/myRoom'
@@ -36,6 +37,58 @@ function renderLanding() {
 vi.mock('../state/myRoom', async () => {
   const actual = await vi.importActual<typeof import('../state/myRoom')>('../state/myRoom')
   return { ...actual, leaveRoom: vi.fn().mockResolvedValue(undefined), refreshMyRoom: vi.fn().mockResolvedValue(undefined) }
+})
+
+vi.mock('../api/client', async (orig) => {
+  const m = await orig<typeof import('../api/client')>()
+  return { ...m, request: vi.fn() }
+})
+
+describe('blocked by an active room', () => {
+  const blocked = () => new ApiError(409, 'already_in_room', 'x', { code: 'OLD', status: 'lobby' })
+
+  beforeEach(() => {
+    vi.mocked(request).mockReset()
+    vi.mocked(getSession).mockImplementation(() => ({ playerId: 'p', token: 't', lang: 'en', name: 'Ann' }))
+  })
+
+  test('create shows the dialog naming the existing room', async () => {
+    vi.mocked(request).mockRejectedValueOnce(blocked())
+    renderLanding()
+    fireEvent.click(screen.getByRole('button', { name: 'Create room' }))
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText(/room OLD/)).toBeInTheDocument()
+  })
+
+  test('Return from the dialog opens the existing room', async () => {
+    vi.mocked(request).mockRejectedValueOnce(blocked())
+    renderLanding()
+    fireEvent.click(screen.getByRole('button', { name: 'Create room' }))
+    await screen.findByRole('dialog')
+    fireEvent.click(screen.getByRole('button', { name: 'Return' }))
+    expect(screen.getByTestId('loc')).toHaveTextContent('/r/OLD')
+  })
+
+  test('Leave and continue leaves the old room, then retries create once', async () => {
+    vi.mocked(request).mockRejectedValueOnce(blocked()).mockResolvedValueOnce({ code: 'NEW' })
+    renderLanding()
+    fireEvent.click(screen.getByRole('button', { name: 'Create room' }))
+    await screen.findByRole('dialog')
+    fireEvent.click(screen.getByRole('button', { name: 'Leave and continue' }))
+    await waitFor(() => expect(screen.getByTestId('loc')).toHaveTextContent('/r/NEW'))
+    expect(leaveRoom).toHaveBeenCalledWith('OLD')
+    expect(vi.mocked(request).mock.calls.filter((c) => c[1] === '/rooms')).toHaveLength(2)
+  })
+
+  test('a second block after leaving shows the normal error, not another dialog', async () => {
+    vi.mocked(request).mockRejectedValueOnce(blocked()).mockRejectedValueOnce(blocked())
+    renderLanding()
+    fireEvent.click(screen.getByRole('button', { name: 'Create room' }))
+    await screen.findByRole('dialog')
+    fireEvent.click(screen.getByRole('button', { name: 'Leave and continue' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+  })
 })
 
 describe('return-to-room banner', () => {

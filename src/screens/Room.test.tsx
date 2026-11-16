@@ -62,6 +62,33 @@ test('409 game_started shows already-started; room_full shows full', async () =>
   expect(await screen.findByText('Room is full')).toBeInTheDocument()
 })
 
+test('already_in_room on join shows the dialog, not the started screen', async () => {
+  vi.mocked(request)
+    .mockRejectedValueOnce(new ApiError(403, 'not_member'))
+    .mockRejectedValueOnce(new ApiError(409, 'already_in_room', 'x', { code: 'OLD', status: 'playing' }))
+  go()
+  expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  expect(screen.getByText(/room OLD/)).toBeInTheDocument()
+  expect(screen.getByText(/hands your seat to a bot/)).toBeInTheDocument()
+  expect(screen.queryByText('Game already started')).toBeNull()
+})
+
+test('Leave and continue on a blocked join leaves the old room then joins once more', async () => {
+  vi.mocked(request)
+    .mockRejectedValueOnce(new ApiError(403, 'not_member'))
+    .mockRejectedValueOnce(new ApiError(409, 'already_in_room', 'x', { code: 'OLD', status: 'lobby' }))
+    .mockResolvedValueOnce({}) // POST /rooms/OLD/leave
+    .mockRejectedValueOnce(new ApiError(403, 'not_member')) // reload: still not a member
+    .mockResolvedValueOnce(playing()) // retried join
+  go()
+  await screen.findByRole('dialog')
+  fireEvent.click(screen.getByRole('button', { name: 'Leave and continue' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+  expect(request).toHaveBeenCalledWith('POST', '/rooms/OLD/leave')
+  const joins = vi.mocked(request).mock.calls.filter((c) => c[1] === '/rooms/ABCD/join')
+  expect(joins).toHaveLength(2)
+})
+
 test('network failure shows a retry screen', async () => {
   vi.mocked(request).mockRejectedValue(new ApiError(0, 'network'))
   go()
