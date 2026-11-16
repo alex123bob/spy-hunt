@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { Player } from '../api/types'
 import { Avatar } from './Avatar'
 import { ClanTag } from './ClanTag'
@@ -8,7 +9,7 @@ export function PlayerChip({ player, isMe, status }: { player: Player; isMe?: bo
     <div className={`chip-row ${player.alive ? '' : 'out'}`}>
       <Avatar player={player} size="m" out={!player.alive} />
       {player.bot_id ? (
-        <a className="name wrap" href={`/bot/${encodeURIComponent(player.bot_id)}`} target="_blank" rel="noopener">{player.name}</a>
+        <Link className="name wrap" to={`/bot/${encodeURIComponent(player.bot_id)}`} target="_blank" rel="noopener">{player.name}</Link>
       ) : (
         <span className="name wrap">{player.name}</span>
       )}

@@ -1,8 +1,9 @@
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { Room } from './Room'
 import { ApiError, request } from '../api/client'
 import { openRoomStream } from '../api/stream'
+import { getSession } from '../state/session'
 import type { Snapshot } from '../api/types'
 
 vi.mock('../api/client', async (orig) => {
@@ -14,7 +15,7 @@ vi.mock('../state/session', () => ({
   ensureGuest: vi.fn().mockResolvedValue({}),
   forgetGuest: vi.fn(),
   setName: vi.fn(),
-  getSession: () => ({ playerId: 'p', token: 't', lang: 'en', name: 'Ann' }),
+  getSession: vi.fn(() => ({ playerId: 'p', token: 't', lang: 'en', name: 'Ann' })),
   setSessionLang: vi.fn(),
 }))
 
@@ -40,6 +41,7 @@ function go() {
 
 beforeEach(() => {
   vi.mocked(request).mockReset()
+  vi.mocked(getSession).mockReturnValue({ playerId: 'p', token: 't', lang: 'en', name: 'Ann' })
 })
 
 test('404 shows room-not-found with a way home', async () => {
@@ -65,6 +67,21 @@ test('network failure shows a retry screen', async () => {
   go()
   expect(await screen.findByText('Connection problem')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
+})
+
+test('submitting a name blurs the input', async () => {
+  // Submitting swaps Room to the loading boot state, which unmounts this form, so the
+  // input would also lose focus on unmount with no explicit blur call. Spy on blur()
+  // itself so the assertion actually exercises the fix rather than the unmount.
+  vi.mocked(getSession).mockReturnValue({ playerId: 'p', token: 't', lang: 'en', name: '' })
+  vi.mocked(request).mockRejectedValue(new ApiError(403, 'not_member'))
+  go()
+  const input = (await screen.findByLabelText('Your name')) as HTMLInputElement
+  input.focus()
+  fireEvent.change(input, { target: { value: 'Ann' } })
+  const blurSpy = vi.spyOn(input, 'blur')
+  fireEvent.click(screen.getByRole('button', { name: 'Join room' }))
+  expect(blurSpy).toHaveBeenCalled()
 })
 
 test('a member in playing/describe renders Table', async () => {

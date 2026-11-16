@@ -1,14 +1,17 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { Lobby } from './Lobby'
 import { setLang, getLang } from '../i18n'
 import type { Snapshot } from '../api/types'
 import { ApiError } from '../api/client'
+import { shareCard } from '../daily/share'
 
 vi.mock('../api/client', async (orig) => {
   const m = await orig<typeof import('../api/client')>()
   return { ...m, request: vi.fn().mockResolvedValue({}) }
 })
 import { request } from '../api/client'
+vi.mock('../daily/share', () => ({ shareCard: vi.fn(), drawCard: vi.fn() }))
 vi.mock('../bots/api', () => ({ listMyBots: vi.fn() }))
 import { listMyBots } from '../bots/api'
 vi.mock('../state/accounts', async (orig) => ({ ...(await orig<typeof import('../state/accounts')>()), patchMyLang: vi.fn() }))
@@ -39,27 +42,28 @@ beforeEach(() => {
 })
 
 test('Start button is absent for a non-host and present for the host', () => {
-  const { unmount } = render(<Lobby state={snap(false)} />)
+  const { unmount } = render(<MemoryRouter><Lobby state={snap(false)} /></MemoryRouter>)
   expect(screen.queryByRole('button', { name: 'Start game' })).toBeNull()
   unmount()
-  render(<Lobby state={snap(true)} />)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   expect(screen.getByRole('button', { name: 'Start game' })).toBeEnabled()
 })
 
 test('invite link text equals origin/r/CODE', () => {
-  render(<Lobby state={snap(true)} />)
-  expect(screen.getByTestId('invite-link')).toHaveTextContent(`${window.location.origin}/r/ABCD`)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  fireEvent.click(screen.getByRole('button', { name: 'QR code' }))
+  expect(screen.getByText(`${window.location.origin}/r/ABCD`)).toBeInTheDocument()
 })
 
 test('bots are labelled and switching language updates strings immediately', () => {
-  render(<Lobby state={snap(true)} />)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   expect(screen.getByText('Bot')).toBeInTheDocument()
   act(() => setLang('zh-Hans'))
   expect(screen.getByRole('button', { name: '开始游戏' })).toBeInTheDocument()
 })
 
 test('a top-bar language change in the lobby syncs my seat language', () => {
-  render(<Lobby state={snap(false)} />)
+  render(<MemoryRouter><Lobby state={snap(false)} /></MemoryRouter>)
   act(() => setLang('zh-Hans'))
   expect(request).toHaveBeenCalledWith('PATCH', '/rooms/ABCD/me', { lang: 'zh-Hans' })
   expect(request).toHaveBeenCalledTimes(1)
@@ -67,18 +71,18 @@ test('a top-bar language change in the lobby syncs my seat language', () => {
 })
 
 test('nothing is sent when my language already matches my seat', () => {
-  render(<Lobby state={snap(false)} />)
+  render(<MemoryRouter><Lobby state={snap(false)} /></MemoryRouter>)
   expect(request).not.toHaveBeenCalledWith('PATCH', '/rooms/ABCD/me', expect.anything())
 })
 
 test('there is no Your language section', () => {
-  render(<Lobby state={snap(true)} />)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   expect(screen.queryByText('Your language')).toBeNull()
   expect(screen.queryByRole('radiogroup')).toBeNull()
 })
 
 test('the host picks the room language from the players card header', () => {
-  render(<Lobby state={snap(true)} />)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   const btn = screen.getByRole('button', { name: 'Room language: English' })
   expect(btn).toHaveTextContent('Room: English')
   fireEvent.click(btn)
@@ -90,14 +94,14 @@ test('the host picks the room language from the players card header', () => {
 })
 
 test('a non-host sees the room language as text, not a button', () => {
-  render(<Lobby state={snap(false)} />)
+  render(<MemoryRouter><Lobby state={snap(false)} /></MemoryRouter>)
   expect(screen.queryByRole('button', { name: /^Room language/ })).toBeNull()
   expect(screen.getByText('Room: English')).toBeInTheDocument()
 })
 
 test('when listMyBots fails, the host still gets Random bot and no alert', async () => {
   vi.mocked(listMyBots).mockRejectedValue(new Error('offline'))
-  render(<Lobby state={snap(true)} />)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   await waitFor(() => expect(listMyBots).toHaveBeenCalled())
   fireEvent.click(screen.getByRole('button', { name: /Add a bot/ }))
   const items = screen.getAllByRole('menuitem')
@@ -120,7 +124,7 @@ const full = (isHost: boolean): Snapshot => {
 
 test('a full room shows the Full badge and no add row', async () => {
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
-  render(<Lobby state={full(true)} />)
+  render(<MemoryRouter><Lobby state={full(true)} /></MemoryRouter>)
   await waitFor(() => expect(listMyBots).toHaveBeenCalled())
   expect(screen.getByText('Players (3/3)')).toBeInTheDocument()
   expect(screen.getByText('Full')).toBeInTheDocument()
@@ -128,12 +132,12 @@ test('a full room shows the Full badge and no add row', async () => {
 })
 
 test('a room with space shows no Full badge', () => {
-  render(<Lobby state={snap(true)} />)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   expect(screen.queryByText('Full')).toBeNull()
 })
 
 test('the host adds a random bot from the add menu', async () => {
-  render(<Lobby state={snap(true)} />)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   fireEvent.click(screen.getByRole('button', { name: /Add a bot/ }))
   fireEvent.click(screen.getByRole('menuitem', { name: /Random bot/ }))
   expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add' })
@@ -142,7 +146,7 @@ test('the host adds a random bot from the add menu', async () => {
 
 test('picking one of my bots posts add with its id', async () => {
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex'), mine('b2', 'Sue')])
-  render(<Lobby state={withBots(false, [botP(3, 'b9', 'Other')])} />)
+  render(<MemoryRouter><Lobby state={withBots(false, [botP(3, 'b9', 'Other')])} /></MemoryRouter>)
   fireEvent.click(await screen.findByRole('button', { name: /Add a bot/ }))
   expect(screen.queryByRole('menuitem', { name: /Random bot/ })).toBeNull()
   expect(screen.getByRole('menuitem', { name: /Sue/ })).toBeInTheDocument()
@@ -152,21 +156,21 @@ test('picking one of my bots posts add with its id', async () => {
 
 test('with my bot seated, the add menu explains why and offers no bots', async () => {
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex'), mine('b2', 'Sue')])
-  render(<Lobby state={withBots(false, [botP(3, 'b1', 'Rex')])} />)
+  render(<MemoryRouter><Lobby state={withBots(false, [botP(3, 'b1', 'Rex')])} /></MemoryRouter>)
   fireEvent.click(await screen.findByRole('button', { name: /Add a bot/ }))
   expect(screen.getByText('Your bot Rex is already in this room. Remove it to add a different one.')).toBeInTheDocument()
   expect(screen.queryAllByRole('menuitem')).toHaveLength(0)
 })
 
 test('a non-host without bots has no add row', async () => {
-  render(<Lobby state={snap(false)} />)
+  render(<MemoryRouter><Lobby state={snap(false)} /></MemoryRouter>)
   await waitFor(() => expect(listMyBots).toHaveBeenCalled())
   expect(screen.queryByRole('button', { name: /Add a bot/ })).toBeNull()
 })
 
 test('only my bot chip has Remove, posting remove with the seat', async () => {
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
-  render(<Lobby state={withBots(false, [botP(4, 'b1', 'Rex'), botP(5, 'b9', 'Other')])} />)
+  render(<MemoryRouter><Lobby state={withBots(false, [botP(4, 'b1', 'Rex'), botP(5, 'b9', 'Other')])} /></MemoryRouter>)
   const rm = await screen.findAllByRole('button', { name: /Remove/ })
   expect(rm).toHaveLength(1)
   fireEvent.click(rm[0])
@@ -174,7 +178,7 @@ test('only my bot chip has Remove, posting remove with the seat', async () => {
 })
 
 test('the host can remove any bot by seat', async () => {
-  render(<Lobby state={withBots(true, [botP(4, 'b9', 'Other')])} />)
+  render(<MemoryRouter><Lobby state={withBots(true, [botP(4, 'b9', 'Other')])} /></MemoryRouter>)
   const rm = await screen.findAllByRole('button', { name: /Remove/ })
   expect(rm).toHaveLength(2)
   fireEvent.click(rm[1])
@@ -182,20 +186,20 @@ test('the host can remove any bot by seat', async () => {
 })
 
 test('there is no global Remove bot button', () => {
-  render(<Lobby state={snap(true)} />)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   expect(screen.queryByRole('button', { name: 'Remove bot' })).toBeNull()
   expect(screen.queryByRole('button', { name: 'Add bot' })).toBeNull()
 })
 
 test('per-seat Remove buttons are touch-sized and show a cross', () => {
-  render(<Lobby state={snap(true)} />)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   const rm = screen.getByRole('button', { name: /Remove/ })
   expect(rm).toHaveClass('remove-btn')
   expect(rm).toHaveTextContent('✕ Remove')
 })
 
 test('a bot player shows its avatar emoji', () => {
-  render(<Lobby state={withBots(false, [botP(4, 'b9', 'Other')])} />)
+  render(<MemoryRouter><Lobby state={withBots(false, [botP(4, 'b9', 'Other')])} /></MemoryRouter>)
   expect(screen.getByText('🐙')).toBeInTheDocument()
 })
 
@@ -206,23 +210,118 @@ const sized = (n: number, bot_fill: boolean): Snapshot => {
 }
 
 test('fill hint shows when bots will be added, needMore without bot fill, nothing when enough', () => {
-  const { unmount } = render(<Lobby state={sized(3, true)} />)
+  const { unmount } = render(<MemoryRouter><Lobby state={sized(3, true)} /></MemoryRouter>)
   expect(screen.getByText('At least 4 players are needed. 1 bot(s) will be added when you start.')).toBeInTheDocument()
   unmount()
-  const u2 = render(<Lobby state={sized(3, false)} />)
+  const u2 = render(<MemoryRouter><Lobby state={sized(3, false)} /></MemoryRouter>)
   expect(screen.getByText('At least 4 players are needed to start.')).toBeInTheDocument()
   u2.unmount()
-  render(<Lobby state={sized(4, true)} />)
+  render(<MemoryRouter><Lobby state={sized(4, true)} /></MemoryRouter>)
   expect(screen.queryByText(/At least 4 players/)).toBeNull()
 })
 
 test('a failing call shows mapped text, not the server text', async () => {
   vi.mocked(request).mockRejectedValueOnce(new ApiError(409, 'bot_in_room', 'English server text'))
-  render(<Lobby state={snap(true)} />)
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   fireEvent.click(screen.getByRole('button', { name: /Add a bot/ }))
   fireEvent.click(screen.getByRole('menuitem', { name: /Random bot/ }))
   const alert = await screen.findByRole('alert')
   expect(alert).toHaveTextContent('You already have a bot in this room.')
   expect(alert).not.toHaveTextContent('English server text')
   expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add' })
+})
+
+test('the first empty seat is the add-bot CTA for the host, styled distinctly', () => {
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  const seatsList = screen.getAllByText(/Empty seat|Add a bot/)
+  expect(seatsList[0]).toHaveTextContent(/Add a bot/)
+  expect(seatsList[0].closest('.seat')).toHaveClass('seat-cta')
+})
+
+test('remaining empty seats (beyond the first) stay plain placeholders', () => {
+  render(<MemoryRouter><Lobby state={sized(2, true)} /></MemoryRouter>)
+  expect(screen.getAllByText('Empty seat')).toHaveLength(1)
+  expect(screen.getAllByRole('button', { name: /Add a bot/ })).toHaveLength(1)
+})
+
+test('a non-host with no bots sees a plain Empty seat, not a CTA, in the first slot', async () => {
+  render(<MemoryRouter><Lobby state={snap(false)} /></MemoryRouter>)
+  await waitFor(() => expect(listMyBots).toHaveBeenCalled())
+  expect(screen.getByText('Empty seat')).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: /Add a bot/ })).toBeNull()
+})
+
+test('a non-host who owns a bot sees the CTA in the first empty seat', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
+  render(<MemoryRouter><Lobby state={snap(false)} /></MemoryRouter>)
+  expect(await screen.findByRole('button', { name: /Add a bot/ })).toBeInTheDocument()
+})
+
+test('a full room has no CTA at all', async () => {
+  vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
+  render(<MemoryRouter><Lobby state={full(true)} /></MemoryRouter>)
+  await waitFor(() => expect(listMyBots).toHaveBeenCalled())
+  expect(screen.queryByRole('button', { name: /Add a bot/ })).toBeNull()
+  expect(document.querySelector('.seat-cta')).toBeNull()
+})
+
+test('there is exactly one add-bot affordance, inside a seat, not a separate row', () => {
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  const btns = screen.getAllByRole('button', { name: /Add a bot/ })
+  expect(btns).toHaveLength(1)
+  expect(btns[0].closest('.seat')).toHaveClass('seat-cta')
+})
+
+test('the CTA still shows when the room has reached min players but is not full', () => {
+  render(<MemoryRouter><Lobby state={sized(4, true)} /></MemoryRouter>)
+  const btn = screen.getByRole('button', { name: /Add a bot/ })
+  expect(btn.closest('.seat')).toHaveClass('seat-cta')
+  expect(screen.queryByText('Empty seat')).toBeNull()
+})
+
+test('the header has Invite and a QR icon button, no standalone Copy link pill', () => {
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  expect(screen.getByRole('button', { name: 'Invite' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'QR code' })).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Copy link' })).toBeNull()
+})
+
+test('there is no bottom invite/QR card', () => {
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  expect(screen.queryByTestId('invite-link')).toBeNull()
+  expect(document.querySelector('.qr')).toBeNull()
+})
+
+test('clicking the QR icon opens the ShareSheet with the invite link', () => {
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  fireEvent.click(screen.getByRole('button', { name: 'QR code' }))
+  expect(screen.getByText(`${window.location.origin}/r/ABCD`)).toBeInTheDocument()
+})
+
+test('clicking Invite shares the room invite card and toasts the outcome', async () => {
+  vi.mocked(shareCard).mockResolvedValue('copied')
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+  await waitFor(() => expect(shareCard).toHaveBeenCalled())
+  const arg = vi.mocked(shareCard).mock.calls[0][0]
+  expect(arg.model.puzzle).toContain('ABCD')
+  expect(arg.model.url).toBe(`${window.location.origin}/r/ABCD`)
+  expect(await screen.findByText('Copied!')).toBeInTheDocument()
+})
+
+test('Invite when the native share is cancelled or fails shows an error toast, no throw', async () => {
+  vi.mocked(shareCard).mockResolvedValue('failed')
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+  expect(await screen.findByText('Could not share.')).toBeInTheDocument()
+})
+
+test('cancelling the native share shows no toast at all', async () => {
+  vi.mocked(shareCard).mockResolvedValue('cancelled')
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+  await waitFor(() => expect(shareCard).toHaveBeenCalled())
+  await act(async () => {})
+  expect(screen.queryByRole('status')).toBeNull()
+  expect(screen.queryByText('Could not share.')).toBeNull()
 })

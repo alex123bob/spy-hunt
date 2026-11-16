@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { PlayerChip } from './PlayerChip'
 import type { Player } from '../api/types'
 
 const p = (o: Partial<Player> = {}): Player => ({ seat: 1, name: 'Bo', lang: 'en', is_bot: true, alive: true, connected: true, is_host: false, ...o })
 
 test('a custom bot links to its page', () => {
-  render(<PlayerChip player={p({ bot_id: 'abc12345' })} />)
+  render(<MemoryRouter><PlayerChip player={p({ bot_id: 'abc12345' })} /></MemoryRouter>)
   const a = screen.getByRole('link', { name: 'Bo' })
   expect(a).toHaveAttribute('href', '/bot/abc12345')
   expect(a).toHaveAttribute('target', '_blank')

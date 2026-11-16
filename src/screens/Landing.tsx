@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { request } from '../api/client'
 import type { Snapshot } from '../api/types'
@@ -20,6 +20,8 @@ export function Landing() {
   const [unseen, setUnseen] = useState(0)
   // null until the server answers, so the card never flashes a status it hasn't confirmed
   const [daily, setDaily] = useState<{ streak: number; played: boolean } | null>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const codeRef = useRef<HTMLInputElement>(null)
   const hasSession = !!getSession().playerId
   const streak = daily?.streak ?? 0
   const played = daily?.played ?? false
@@ -55,6 +57,7 @@ export function Landing() {
   const create = async () => {
     const n = needName()
     if (!n) return
+    nameRef.current?.blur()
     setBusy(true)
     try {
       await ensureGuest()
@@ -69,6 +72,7 @@ export function Landing() {
 
   const join = () => {
     if (!needName()) return
+    codeRef.current?.blur()
     const c = code.trim().toUpperCase()
     if (c) nav(`/r/${c}`)
   }
@@ -115,7 +119,7 @@ export function Landing() {
       </div>
       <label className="field-label">
         <span className="muted">{t('landing.name')}</span>
-        <input className="field" value={name} maxLength={16} onChange={(e) => setName(e.target.value)} autoComplete="nickname" />
+        <input ref={nameRef} className="field" value={name} maxLength={16} onChange={(e) => setName(e.target.value)} autoComplete="nickname" />
       </label>
       {err && <p role="alert" className="error">{err}</p>}
       <button type="button" className="btn primary" disabled={busy} onClick={create}>
@@ -125,7 +129,7 @@ export function Landing() {
       <div className="join-row">
         <label className="field-label">
           <span className="muted">{t('landing.code')}</span>
-          <input className="field ticket" value={code} maxLength={8} onChange={(e) => setCode(e.target.value)} autoCapitalize="characters" />
+          <input ref={codeRef} className="field ticket" value={code} maxLength={8} onChange={(e) => setCode(e.target.value)} autoCapitalize="characters" />
         </label>
         <button type="button" className="btn secondary" onClick={join}>
           {t('landing.join')}

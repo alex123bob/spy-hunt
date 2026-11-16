@@ -108,7 +108,7 @@ describe('shareResult', () => {
       share: vi.fn().mockRejectedValue(Object.assign(new DOMException('cancel', 'AbortError'))),
       clipboard: { writeText },
     })
-    expect(await shareDailyResult(base)).toBe('failed')
+    expect(await shareDailyResult(base)).toBe('cancelled')
     expect(writeText).not.toHaveBeenCalled()
   })
 })

@@ -22,6 +22,7 @@ export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const nameOf = (seat: number | null) => state.players.find((p) => p.seat === seat)?.name ?? ''
 
   // The turn bar is sticky over the bottom of the page, so "in view" is not enough: leave room for it,
@@ -50,6 +51,7 @@ export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot
   }
 
   const send = async () => {
+    inputRef.current?.blur()
     const v = text.trim()
     if (!v || busy) return
     setBusy(true)
@@ -103,6 +105,7 @@ export function Table({ state, offset = 0, holdUntil = null }: { state: Snapshot
         {eliminated && <p className="ghost-note">👻 {t('table.eliminated')}</p>}
         <div className="row">
           <input
+            ref={inputRef}
             value={text}
             maxLength={state.config.statement_max_chars}
             disabled={!myTurn || busy}

@@ -29,6 +29,8 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     if (busy) return
+    const active = document.activeElement as HTMLElement | null
+    active?.blur()
     setBusy(true)
     setErr('')
     try {
