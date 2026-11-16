@@ -29,3 +29,17 @@ test('network failure becomes ApiError status 0', async () => {
   vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('offline'))
   await expect(request('GET', '/x')).rejects.toMatchObject({ status: 0, code: 'network' })
 })
+
+test('a 409 keeps the extra fields of the error body on ApiError.data', async () => {
+  mockFetch(409, { error: 'already_in_room', message: 'no', code: 'XYZ', status: 'lobby' })
+  await expect(request('POST', '/rooms')).rejects.toMatchObject({
+    status: 409,
+    code: 'already_in_room',
+    data: { code: 'XYZ', status: 'lobby' },
+  })
+})
+
+test('ApiError.data is an empty object when the body has none', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('boom', { status: 500 }))
+  await expect(request('GET', '/x')).rejects.toMatchObject({ status: 500, data: {} })
+})

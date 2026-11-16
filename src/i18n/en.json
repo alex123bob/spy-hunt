@@ -447,5 +447,13 @@
   "profile.game.winner.spies": "Spies won",
   "profile.game.winner.none": "No winner",
   "profile.game.loading": "Loading…",
-  "profile.game.error": "Could not load this game."
+  "profile.game.error": "Could not load this game.",
+  "room.chip": "In room {code}",
+  "room.return": "Return",
+  "room.leave": "Leave room",
+  "landing.inRoom": "You're in room {code}",
+  "room.blocked.title": "You're already in a room",
+  "room.blocked.body": "Finish or leave room {code} first.",
+  "room.blocked.playingWarn": "Leaving a game in progress hands your seat to a bot.",
+  "room.blocked.leave": "Leave and continue"
 }

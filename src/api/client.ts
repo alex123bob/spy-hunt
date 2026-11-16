@@ -1,10 +1,13 @@
 export class ApiError extends Error {
   status: number
   code: string
-  constructor(status: number, code: string, message?: string) {
+  // the parsed error body, e.g. { code, status } of the room behind already_in_room
+  data: Record<string, unknown>
+  constructor(status: number, code: string, message?: string, data: Record<string, unknown> = {}) {
     super(message || code)
     this.status = status
     this.code = code
+    this.data = data
   }
 }
 
@@ -42,8 +45,11 @@ export async function request<T>(method: string, path: string, body?: unknown, h
     data = null
   }
   if (!res.ok) {
-    const d = (data ?? {}) as { error?: string; message?: string }
-    throw new ApiError(res.status, d.error ?? 'error', d.message)
+    const d = (typeof data === 'object' && data !== null ? data : {}) as Record<string, unknown> & {
+      error?: string
+      message?: string
+    }
+    throw new ApiError(res.status, d.error ?? 'error', d.message, d)
   }
   return data as T
 }

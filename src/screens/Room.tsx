@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ApiError, request } from '../api/client'
 import { openRoomStream } from '../api/stream'
 import type { Snapshot } from '../api/types'
@@ -8,6 +8,9 @@ import { reloadDelay } from '../state/backoff'
 import { RoomStore, useRoomStore } from '../state/roomStore'
 import { useHeldScreen, type Screen } from '../state/useHeldScreen'
 import { ensureGuest, forgetGuest, getSession, setName as saveName } from '../state/session'
+import { leaveRoom } from '../state/myRoom'
+import { blockingRoom, type BlockingRoom } from '../state/blockingRoom'
+import { AlreadyInRoomSheet } from '../components/AlreadyInRoomSheet'
 import { Loader } from '../components/Loader'
 import { Lobby } from './Lobby'
 import { Reveal } from './Reveal'
@@ -16,7 +19,12 @@ import { RoomError, type RoomErrorKind } from './RoomError'
 import { Table } from './Table'
 import { Vote } from './Vote'
 
-type Boot = { kind: 'loading' } | { kind: 'error'; error: RoomErrorKind } | { kind: 'needName' } | { kind: 'ready' }
+type Boot =
+  | { kind: 'loading' }
+  | { kind: 'error'; error: RoomErrorKind }
+  | { kind: 'needName' }
+  | { kind: 'blocked'; room: BlockingRoom }
+  | { kind: 'ready' }
 
 function errorKind(e: unknown): RoomErrorKind {
   if (e instanceof ApiError) {
@@ -28,6 +36,7 @@ function errorKind(e: unknown): RoomErrorKind {
 
 export function Room() {
   const { code: rawCode = '' } = useParams()
+  const nav = useNavigate()
   const code = rawCode.trim().toUpperCase()
   useLang()
   const storeRef = useRef<RoomStore | null>(null)
@@ -41,7 +50,9 @@ export function Room() {
   const failedStreams = useRef(0)
   const nameInputRef = useRef<HTMLInputElement>(null)
 
-  const load = useCallback(async (retried = false, myGen = ++gen.current): Promise<void> => {
+  // `joinRetried`: a join already retried after leaving the blocking room; a second
+  // already_in_room is then a plain failure, not another dialog
+  const load = useCallback(async (retried = false, myGen = ++gen.current, joinRetried = false): Promise<void> => {
     const stale = () => myGen !== gen.current
     setBoot({ kind: 'loading' })
     try {
@@ -60,7 +71,16 @@ export function Room() {
             if (!stale()) setBoot({ kind: 'needName' })
             return
           }
-          snap = await request<Snapshot>('POST', `/rooms/${code}/join`, { name: s.name.trim(), lang: s.lang })
+          try {
+            snap = await request<Snapshot>('POST', `/rooms/${code}/join`, { name: s.name.trim(), lang: s.lang })
+          } catch (je) {
+            const other = joinRetried ? null : blockingRoom(je)
+            if (other) {
+              if (!stale()) setBoot({ kind: 'blocked', room: other })
+              return
+            }
+            throw je
+          }
         } else {
           throw e
         }
@@ -114,6 +134,30 @@ export function Room() {
   if (boot.kind === 'loading') return <main className="screen center"><Loader label={t('room.loading')} /></main>
   if (boot.kind === 'error') {
     return <RoomError kind={boot.error} onRetry={() => setAttempt((a) => a + 1)} />
+  }
+  if (boot.kind === 'blocked') {
+    const old = boot.room
+    return (
+      <main className="screen center">
+        <AlreadyInRoomSheet
+          code={old.code}
+          status={old.status}
+          onReturn={() => nav(`/r/${old.code}`)}
+          onLeaveAndContinue={() => {
+            void (async () => {
+              try {
+                await leaveRoom(old.code)
+              } catch {
+                setBoot({ kind: 'error', error: 'network' })
+                return
+              }
+              void load(false, ++gen.current, true)
+            })()
+          }}
+          onClose={() => nav('/')}
+        />
+      </main>
+    )
   }
   if (boot.kind === 'needName') {
     return (

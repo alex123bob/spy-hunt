@@ -7,16 +7,22 @@ import { t, useLang } from '../i18n'
 import { getDailyStreak } from '../daily/api'
 import { recordPageLoadVisit, recordStreakMilestone } from '../state/nudges'
 import { ensureGuest, getSession, setName as saveName } from '../state/session'
+import { leaveRoom, useMyRoom } from '../state/myRoom'
+import { blockingRoom, type BlockingRoom } from '../state/blockingRoom'
+import { AlreadyInRoomSheet } from '../components/AlreadyInRoomSheet'
 
 const MASCOTS = [['🦊', 'sky'], ['🐸', 'pink'], ['🕵️', 'sun'], ['🐼', 'mint'], ['🐙', 'lilac']] as const
 
 export function Landing() {
   const nav = useNavigate()
   const lang = useLang()
+  const myRoom = useMyRoom()
   const [name, setName] = useState(getSession().name)
   const [code, setCode] = useState('')
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
+  const [blocked, setBlocked] = useState<BlockingRoom | null>(null)
+  const [confirmLeave, setConfirmLeave] = useState(false)
   const [unseen, setUnseen] = useState(0)
   // null until the server answers, so the card never flashes a status it hasn't confirmed
   const [daily, setDaily] = useState<{ streak: number; played: boolean } | null>(null)
@@ -54,7 +60,7 @@ export function Landing() {
     return n
   }
 
-  const create = async () => {
+  const create = async (retry = false) => {
     const n = needName()
     if (!n) return
     nameRef.current?.blur()
@@ -64,10 +70,26 @@ export function Landing() {
       const snap = await request<Snapshot>('POST', '/rooms', { name: n, lang })
       nav(`/r/${snap.code}`)
     } catch (e) {
-      setErr((e as { status?: number }).status === 0 ? t('error.network') : t('error.generic'))
+      const other = retry ? null : blockingRoom(e)
+      if (other) setBlocked(other)
+      else setErr((e as { status?: number }).status === 0 ? t('error.network') : t('error.generic'))
     } finally {
       setBusy(false)
     }
+  }
+
+  // leave the room that blocked us, then try once more; a second refusal is a plain error
+  const leaveAndCreate = async () => {
+    if (!blocked) return
+    const old = blocked.code
+    setBlocked(null)
+    try {
+      await leaveRoom(old)
+    } catch {
+      setErr(t('error.generic'))
+      return
+    }
+    await create(true)
   }
 
   const join = () => {
@@ -117,12 +139,29 @@ export function Landing() {
           <strong>{t('top.card')}</strong>
         </button>
       </div>
+      {myRoom && (
+        <div className="room-banner">
+          <strong>{t('landing.inRoom', { code: myRoom.code })}</strong>
+          <div className="actions">
+            <button type="button" className="btn primary" onClick={() => nav(`/r/${myRoom.code}`)}>
+              {t('room.return')}
+            </button>
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={() => (myRoom.status === 'playing' ? setConfirmLeave(true) : void leaveRoom(myRoom.code).catch(() => {}))}
+            >
+              {t('room.leave')}
+            </button>
+          </div>
+        </div>
+      )}
       <label className="field-label">
         <span className="muted">{t('landing.name')}</span>
         <input ref={nameRef} className="field" value={name} maxLength={16} onChange={(e) => setName(e.target.value)} autoComplete="nickname" />
       </label>
       {err && <p role="alert" className="error">{err}</p>}
-      <button type="button" className="btn primary" disabled={busy} onClick={create}>
+      <button type="button" className="btn primary" disabled={busy} onClick={() => void create()}>
         {t('landing.create')}
       </button>
       <p className="or">{t('landing.or')}</p>
@@ -135,6 +174,27 @@ export function Landing() {
           {t('landing.join')}
         </button>
       </div>
+      {confirmLeave && myRoom && (
+        <AlreadyInRoomSheet
+          code={myRoom.code}
+          status={myRoom.status}
+          onReturn={() => nav(`/r/${myRoom.code}`)}
+          onLeaveAndContinue={() => {
+            setConfirmLeave(false)
+            void leaveRoom(myRoom.code).catch(() => {})
+          }}
+          onClose={() => setConfirmLeave(false)}
+        />
+      )}
+      {blocked && (
+        <AlreadyInRoomSheet
+          code={blocked.code}
+          status={blocked.status}
+          onReturn={() => nav(`/r/${blocked.code}`)}
+          onLeaveAndContinue={() => void leaveAndCreate()}
+          onClose={() => setBlocked(null)}
+        />
+      )}
     </main>
   )
 }
