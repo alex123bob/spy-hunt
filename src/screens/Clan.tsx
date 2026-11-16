@@ -80,6 +80,8 @@ function NoClan({ onDone }: { onDone: () => void }) {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const codeRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     listOpenClans().then(setOpen, () => setOpen([]))
@@ -104,21 +106,21 @@ function NoClan({ onDone }: { onDone: () => void }) {
     <>
       <p className="muted">{t('clan.pitch')}</p>
       {error && <p role="alert" className="error">{error}</p>}
-      <form className="card clan-card" onSubmit={(e) => { e.preventDefault(); if (badge) run(() => createClan(name.trim(), badge)) }}>
+      <form className="card clan-card" onSubmit={(e) => { e.preventDefault(); nameRef.current?.blur(); if (badge) run(() => createClan(name.trim(), badge)) }}>
         <h2>{t('clan.createTitle')}</h2>
         <label>
           <span>{t('clan.name')}</span>
-          <input value={name} maxLength={20} aria-describedby="clan-name-hint" onChange={(e) => setName(e.target.value)} />
+          <input ref={nameRef} value={name} maxLength={20} aria-describedby="clan-name-hint" onChange={(e) => setName(e.target.value)} />
         </label>
         <span id="clan-name-hint" className="muted small">{t('clan.nameHint')}</span>
         {catalog && badge && <BadgeBuilder catalog={catalog} value={badge} onChange={setBadge} />}
         <button type="submit" className="btn primary" disabled={busy || !badge || name.trim().length < 3}>{t('clan.create')}</button>
       </form>
-      <form className="card clan-card" onSubmit={(e) => { e.preventDefault(); run(() => joinClan(code)) }}>
+      <form className="card clan-card" onSubmit={(e) => { e.preventDefault(); codeRef.current?.blur(); run(() => joinClan(code)) }}>
         <h2>{t('clan.joinTitle')}</h2>
         <label>
           <span>{t('clan.code')}</span>
-          <input className="clan-code-input" value={code} maxLength={6} autoCapitalize="characters" onChange={(e) => setCode(e.target.value)} />
+          <input ref={codeRef} className="clan-code-input" value={code} maxLength={6} autoCapitalize="characters" onChange={(e) => setCode(e.target.value)} />
         </label>
         <button type="submit" className="btn secondary" disabled={busy || code.trim().length === 0}>{t('clan.join')}</button>
       </form>

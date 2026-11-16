@@ -100,6 +100,24 @@ test('join errors are shown', async () => {
   expect(joinClan).toHaveBeenCalledWith('OWL111')
 })
 
+test('creating a clan blurs the name input', async () => {
+  render(tree)
+  const input = await screen.findByLabelText('Clan name')
+  input.focus()
+  fireEvent.change(input, { target: { value: 'Foxes' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Create clan' }))
+  expect(input).not.toHaveFocus()
+})
+
+test('joining a clan blurs the code input', async () => {
+  render(tree)
+  const input = await screen.findByLabelText('Invite code')
+  input.focus()
+  fireEvent.change(input, { target: { value: 'ABCDEF' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Join' }))
+  expect(input).not.toHaveFocus()
+})
+
 test('member sees badge, code, this week vs rival, members and history', async () => {
   vi.mocked(getMyClan).mockResolvedValue(memberOf(season()))
   render(tree)
