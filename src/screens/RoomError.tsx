@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom'
 import { EmptyState } from '../components/EmptyState'
 import { t } from '../i18n'
 
-export type RoomErrorKind = 'notFound' | 'started' | 'full' | 'network' | 'closed'
+export type RoomErrorKind = 'notFound' | 'started' | 'full' | 'network' | 'closed' | 'inRoom'
 
-const EMOJI: Record<RoomErrorKind, string> = { notFound: '🔍', started: '⏳', full: '🪑', network: '📡', closed: '🚪' }
+const EMOJI: Record<RoomErrorKind, string> = { notFound: '🔍', started: '⏳', full: '🪑', network: '📡', closed: '🚪', inRoom: '🧳' }
 
 export function RoomError({ kind, onRetry }: { kind: RoomErrorKind; onRetry?: () => void }) {
   return (

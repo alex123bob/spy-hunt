@@ -29,7 +29,11 @@ type Boot =
 function errorKind(e: unknown): RoomErrorKind {
   if (e instanceof ApiError) {
     if (e.status === 404) return 'notFound'
-    if (e.status === 409) return e.code === 'room_full' ? 'full' : 'started'
+    if (e.status === 409) {
+      if (e.code === 'room_full') return 'full'
+      if (e.code === 'already_in_room') return 'inRoom'
+      return 'started'
+    }
   }
   return 'network'
 }
@@ -48,6 +52,7 @@ export function Room() {
   const [attempt, setAttempt] = useState(0)
   const gen = useRef(0)
   const failedStreams = useRef(0)
+  const leaving = useRef(false)
   const nameInputRef = useRef<HTMLInputElement>(null)
 
   // `joinRetried`: a join already retried after leaving the blocking room; a second
@@ -144,13 +149,17 @@ export function Room() {
           status={old.status}
           onReturn={() => nav(`/r/${old.code}`)}
           onLeaveAndContinue={() => {
+            if (leaving.current) return // a double tap must not send a second leave
+            leaving.current = true
             void (async () => {
               try {
                 await leaveRoom(old.code)
               } catch {
+                leaving.current = false
                 setBoot({ kind: 'error', error: 'network' })
                 return
               }
+              leaving.current = false
               void load(false, ++gen.current, true)
             })()
           }}

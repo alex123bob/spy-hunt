@@ -125,6 +125,14 @@ describe('return-to-room banner', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
+  test('a failed Leave room tells the player instead of failing silently', async () => {
+    vi.mocked(leaveRoom).mockRejectedValueOnce(new Error('nope'))
+    setMyRoom({ code: 'ABC', status: 'lobby' })
+    renderLanding()
+    fireEvent.click(screen.getByRole('button', { name: 'Leave room' }))
+    expect(await screen.findByRole('alert')).toBeInTheDocument()
+  })
+
   test('offers Leave room, which leaves that room', async () => {
     setMyRoom({ code: 'ABC', status: 'lobby' })
     renderLanding()

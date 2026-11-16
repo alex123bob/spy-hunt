@@ -53,11 +53,11 @@ test('is hidden on the landing page, which has its own banner', () => {
   expect(screen.queryByRole('link')).toBeNull()
 })
 
-test('refreshes the player room on a non-room page, but not inside a room screen', () => {
+test('refreshes the player room on every page, including a room screen (hard load of another room)', () => {
   vi.mocked(refreshMyRoom).mockClear()
   renderAt('/bots')
   expect(refreshMyRoom).toHaveBeenCalledTimes(1)
   vi.mocked(refreshMyRoom).mockClear()
-  renderAt('/r/ABC')
-  expect(refreshMyRoom).not.toHaveBeenCalled()
+  renderAt('/r/DEF')
+  expect(refreshMyRoom).toHaveBeenCalledTimes(1)
 })

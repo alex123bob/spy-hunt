@@ -78,6 +78,14 @@ export function Landing() {
     }
   }
 
+  const leaveFromBanner = async (code: string) => {
+    try {
+      await leaveRoom(code)
+    } catch {
+      setErr(t('error.generic'))
+    }
+  }
+
   // leave the room that blocked us, then try once more; a second refusal is a plain error
   const leaveAndCreate = async () => {
     if (!blocked) return
@@ -149,7 +157,7 @@ export function Landing() {
             <button
               type="button"
               className="btn secondary"
-              onClick={() => (myRoom.status === 'playing' ? setConfirmLeave(true) : void leaveRoom(myRoom.code).catch(() => {}))}
+              onClick={() => (myRoom.status === 'playing' ? setConfirmLeave(true) : void leaveFromBanner(myRoom.code))}
             >
               {t('room.leave')}
             </button>
@@ -181,7 +189,7 @@ export function Landing() {
           onReturn={() => nav(`/r/${myRoom.code}`)}
           onLeaveAndContinue={() => {
             setConfirmLeave(false)
-            void leaveRoom(myRoom.code).catch(() => {})
+            void leaveFromBanner(myRoom.code)
           }}
           onClose={() => setConfirmLeave(false)}
         />
