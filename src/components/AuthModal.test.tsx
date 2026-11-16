@@ -29,6 +29,17 @@ test('starts on the Register tab and switches to Log in', () => {
   expect(screen.queryByRole('button', { name: 'Create account' })).toBeNull()
 })
 
+test('submitting the auth form blurs the focused input', () => {
+  vi.mocked(register).mockResolvedValue({ email: 'a@b.com' })
+  render(<AuthModal onClose={() => {}} />)
+  const email = screen.getByLabelText('Email')
+  email.focus()
+  fireEvent.change(email, { target: { value: 'a@b.com' } })
+  fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'secret123' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
+  expect(email).not.toHaveFocus()
+})
+
 test('registering sends the typed values, shows signed in, then reloads', async () => {
   vi.useFakeTimers()
   vi.mocked(register).mockResolvedValue({ email: 'a@b.com' })
