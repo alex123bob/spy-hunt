@@ -1,22 +1,23 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { request } from '../api/client'
 import { errorText } from '../api/errors'
 import type { BotCard, Snapshot } from '../api/types'
 import { listMyBots } from '../bots/api'
+import { shareCard } from '../daily/share'
+import { lobbyInviteCardModel } from '../game/lobbyShare'
 import { AddBotMenu } from '../components/AddBotMenu'
 import { LangMenu } from '../components/LangMenu'
 import { Loader } from '../components/Loader'
-import { Toast, TOAST_MS } from '../components/Toast'
+import { ShareSheet } from '../components/ShareSheet'
+import { Toast } from '../components/Toast'
 import { PlayerChip } from '../components/PlayerChip'
-import { QrCode } from '../components/QrCode'
 import { t, useLang } from '../i18n'
 
 export function Lobby({ state }: { state: Snapshot }) {
   const lang = useLang()
   const [err, setErr] = useState('')
-  const [copied, setCopied] = useState(false)
-  const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => () => clearTimeout(copyTimer.current), [])
+  const [qrOpen, setQrOpen] = useState(false)
+  const [shareState, setShareState] = useState({ text: '', n: 0 })
   const [myBots, setMyBots] = useState<BotCard[]>([])
   const code = state.code
   const link = `${window.location.origin}${import.meta.env.BASE_URL}r/${code}`
@@ -51,15 +52,13 @@ export function Lobby({ state }: { state: Snapshot }) {
     }
   }
 
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(link)
-      setCopied(true)
-      clearTimeout(copyTimer.current)
-      copyTimer.current = setTimeout(() => setCopied(false), TOAST_MS)
-    } catch {
-      // clipboard blocked: the link is selectable text
-    }
+  const inviteShare = async () => {
+    const r = await shareCard({
+      model: lobbyInviteCardModel(code, state.players.length, state.config.max_players, link),
+      text: t('lobby.shareText', { code }) + `\n${link}`,
+      filename: `spy-hunt-room-${code}.png`,
+    })
+    setShareState((s) => ({ text: r === 'shared' ? t('lobby.shared') : r === 'copied' ? t('lobby.copied') : t('lobby.shareFailed'), n: s.n + 1 }))
   }
 
   // Same gate AddBotMenu applies internally; the first open seat hosts the add-bot CTA.
@@ -73,9 +72,13 @@ export function Lobby({ state }: { state: Snapshot }) {
           <p className="muted">{t('lobby.title')}</p>
           <p className="lobby-code" aria-label={code}>{code}</p>
         </div>
-        <button type="button" className="pill" onClick={copy}>{copied ? t('lobby.copied') : t('lobby.copy')}</button>
+        <div className="row lobby-share">
+          <button type="button" className="pill" onClick={inviteShare}>{t('lobby.invitePill')}</button>
+          <button type="button" className="pill" aria-label={t('lobby.qrCode')} onClick={() => setQrOpen(true)}><span aria-hidden>▦</span></button>
+        </div>
       </header>
-      <Toast text={copied ? t('lobby.copied') : ''} />
+      {qrOpen && <ShareSheet link={link} onClose={() => setQrOpen(false)} />}
+      <Toast text={shareState.text} nonce={shareState.n} />
       <section className="card">
         <div className="cardhead">
           <div className="cardhead-title">
@@ -120,11 +123,6 @@ export function Lobby({ state }: { state: Snapshot }) {
               : t('lobby.needMore', { min: state.config.min_players })}
           </p>
         )}
-      </section>
-      <section className="card center">
-        <p className="muted">{t('lobby.invite')}</p>
-        <QrCode text={link} />
-        <p data-testid="invite-link" className="wrap link">{link}</p>
       </section>
       {err && <p role="alert" className="error">{err}</p>}
       {isHost ? (

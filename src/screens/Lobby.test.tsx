@@ -4,12 +4,14 @@ import { Lobby } from './Lobby'
 import { setLang, getLang } from '../i18n'
 import type { Snapshot } from '../api/types'
 import { ApiError } from '../api/client'
+import { shareCard } from '../daily/share'
 
 vi.mock('../api/client', async (orig) => {
   const m = await orig<typeof import('../api/client')>()
   return { ...m, request: vi.fn().mockResolvedValue({}) }
 })
 import { request } from '../api/client'
+vi.mock('../daily/share', () => ({ shareCard: vi.fn(), drawCard: vi.fn() }))
 vi.mock('../bots/api', () => ({ listMyBots: vi.fn() }))
 import { listMyBots } from '../bots/api'
 vi.mock('../state/accounts', async (orig) => ({ ...(await orig<typeof import('../state/accounts')>()), patchMyLang: vi.fn() }))
@@ -49,7 +51,8 @@ test('Start button is absent for a non-host and present for the host', () => {
 
 test('invite link text equals origin/r/CODE', () => {
   render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
-  expect(screen.getByTestId('invite-link')).toHaveTextContent(`${window.location.origin}/r/ABCD`)
+  fireEvent.click(screen.getByRole('button', { name: 'QR code' }))
+  expect(screen.getByText(`${window.location.origin}/r/ABCD`)).toBeInTheDocument()
 })
 
 test('bots are labelled and switching language updates strings immediately', () => {
@@ -274,4 +277,41 @@ test('the CTA still shows when the room has reached min players but is not full'
   const btn = screen.getByRole('button', { name: /Add a bot/ })
   expect(btn.closest('.seat')).toHaveClass('seat-cta')
   expect(screen.queryByText('Empty seat')).toBeNull()
+})
+
+test('the header has Invite and a QR icon button, no standalone Copy link pill', () => {
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  expect(screen.getByRole('button', { name: 'Invite' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'QR code' })).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Copy link' })).toBeNull()
+})
+
+test('there is no bottom invite/QR card', () => {
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  expect(screen.queryByTestId('invite-link')).toBeNull()
+  expect(document.querySelector('.qr')).toBeNull()
+})
+
+test('clicking the QR icon opens the ShareSheet with the invite link', () => {
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  fireEvent.click(screen.getByRole('button', { name: 'QR code' }))
+  expect(screen.getByText(`${window.location.origin}/r/ABCD`)).toBeInTheDocument()
+})
+
+test('clicking Invite shares the room invite card and toasts the outcome', async () => {
+  vi.mocked(shareCard).mockResolvedValue('copied')
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+  await waitFor(() => expect(shareCard).toHaveBeenCalled())
+  const arg = vi.mocked(shareCard).mock.calls[0][0]
+  expect(arg.model.puzzle).toContain('ABCD')
+  expect(arg.model.url).toBe(`${window.location.origin}/r/ABCD`)
+  expect(await screen.findByText('Copied!')).toBeInTheDocument()
+})
+
+test('Invite when the native share is cancelled or fails shows an error toast, no throw', async () => {
+  vi.mocked(shareCard).mockResolvedValue('failed')
+  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
+  fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+  expect(await screen.findByText('Could not share.')).toBeInTheDocument()
 })

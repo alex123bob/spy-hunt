@@ -142,6 +142,8 @@ button.flip-scene { cursor: pointer; }
 .lobby.has-dock { padding-bottom: 0; }
 .lobby-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .lobby-head .pill { min-height: 44px; cursor: pointer; }
+.lobby-share { gap: 8px; }
+.lobby-share .pill { min-width: 44px; justify-content: center; }
 .lobby-code { font: 700 44px/1 Fredoka, system-ui, sans-serif; letter-spacing: 4px; margin: 0; }
 .need-name-code { text-align: center; }
 .seats { display: flex; flex-direction: column; gap: 8px; }
