@@ -203,3 +203,24 @@ describe('a failed stream reloads with a growing delay', () => {
     expect(gets()).toBe(1)
   })
 })
+
+describe('host handover notice', () => {
+  const lobby = (players: Snapshot['players'], meSeat: number): Snapshot => ({
+    ...playing(), status: 'lobby', phase: null, phase_deadline: null, round: 0, current_speaker: null,
+    host_seat: players.find((p) => p.is_host)?.seat ?? null, players,
+    me: { seat: meSeat, is_host: !!players.find((p) => p.seat === meSeat)?.is_host, my_word: null },
+  })
+  const pl = (seat: number, name: string, is_host: boolean) =>
+    ({ seat, name, lang: 'en', is_bot: false, alive: true, connected: true, is_host }) as Snapshot['players'][number]
+
+  test('the new host sees a toast when the old host leaves, in the lobby', async () => {
+    vi.mocked(request).mockResolvedValue(lobby([pl(0, 'Alex', true), pl(1, 'Ann', false)], 1))
+    vi.mocked(openRoomStream).mockClear()
+    go()
+    await waitFor(() => expect(openRoomStream).toHaveBeenCalled())
+    expect(screen.queryByText(/now the host/)).toBeNull()
+    const onEvent = vi.mocked(openRoomStream).mock.calls[0][1]
+    act(() => onEvent({ event: 'state', data: { ...lobby([pl(1, 'Ann', true)], 1), version: 2, last_seq: 4 } }))
+    expect(await screen.findByRole('status')).toHaveTextContent("Alex left. You're now the host.")
+  })
+})

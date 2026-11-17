@@ -12,6 +12,8 @@ import { leaveRoom } from '../state/myRoom'
 import { blockingRoom, type BlockingRoom } from '../state/blockingRoom'
 import { AlreadyInRoomSheet } from '../components/AlreadyInRoomSheet'
 import { Loader } from '../components/Loader'
+import { Toast } from '../components/Toast'
+import { useHostChange } from '../state/useHostChange'
 import { Lobby } from './Lobby'
 import { Reveal } from './Reveal'
 import { Result } from './Result'
@@ -206,6 +208,7 @@ function targetScreen(state: Snapshot): Screen {
 
 function RoomView({ state, status, offset }: { state: Snapshot; status: string; offset: number }) {
   const { screen, holdUntil } = useHeldScreen(targetScreen(state), state.reveal)
+  const hostNote = useHostChange(state)
   const banner = status === 'reconnecting' || status === 'polling' ? <div className="banner" role="status"><i className="dot" aria-hidden />{t('room.reconnecting')}</div> : null
   let body
   if (screen === 'lobby') body = <Lobby state={state} />
@@ -214,5 +217,5 @@ function RoomView({ state, status, offset }: { state: Snapshot; status: string; 
   else if (screen === 'vote') body = <Vote state={state} offset={offset} />
   else if (screen === 'reveal') body = <Reveal state={state} offset={offset} holdUntil={holdUntil} />
   else body = <Table state={state} offset={offset} holdUntil={holdUntil} />
-  return <>{banner}<div key={screen} className="phase">{body}</div></>
+  return <>{banner}<Toast text={hostNote.text} nonce={hostNote.n} /><div key={screen} className="phase">{body}</div></>
 }
