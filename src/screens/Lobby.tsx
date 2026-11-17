@@ -62,10 +62,8 @@ export function Lobby({ state }: { state: Snapshot }) {
     setShareState((s) => ({ text: shareToast(r, { shared: 'lobby.shared', copied: 'lobby.copied', failed: 'lobby.shareFailed' }), n: s.n + 1 }))
   }
 
-  // Same gate AddBotMenu applies internally; the first open seat hosts the add-bot CTA.
-  const canAddBot = (isHost || myBots.length > 0) && !full
-  // Past min_players there are no placeholder seats, but the CTA must stay reachable: one extra slot.
-  const seatSlots = Math.max(state.config.min_players - state.players.length, canAddBot ? 1 : 0)
+  // Placeholders only for seats still needed to reach min_players; the add-bot pill lives in the header.
+  const seatSlots = Math.max(state.config.min_players - state.players.length, 0)
   return (
     <main className={`screen lobby${isHost ? ' has-dock' : ''}`}>
       <header className="ticket lobby-head">
@@ -74,6 +72,10 @@ export function Lobby({ state }: { state: Snapshot }) {
           <p className="lobby-code" aria-label={code}>{code}</p>
         </div>
         <div className="row lobby-share">
+          {!full && (
+            <AddBotMenu isHost={isHost} myBots={myBots} ownBotIn={ownBotIn}
+              onAdd={(botId) => call('POST', '/bots', botId === undefined ? { action: 'add' } : { action: 'add', bot_id: botId })} />
+          )}
           <button type="button" className="pill" onClick={inviteShare}>{t('lobby.invitePill')}</button>
           <button type="button" className="pill" aria-label={t('lobby.qrCode')} onClick={() => setQrOpen(true)}><span aria-hidden>▦</span></button>
         </div>
@@ -105,16 +107,9 @@ export function Lobby({ state }: { state: Snapshot }) {
             </div>
           ))}
           {Array.from({ length: seatSlots }, (_, k) => (
-            k === 0 && canAddBot ? (
-              <div key="e0" className="seat seat-cta" style={{ '--i': state.players.length } as CSSProperties}>
-                <AddBotMenu isHost={isHost} myBots={myBots} ownBotIn={ownBotIn}
-                  onAdd={(botId) => call('POST', '/bots', botId === undefined ? { action: 'add' } : { action: 'add', bot_id: botId })} />
-              </div>
-            ) : (
-              <div key={`e${k}`} className="seat empty" aria-hidden style={{ '--i': state.players.length + k } as CSSProperties}>
-                {t('lobby.emptySeat')}
-              </div>
-            )
+            <div key={`e${k}`} className="seat empty" aria-hidden style={{ '--i': state.players.length + k } as CSSProperties}>
+              {t('lobby.emptySeat')}
+            </div>
           ))}
         </div>
         {short && (

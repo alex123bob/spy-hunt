@@ -138,10 +138,10 @@ test('a room with space shows no Full badge', () => {
 
 test('the host adds a random bot from the add menu', async () => {
   render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
-  fireEvent.click(screen.getByRole('button', { name: /Add a bot/ }))
+  fireEvent.click(screen.getByRole('button', { name: 'Add a bot' }))
   fireEvent.click(screen.getByRole('menuitem', { name: /Random bot/ }))
   expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add' })
-  expect(screen.getByRole('menu')).toBeInTheDocument()
+  expect(screen.queryByRole('dialog')).toBeNull()
 })
 
 test('picking one of my bots posts add with its id', async () => {
@@ -223,7 +223,7 @@ test('fill hint shows when bots will be added, needMore without bot fill, nothin
 test('a failing call shows mapped text, not the server text', async () => {
   vi.mocked(request).mockRejectedValueOnce(new ApiError(409, 'bot_in_room', 'English server text'))
   render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
-  fireEvent.click(screen.getByRole('button', { name: /Add a bot/ }))
+  fireEvent.click(screen.getByRole('button', { name: 'Add a bot' }))
   fireEvent.click(screen.getByRole('menuitem', { name: /Random bot/ }))
   const alert = await screen.findByRole('alert')
   expect(alert).toHaveTextContent('You already have a bot in this room.')
@@ -231,51 +231,44 @@ test('a failing call shows mapped text, not the server text', async () => {
   expect(request).toHaveBeenCalledWith('POST', '/rooms/ABCD/bots', { action: 'add' })
 })
 
-test('the first empty seat is the add-bot CTA for the host, styled distinctly', () => {
+test('the host sees an Add a bot pill in the header, next to Invite', () => {
   render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
-  const seatsList = screen.getAllByText(/Empty seat|Add a bot/)
-  expect(seatsList[0]).toHaveTextContent(/Add a bot/)
-  expect(seatsList[0].closest('.seat')).toHaveClass('seat-cta')
+  const pill = screen.getByRole('button', { name: 'Add a bot' })
+  expect(pill.closest('.lobby-share')).not.toBeNull()
+  expect(screen.getByRole('button', { name: 'Invite' }).closest('.lobby-share')).toBe(pill.closest('.lobby-share'))
 })
 
-test('remaining empty seats (beyond the first) stay plain placeholders', () => {
-  render(<MemoryRouter><Lobby state={sized(2, true)} /></MemoryRouter>)
-  expect(screen.getAllByText('Empty seat')).toHaveLength(1)
-  expect(screen.getAllByRole('button', { name: /Add a bot/ })).toHaveLength(1)
+test('empty seats are plain placeholders, one per missing player', () => {
+  const state = snap(true)
+  render(<MemoryRouter><Lobby state={state} /></MemoryRouter>)
+  const missing = state.config.min_players - state.players.length
+  expect(screen.getAllByText('Empty seat')).toHaveLength(missing)
+  expect(document.querySelector('.seat-cta')).toBeNull()
+  expect(document.querySelectorAll('.seat button:not(.remove-btn)')).toHaveLength(0)
 })
 
-test('a non-host with no bots sees a plain Empty seat, not a CTA, in the first slot', async () => {
+test('a non-host with no bots sees no pill', async () => {
   render(<MemoryRouter><Lobby state={snap(false)} /></MemoryRouter>)
   await waitFor(() => expect(listMyBots).toHaveBeenCalled())
-  expect(screen.getByText('Empty seat')).toBeInTheDocument()
-  expect(screen.queryByRole('button', { name: /Add a bot/ })).toBeNull()
+  expect(screen.queryByRole('button', { name: 'Add a bot' })).toBeNull()
 })
 
-test('a non-host who owns a bot sees the CTA in the first empty seat', async () => {
+test('a non-host who owns a bot sees the pill', async () => {
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
   render(<MemoryRouter><Lobby state={snap(false)} /></MemoryRouter>)
-  expect(await screen.findByRole('button', { name: /Add a bot/ })).toBeInTheDocument()
+  expect(await screen.findByRole('button', { name: 'Add a bot' })).toBeInTheDocument()
 })
 
-test('a full room has no CTA at all', async () => {
+test('a full room has no pill at all', async () => {
   vi.mocked(listMyBots).mockResolvedValue([mine('b1', 'Rex')])
   render(<MemoryRouter><Lobby state={full(true)} /></MemoryRouter>)
   await waitFor(() => expect(listMyBots).toHaveBeenCalled())
-  expect(screen.queryByRole('button', { name: /Add a bot/ })).toBeNull()
-  expect(document.querySelector('.seat-cta')).toBeNull()
+  expect(screen.queryByRole('button', { name: 'Add a bot' })).toBeNull()
 })
 
-test('there is exactly one add-bot affordance, inside a seat, not a separate row', () => {
-  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
-  const btns = screen.getAllByRole('button', { name: /Add a bot/ })
-  expect(btns).toHaveLength(1)
-  expect(btns[0].closest('.seat')).toHaveClass('seat-cta')
-})
-
-test('the CTA still shows when the room has reached min players but is not full', () => {
+test('at min players (not full) the pill shows and no extra placeholder seat appears', () => {
   render(<MemoryRouter><Lobby state={sized(4, true)} /></MemoryRouter>)
-  const btn = screen.getByRole('button', { name: /Add a bot/ })
-  expect(btn.closest('.seat')).toHaveClass('seat-cta')
+  expect(screen.getByRole('button', { name: 'Add a bot' })).toBeInTheDocument()
   expect(screen.queryByText('Empty seat')).toBeNull()
 })
 
