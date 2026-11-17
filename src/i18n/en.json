@@ -37,6 +37,7 @@
   "lobby.removeMine": "Remove",
   "lobby.ownBotIn": "Your bot {name} is already in this room. Remove it to add a different one.",
   "lobby.addBotRow": "Add a bot",
+  "lobby.addBotPill": "+ Bot",
   "lobby.randomBot": "Random bot",
   "lobby.myBotsHeading": "Your bots",
   "lobby.roomPrefix": "Room:",

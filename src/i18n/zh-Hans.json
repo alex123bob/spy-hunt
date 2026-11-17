@@ -37,6 +37,7 @@
   "lobby.removeMine": "移除",
   "lobby.ownBotIn": "你的机器人 {name} 已在房间里。移除后才能添加其他机器人。",
   "lobby.addBotRow": "添加机器人",
+  "lobby.addBotPill": "+ 机器人",
   "lobby.randomBot": "随机机器人",
   "lobby.myBotsHeading": "我的机器人",
   "lobby.roomPrefix": "房间：",

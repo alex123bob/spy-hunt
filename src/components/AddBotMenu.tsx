@@ -2,43 +2,37 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { t } from '../i18n'
 import type { BotCard } from '../api/types'
 import { Avatar } from './Avatar'
+import { Sheet } from './Sheet'
 
-/** Dashed "Add a bot" row that opens a menu: Random bot (host only) and the player's own bots. */
+/** "+ Bot" pill that opens a sheet: Random bot (host only) and the player's own bots. */
 export function AddBotMenu({ isHost, myBots, ownBotIn, onAdd }:
   { isHost: boolean; myBots: BotCard[]; ownBotIn: BotCard | null; onAdd: (botId?: string) => void }) {
   const [open, setOpen] = useState(false)
-  const root = useRef<HTMLDivElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
+  const wasOpen = useRef(false)
   const noteId = useId()
   const headingId = useId()
 
+  // Sheet restores focus to whatever was active on open; Safari doesn't focus a button on click, so reclaim it.
   useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { setOpen(false); trigger.current?.focus() } }
-    const onDown = (e: Event) => {
-      if (root.current && !root.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('keydown', onKey)
-    document.addEventListener('pointerdown', onDown)
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.removeEventListener('pointerdown', onDown)
-    }
+    if (wasOpen.current && !open) trigger.current?.focus()
+    wasOpen.current = open
   }, [open])
 
   if (!isHost && myBots.length === 0) return null
 
-  const pick = (botId?: string) => { if (botId === undefined) onAdd(); else onAdd(botId) }
+  // Close first: a failed add reports in the page's alert, which a modal backdrop would hide.
+  const pick = (botId?: string) => { setOpen(false); if (botId === undefined) onAdd(); else onAdd(botId) }
   const showNote = myBots.length > 0 && ownBotIn !== null
   const showMine = myBots.length > 0 && ownBotIn === null
 
   return (
-    <div className="addbot" ref={root}>
-      <button type="button" className="addbot-row" ref={trigger} aria-haspopup="menu" aria-expanded={open}
-        aria-describedby={open && showNote ? noteId : undefined}
-        onClick={() => setOpen(o => !o)}><span aria-hidden>+ </span>{t('lobby.addBotRow')}<span aria-hidden> ▾</span></button>
+    <>
+      <button type="button" ref={trigger} className="pill addbot-pill" aria-label={t('lobby.addBotRow')} aria-haspopup="dialog"
+        onClick={() => setOpen(true)}>{t('lobby.addBotPill')}</button>
       {open && (
-        <div className="addbot-pop">
+        <Sheet label={t('lobby.addBotRow')} onClose={() => setOpen(false)}>
+          <h3 className="addbot-title">{t('lobby.addBotRow')}</h3>
           {isHost && (
             <div className="addbot-menu" role="menu" aria-label={t('lobby.addBotRow')}>
               <button type="button" role="menuitem" className="addbot-item" onClick={() => pick()}>
@@ -59,8 +53,8 @@ export function AddBotMenu({ isHost, myBots, ownBotIn, onAdd }:
               </div>
             </>
           )}
-        </div>
+        </Sheet>
       )}
-    </div>
+    </>
   )
 }
