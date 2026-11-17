@@ -41,10 +41,28 @@ test('others are told who took over', () => {
   expect(h.result.current.text).toBe('Alex left. Sam is now the host.')
 })
 
-test('a disconnected old host still counts as left', () => {
+test('a host who leaves mid-game becomes a bot with the same name: still "left"', () => {
   const h = setup(snap([p(0, 'Alex', true), p(1, 'Sam', false), p(2, 'Kim', false)], 2))
-  h.rerender({ s: snap([p(0, 'Alex', false, false), p(1, 'Sam', true), p(2, 'Kim', false)], 2) })
+  const bot = { ...p(0, 'Alex', false), is_bot: true } as Player
+  h.rerender({ s: snap([bot, p(1, 'Sam', false), p(2, 'Kim', false)], 2) })
+  expect(h.result.current.text).toBe('')
+  h.rerender({ s: snap([bot, p(1, 'Sam', true), p(2, 'Kim', false)], 2) })
   expect(h.result.current.text).toBe('Alex left. Sam is now the host.')
+})
+
+test('the real leave sends a hostless frame before the new host: the toast still shows', () => {
+  const h = setup(snap([p(0, 'Alex', true), p(1, 'Sam', false), p(2, 'Kim', false)], 2))
+  h.rerender({ s: snap([p(1, 'Sam', false), p(2, 'Kim', false)], 2) })
+  expect(h.result.current.text).toBe('')
+  h.rerender({ s: snap([p(1, 'Sam', true), p(2, 'Kim', false)], 2) })
+  expect(h.result.current.text).toBe('Alex left. Sam is now the host.')
+})
+
+test('a game-start reseat keeps the same host in a new seat: no toast', () => {
+  const h = setup(snap([p(0, 'Alex', true), p(1, 'Sam', false), p(2, 'Kim', false), p(3, 'Bo', false)], 1))
+  h.rerender({ s: snap([p(0, 'Sam', false), p(1, 'Kim', false), p(2, 'Alex', true), p(3, 'Bo', false)], 1) })
+  expect(h.result.current.text).toBe('')
+  expect(h.result.current.n).toBe(0)
 })
 
 test('old host still listed and connected: no "left" wording', () => {

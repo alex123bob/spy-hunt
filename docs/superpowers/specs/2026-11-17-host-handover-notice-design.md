@@ -23,7 +23,7 @@ When the host leaves, the role passes to the next player and the UI updates, but
 
 ## Design
 - New `src/state/useHostChange.ts`: `useHostChange(state: Snapshot): string` returns the toast text, or `''`. It keeps the previous state in a ref. When the previous state had a host, the current one has a different host, and the room is the same, it builds the message.
-- Wording picks: you're the new host → `host.nowYou` ("{old} left. You're now the host."); someone else → `host.nowOther` ("{old} left. {new} is now the host."). If the old host is still in the list (e.g. disconnected mid-game), the text drops "left" and says `host.nowOtherNoLeft` / `host.nowYouNoLeft`: "You're now the host." / "{new} is now the host."
+- Wording picks: you're the new host → `host.nowYou` ("{old} left. You're now the host."); someone else → `host.nowOther` ("{old} left. {new} is now the host."). The server sends a leave as `player_left` and then a separate `player_updated` naming the new host, so the hook remembers the last known host (by name, since game start reshuffles seats) across the hostless frame in between. A leaver mid-game stays listed as a bot under the same name, which still counts as left. Only if the old host is still a connected human does the text drop "left" (`host.nowOtherNoLeft` / `host.nowYouNoLeft`); the server doesn't normally produce that, so it is a fallback.
 - `Room.tsx` `RoomView` renders `<Toast text={...} nonce={...} />` alongside the existing banner.
 - i18n keys in en and zh-Hans; the key test list is updated.
 

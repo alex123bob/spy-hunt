@@ -223,4 +223,15 @@ describe('host handover notice', () => {
     act(() => onEvent({ event: 'state', data: { ...lobby([pl(1, 'Ann', true)], 1), version: 2, last_seq: 4 } }))
     expect(await screen.findByRole('status')).toHaveTextContent("Alex left. You're now the host.")
   })
+
+  test('the real leave sequence (player_left, then player_updated a tick later) still shows the toast', async () => {
+    vi.mocked(request).mockResolvedValue(lobby([pl(0, 'Alex', true), pl(1, 'Ann', false)], 1))
+    vi.mocked(openRoomStream).mockClear()
+    go()
+    await waitFor(() => expect(openRoomStream).toHaveBeenCalled())
+    const onEvent = vi.mocked(openRoomStream).mock.calls[0][1]
+    await act(async () => { onEvent({ event: 'player_left', data: { player: pl(0, 'Alex', true) } }) })
+    await act(async () => { onEvent({ event: 'player_updated', data: { player: pl(1, 'Ann', true) } }) })
+    expect(await screen.findByRole('status')).toHaveTextContent("Alex left. You're now the host.")
+  })
 })
