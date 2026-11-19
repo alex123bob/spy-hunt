@@ -47,6 +47,16 @@ test('fires a notification when it becomes my turn, while unfocused', () => {
   expect(fireNotification).toHaveBeenCalledTimes(1)
 })
 
+test('says "speak" for a describe-phase turn, "vote" for a vote-phase turn', () => {
+  const h = setup(snap({ status: 'playing', phase: 'describe', current_speaker: 1 }))
+  h.rerender({ s: snap({ status: 'playing', phase: 'describe', current_speaker: 0 }) })
+  expect(fireNotification).toHaveBeenCalledWith('Your turn to speak', expect.anything())
+  vi.mocked(fireNotification).mockClear()
+  h.rerender({ s: snap({ status: 'playing', phase: 'describe', current_speaker: 1 }) })
+  h.rerender({ s: snap({ status: 'playing', phase: 'vote', current_speaker: null, locked: [] }) })
+  expect(fireNotification).toHaveBeenCalledWith('Your turn to vote', expect.anything())
+})
+
 test('does nothing while the tab is focused', () => {
   vi.mocked(document.hasFocus).mockReturnValue(true)
   const h = setup(snap({ status: 'lobby' }))

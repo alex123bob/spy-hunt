@@ -15,7 +15,7 @@ export function useGameNotify(state: Snapshot): void {
     if (!notificationsSupported()) return
     if (document.hasFocus() || getNotifyPref() !== 'on') return
     for (const event of events) {
-      const key = event.kind === 'started' ? 'notify.started' : 'notify.turn'
+      const key = event.kind === 'started' ? 'notify.started' : state.phase === 'vote' || state.phase === 'revote' ? 'notify.turnVote' : 'notify.turnSpeak'
       fireNotification(t(key), { tag: `${state.code}:${event.kind}:${state.phase}:${state.game_no}:${state.round}` })
     }
   }, [state])

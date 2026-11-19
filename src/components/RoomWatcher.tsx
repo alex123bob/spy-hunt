@@ -35,7 +35,7 @@ export function RoomWatcher() {
     const prevRef: { current: Snapshot | null } = { current: null }
     const handleEvents = (events: NotifyEvent[], state: Snapshot) => {
       for (const event of events) {
-        const key = event.kind === 'started' ? 'notify.started' : 'notify.turn'
+        const key = event.kind === 'started' ? 'notify.started' : state.phase === 'vote' || state.phase === 'revote' ? 'notify.turnVote' : 'notify.turnSpeak'
         if (document.hasFocus()) {
           setToast((c) => ({ text: t(key), code: state.code, n: c.n + 1 }))
         } else if (notificationsSupported() && getNotifyPref() === 'on') {

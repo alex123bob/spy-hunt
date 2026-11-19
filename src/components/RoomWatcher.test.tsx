@@ -80,6 +80,22 @@ test('shows a toast when it becomes my turn while focused and away from the room
   vi.restoreAllMocks()
 })
 
+test('says "speak" for a describe-phase turn toast, "vote" for a vote-phase turn toast', async () => {
+  vi.spyOn(document, 'hasFocus').mockReturnValue(true)
+  setMyRoom({ code: 'ABCD', status: 'playing' })
+  vi.mocked(request).mockResolvedValue(playing({ current_speaker: null, phase: 'describe' }))
+  renderAt('/bots')
+  await act(async () => {})
+  const onEvent = vi.mocked(openRoomStream).mock.calls[0][1]
+  act(() => onEvent({ event: 'turn', data: { seat: 0, phase: 'describe' } }))
+  expect(await screen.findByRole('status')).toHaveTextContent('Your turn to speak')
+  act(() => onEvent({ event: 'turn', data: { seat: 1, phase: 'describe' } }))
+  act(() => onEvent({ event: 'phase', data: { phase: 'vote' } }))
+  act(() => onEvent({ event: 'state', data: playing({ current_speaker: null, phase: 'vote', locked: [] }) }))
+  expect(await screen.findByRole('status')).toHaveTextContent('Your turn to vote')
+  vi.restoreAllMocks()
+})
+
 test('clicking the out-of-room toast navigates back into the room', async () => {
   vi.spyOn(document, 'hasFocus').mockReturnValue(true)
   setMyRoom({ code: 'ABCD', status: 'playing' })
