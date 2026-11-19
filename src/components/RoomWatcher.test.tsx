@@ -1,5 +1,5 @@
-import { act, render, screen } from '@testing-library/react'
-import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router-dom'
+import { act, fireEvent, render, screen } from '@testing-library/react'
+import { createMemoryRouter, MemoryRouter, RouterProvider, useNavigate } from 'react-router-dom'
 import { RoomWatcher } from './RoomWatcher'
 import { request } from '../api/client'
 import { openRoomStream } from '../api/stream'
@@ -91,4 +91,25 @@ test('closes the stream once navigation lands on the room\'s own page', async ()
   await act(async () => {})
   await act(async () => router.navigate('/r/ABCD'))
   expect(close).toHaveBeenCalled()
+})
+
+test('navigating between two non-room screens keeps the same stream open (does not restart on every route change)', async () => {
+  setMyRoom({ code: 'ABCD', status: 'playing' })
+  vi.mocked(request).mockResolvedValue(playing())
+  function NavButton() {
+    const navigate = useNavigate()
+    return <button onClick={() => navigate('/top')}>go</button>
+  }
+  render(
+    <MemoryRouter initialEntries={['/bots']}>
+      <RoomWatcher />
+      <NavButton />
+    </MemoryRouter>,
+  )
+  await act(async () => {})
+  expect(openRoomStream).toHaveBeenCalledTimes(1)
+  fireEvent.click(screen.getByText('go'))
+  await act(async () => {})
+  expect(openRoomStream).toHaveBeenCalledTimes(1)
+  expect(request).toHaveBeenCalledTimes(1)
 })

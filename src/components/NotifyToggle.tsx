@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { notificationsSupported } from '../state/notify'
 import { getNotifyPref, setNotifyPref, useNotifyPref } from '../state/notifyPrefs'
 import { t } from '../i18n'
 
 export function NotifyToggle() {
   const pref = useNotifyPref()
+  const [, forceUpdate] = useState(0)
   if (!notificationsSupported()) return null
   const permission = Notification.permission
 
@@ -23,6 +25,7 @@ export function NotifyToggle() {
         onClick={() => {
           void Notification.requestPermission().then((p) => {
             if (p === 'granted') setNotifyPref('on')
+            forceUpdate((n) => n + 1)
           })
         }}
       >

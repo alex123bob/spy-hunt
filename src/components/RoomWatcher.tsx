@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { request } from '../api/client'
 import { openRoomStream } from '../api/stream'
@@ -15,6 +15,8 @@ export function RoomWatcher() {
   const room = useMyRoom()
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const navigateRef = useRef(navigate)
+  navigateRef.current = navigate
   const onOwnRoomPage = !!room && pathname.toUpperCase() === `/R/${room.code}`
   const active = room && !onOwnRoomPage ? room.code : null
 
@@ -37,8 +39,8 @@ export function RoomWatcher() {
           setToast((c) => ({ text: t(key), n: c.n + 1 }))
         } else if (notificationsSupported() && getNotifyPref() === 'on') {
           fireNotification(t(key), {
-            tag: `${state.code}:${event.kind}:${state.game_no}:${state.round}`,
-            onClick: () => navigate(`/r/${state.code}`),
+            tag: `${state.code}:${event.kind}:${state.phase}:${state.game_no}:${state.round}`,
+            onClick: () => navigateRef.current(`/r/${state.code}`),
           })
         }
       }
@@ -53,7 +55,7 @@ export function RoomWatcher() {
       unsubscribe()
       stream?.close()
     }
-  }, [active, navigate])
+  }, [active])
 
   if (!active) return null
   return <Toast text={toast.text} nonce={toast.n} className="toast-top" />

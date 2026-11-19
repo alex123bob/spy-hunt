@@ -37,6 +37,32 @@ test('clicking when default requests permission and turns the pref on when grant
   vi.unstubAllGlobals()
 })
 
+test('the button updates to reflect granted permission once the prompt is answered', async () => {
+  const stub = Object.assign(vi.fn(), { permission: 'default' as NotificationPermission, requestPermission: vi.fn() })
+  vi.mocked(stub.requestPermission).mockImplementation(async () => {
+    stub.permission = 'granted'
+    return 'granted'
+  })
+  vi.stubGlobal('Notification', stub)
+  render(<NotifyToggle />)
+  fireEvent.click(screen.getByRole('button', { name: 'Enable notifications' }))
+  expect(await screen.findByRole('button', { name: 'Notifications on' })).toBeInTheDocument()
+  vi.unstubAllGlobals()
+})
+
+test('the button updates to reflect denied permission once the prompt is answered', async () => {
+  const stub = Object.assign(vi.fn(), { permission: 'default' as NotificationPermission, requestPermission: vi.fn() })
+  vi.mocked(stub.requestPermission).mockImplementation(async () => {
+    stub.permission = 'denied'
+    return 'denied'
+  })
+  vi.stubGlobal('Notification', stub)
+  render(<NotifyToggle />)
+  fireEvent.click(screen.getByRole('button', { name: 'Enable notifications' }))
+  expect(await screen.findByRole('button', { name: 'Notifications blocked' })).toBeDisabled()
+  vi.unstubAllGlobals()
+})
+
 test('shows enabled state when granted and pref is on; click turns it off', () => {
   vi.stubGlobal('Notification', Object.assign(vi.fn(), { permission: 'granted', requestPermission: vi.fn() }))
   setNotifyPref('on')

@@ -73,3 +73,15 @@ test('current_speaker unchanged: no repeated turn event', () => {
   const next = snap({ status: 'playing', phase: 'describe', current_speaker: 0, messages: [{ id: 1 } as never] })
   expect(detectNotifyEvents(prev, next)).toEqual([])
 })
+
+test('entering a revote while tied myself: no turn event (tied players cannot vote)', () => {
+  const prev = snap({ status: 'playing', phase: 'reveal', current_speaker: null, locked: [] })
+  const next = snap({ status: 'playing', phase: 'revote', current_speaker: null, locked: [], tied: [0, 1] })
+  expect(detectNotifyEvents(prev, next)).toEqual([])
+})
+
+test('entering a revote while not tied: turn', () => {
+  const prev = snap({ status: 'playing', phase: 'reveal', current_speaker: null, locked: [] })
+  const next = snap({ status: 'playing', phase: 'revote', current_speaker: null, locked: [], tied: [1, 2] })
+  expect(detectNotifyEvents(prev, next)).toEqual([{ kind: 'turn' }])
+})

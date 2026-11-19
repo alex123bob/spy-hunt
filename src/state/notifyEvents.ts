@@ -7,7 +7,10 @@ function isMyTurn(s: Snapshot): boolean {
   const me = s.players.find((p) => p.seat === s.me.seat)
   if (!me?.alive) return false
   if (s.phase === 'describe' || s.phase === 'tiebreak_describe') return s.current_speaker === s.me.seat
-  if (s.phase === 'vote' || s.phase === 'revote') return !(s.locked ?? []).includes(s.me.seat)
+  if (s.phase === 'vote' || s.phase === 'revote') {
+    if (s.phase === 'revote' && (s.tied ?? []).includes(s.me.seat)) return false
+    return !(s.locked ?? []).includes(s.me.seat)
+  }
   return false
 }
 

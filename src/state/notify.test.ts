@@ -54,3 +54,25 @@ test('fireNotification wires onclick to focus the window, run onClick, and close
   vi.unstubAllGlobals()
   focus.mockRestore()
 })
+
+test('fireNotification focuses the window on click even with no onClick given', () => {
+  const instance: { onclick?: () => void; close: () => void } = { close: vi.fn() }
+  const ctor = vi.fn().mockImplementation(function () { return instance })
+  vi.stubGlobal('Notification', Object.assign(ctor, { permission: 'granted' }))
+  const focus = vi.spyOn(window, 'focus').mockImplementation(() => {})
+  fireNotification('hi')
+  instance.onclick?.()
+  expect(focus).toHaveBeenCalled()
+  expect(instance.close).toHaveBeenCalled()
+  vi.unstubAllGlobals()
+  focus.mockRestore()
+})
+
+test('fireNotification does not throw when the constructor itself throws (e.g. Android Chrome without a service worker)', () => {
+  const ctor = vi.fn().mockImplementation(() => {
+    throw new TypeError('Illegal constructor. Use ServiceWorkerRegistration.showNotification() instead.')
+  })
+  vi.stubGlobal('Notification', Object.assign(ctor, { permission: 'granted' }))
+  expect(() => fireNotification('hi')).not.toThrow()
+  vi.unstubAllGlobals()
+})

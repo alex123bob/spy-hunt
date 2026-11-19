@@ -66,3 +66,14 @@ test('fires twice, in order, when started and turn both land in one transition',
   h.rerender({ s: snap({ status: 'playing', phase: 'describe', current_speaker: 0 }) })
   expect(fireNotification).toHaveBeenCalledTimes(2)
 })
+
+test('a describe-turn alert and a vote-turn alert in the same round use different tags (must not collapse into one)', () => {
+  const h = setup(snap({ status: 'playing', phase: 'describe', current_speaker: 1, round: 2 }))
+  h.rerender({ s: snap({ status: 'playing', phase: 'describe', current_speaker: 0, round: 2 }) })
+  const describeTag = vi.mocked(fireNotification).mock.calls[0][1]?.tag
+  vi.mocked(fireNotification).mockClear()
+  h.rerender({ s: snap({ status: 'playing', phase: 'describe', current_speaker: 1, round: 2 }) })
+  h.rerender({ s: snap({ status: 'playing', phase: 'vote', current_speaker: null, locked: [], round: 2 }) })
+  const voteTag = vi.mocked(fireNotification).mock.calls[0][1]?.tag
+  expect(describeTag).not.toBe(voteTag)
+})
