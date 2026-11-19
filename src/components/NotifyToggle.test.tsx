@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { act, render, screen, fireEvent } from '@testing-library/react'
 import { NotifyToggle } from './NotifyToggle'
 import { resetNotifyPrefForTests, setNotifyPref } from '../state/notifyPrefs'
 import { setLang } from '../i18n'
@@ -69,7 +69,7 @@ test('shows enabled state when granted and pref is on; click turns it off', () =
   render(<NotifyToggle />)
   const btn = screen.getByRole('button', { name: 'Notifications on' })
   fireEvent.click(btn)
-  expect(screen.getByRole('button', { name: 'Notifications off' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Notifications muted' })).toBeInTheDocument()
   vi.unstubAllGlobals()
 })
 
@@ -77,7 +77,7 @@ test('shows muted state when granted and pref is off; click turns it back on', (
   vi.stubGlobal('Notification', Object.assign(vi.fn(), { permission: 'granted', requestPermission: vi.fn() }))
   setNotifyPref('off')
   render(<NotifyToggle />)
-  const btn = screen.getByRole('button', { name: 'Notifications off' })
+  const btn = screen.getByRole('button', { name: 'Notifications muted' })
   fireEvent.click(btn)
   expect(screen.getByRole('button', { name: 'Notifications on' })).toBeInTheDocument()
   vi.unstubAllGlobals()
@@ -108,5 +108,52 @@ test('reflects permission revoked mid-session on the next render, not a stale ca
   stub.permission = 'denied' // e.g. the user revoked it in browser settings while the tab stayed open
   rerender(<NotifyToggle />)
   expect(screen.getByRole('button', { name: 'Notifications blocked' })).toBeDisabled()
+  vi.unstubAllGlobals()
+})
+
+test('the on/muted button exposes its state via aria-pressed and a hint title', () => {
+  vi.stubGlobal('Notification', Object.assign(vi.fn(), { permission: 'granted', requestPermission: vi.fn() }))
+  setNotifyPref('on')
+  render(<NotifyToggle />)
+  const btn = screen.getByRole('button', { name: 'Notifications on' })
+  expect(btn).toHaveAttribute('aria-pressed', 'true')
+  expect(btn).toHaveAttribute('title', 'Mute game notifications on this device')
+  fireEvent.click(btn)
+  const muted = screen.getByRole('button', { name: 'Notifications muted' })
+  expect(muted).toHaveAttribute('aria-pressed', 'false')
+  expect(muted).toHaveAttribute('title', 'Unmute game notifications on this device')
+  vi.unstubAllGlobals()
+})
+
+test('re-reads the permission when the window regains focus', () => {
+  const stub = Object.assign(vi.fn(), { permission: 'granted' as NotificationPermission, requestPermission: vi.fn() })
+  vi.stubGlobal('Notification', stub)
+  setNotifyPref('on')
+  render(<NotifyToggle />)
+  expect(screen.getByRole('button', { name: 'Notifications on' })).toBeInTheDocument()
+  stub.permission = 'denied' // changed in browser site settings while the tab stayed open
+  act(() => { window.dispatchEvent(new Event('focus')) })
+  expect(screen.getByRole('button', { name: 'Notifications blocked' })).toBeDisabled()
+  stub.permission = 'default' // permission reset
+  act(() => { document.dispatchEvent(new Event('visibilitychange')) })
+  expect(screen.getByRole('button', { name: 'Enable notifications' })).toBeInTheDocument()
+  vi.unstubAllGlobals()
+})
+
+test('re-reads the permission when the Permissions API reports a change', async () => {
+  const stub = Object.assign(vi.fn(), { permission: 'granted' as NotificationPermission, requestPermission: vi.fn() })
+  vi.stubGlobal('Notification', stub)
+  const status = new EventTarget()
+  const query = vi.fn().mockResolvedValue(status)
+  const originalPermissions = navigator.permissions
+  Object.defineProperty(navigator, 'permissions', { configurable: true, value: { query } })
+  setNotifyPref('on')
+  render(<NotifyToggle />)
+  await act(async () => {})
+  expect(query).toHaveBeenCalledWith({ name: 'notifications' })
+  stub.permission = 'denied'
+  act(() => { status.dispatchEvent(new Event('change')) })
+  expect(screen.getByRole('button', { name: 'Notifications blocked' })).toBeDisabled()
+  Object.defineProperty(navigator, 'permissions', { configurable: true, value: originalPermissions })
   vi.unstubAllGlobals()
 })
