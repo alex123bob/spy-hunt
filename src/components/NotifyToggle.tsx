@@ -1,0 +1,40 @@
+import { notificationsSupported } from '../state/notify'
+import { getNotifyPref, setNotifyPref, useNotifyPref } from '../state/notifyPrefs'
+import { t } from '../i18n'
+
+export function NotifyToggle() {
+  const pref = useNotifyPref()
+  if (!notificationsSupported()) return null
+  const permission = Notification.permission
+
+  if (permission === 'denied') {
+    return (
+      <button type="button" className="pill" disabled>
+        {t('notify.blocked')}
+      </button>
+    )
+  }
+
+  if (permission === 'default') {
+    return (
+      <button
+        type="button"
+        className="pill"
+        onClick={() => {
+          void Notification.requestPermission().then((p) => {
+            if (p === 'granted') setNotifyPref('on')
+          })
+        }}
+      >
+        {t('notify.enable')}
+      </button>
+    )
+  }
+
+  const on = pref === 'on'
+  return (
+    <button type="button" className="pill" onClick={() => setNotifyPref(getNotifyPref() === 'on' ? 'off' : 'on')}>
+      {t(on ? 'notify.on' : 'notify.off')}
+    </button>
+  )
+}

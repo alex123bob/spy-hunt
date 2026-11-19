@@ -12,6 +12,7 @@ import { leaveRoom } from '../state/myRoom'
 import { blockingRoom, type BlockingRoom } from '../state/blockingRoom'
 import { AlreadyInRoomSheet } from '../components/AlreadyInRoomSheet'
 import { Loader } from '../components/Loader'
+import { NotifyToggle } from '../components/NotifyToggle'
 import { Toast } from '../components/Toast'
 import { useGameNotify } from '../state/useGameNotify'
 import { useHostChange } from '../state/useHostChange'
@@ -219,5 +220,5 @@ function RoomView({ state, status, offset }: { state: Snapshot; status: string; 
   else if (screen === 'vote') body = <Vote state={state} offset={offset} />
   else if (screen === 'reveal') body = <Reveal state={state} offset={offset} holdUntil={holdUntil} />
   else body = <Table state={state} offset={offset} holdUntil={holdUntil} />
-  return <>{banner}<Toast text={hostNote.text} nonce={hostNote.n} /><div key={screen} className="phase">{body}</div></>
+  return <>{banner}<Toast text={hostNote.text} nonce={hostNote.n} /><NotifyToggle /><div key={screen} className="phase">{body}</div></>
 }
