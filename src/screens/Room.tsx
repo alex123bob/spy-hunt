@@ -13,6 +13,7 @@ import { blockingRoom, type BlockingRoom } from '../state/blockingRoom'
 import { AlreadyInRoomSheet } from '../components/AlreadyInRoomSheet'
 import { Loader } from '../components/Loader'
 import { Toast } from '../components/Toast'
+import { useGameNotify } from '../state/useGameNotify'
 import { useHostChange } from '../state/useHostChange'
 import { Lobby } from './Lobby'
 import { Reveal } from './Reveal'
@@ -209,6 +210,7 @@ function targetScreen(state: Snapshot): Screen {
 function RoomView({ state, status, offset }: { state: Snapshot; status: string; offset: number }) {
   const { screen, holdUntil } = useHeldScreen(targetScreen(state), state.reveal)
   const hostNote = useHostChange(state)
+  useGameNotify(state)
   const banner = status === 'reconnecting' || status === 'polling' ? <div className="banner" role="status"><i className="dot" aria-hidden />{t('room.reconnecting')}</div> : null
   let body
   if (screen === 'lobby') body = <Lobby state={state} />
