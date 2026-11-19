@@ -224,3 +224,19 @@ test('does not fire the started notification when myRoom already said "playing" 
   expect(fireNotification).not.toHaveBeenCalled()
   vi.restoreAllMocks()
 })
+
+test('does not replay a stale toast after visiting the room and leaving again', async () => {
+  vi.spyOn(document, 'hasFocus').mockReturnValue(true)
+  setMyRoom({ code: 'ABCD', status: 'playing' })
+  vi.mocked(request).mockResolvedValue(playing({ current_speaker: null }))
+  const router = createMemoryRouter([{ path: '*', element: <RoomWatcher /> }], { initialEntries: ['/bots'] })
+  render(<RouterProvider router={router} />)
+  await act(async () => {})
+  const onEvent = vi.mocked(openRoomStream).mock.calls[0][1]
+  act(() => onEvent({ event: 'turn', data: { seat: 0, phase: 'describe' } }))
+  expect(await screen.findByRole('status')).toHaveTextContent('Your turn to speak')
+  await act(async () => router.navigate('/r/ABCD'))
+  await act(async () => router.navigate('/bots'))
+  expect(screen.queryByRole('status')).toBeNull()
+  vi.restoreAllMocks()
+})

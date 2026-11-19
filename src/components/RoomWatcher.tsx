@@ -25,6 +25,11 @@ export function RoomWatcher() {
   const [toast, setToast] = useState({ text: '', code: '', n: 0 })
   const [attempt, setAttempt] = useState(0)
 
+  // A toast belongs to one away-from-room stint. Without clearing it, entering the room
+  // unmounts <Toast> but keeps its text here, and leaving again remounts it with that stale
+  // text, replaying e.g. "your turn to speak" for a turn the player already took.
+  useEffect(() => () => setToast((c) => ({ ...c, text: '', code: '' })), [active])
+
   useEffect(() => {
     if (!active) return
     let closed = false
