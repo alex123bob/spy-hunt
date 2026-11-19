@@ -460,6 +460,8 @@
   "notify.on": "Notifications on",
   "notify.off": "Notifications off",
   "notify.blocked": "Notifications blocked",
+  "notify.started": "Game started",
+  "notify.turn": "It's your turn",
   "landing.inRoom": "You're in room {code}",
   "room.blocked.title": "You're already in a room",
   "room.blocked.body": "Finish or leave room {code} first.",
