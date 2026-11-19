@@ -182,3 +182,29 @@ test('reconnects the stream when the tab becomes visible again', async () => {
   act(() => document.dispatchEvent(new Event('visibilitychange')))
   expect(reconnectNow).toHaveBeenCalled()
 })
+
+test('fires the started notification when the game started between navigating away and the bootstrap fetch resolving', async () => {
+  // myRoom still says "lobby" (the last known status before navigating away), but the
+  // server-side game started in the meantime, so the bootstrap GET already returns "playing" --
+  // there is no earlier "lobby" snapshot for the diff to compare against
+  vi.spyOn(document, 'hasFocus').mockReturnValue(false)
+  setMyRoom({ code: 'ABCD', status: 'lobby' })
+  vi.mocked(request).mockResolvedValue(playing({ current_speaker: null }))
+  renderAt('/bots')
+  await act(async () => {})
+  expect(fireNotification).toHaveBeenCalledTimes(1)
+  expect(fireNotification).toHaveBeenCalledWith('Game started', expect.anything())
+  vi.restoreAllMocks()
+})
+
+test('does not fire the started notification when myRoom already said "playing" before navigating away', async () => {
+  // the normal case: the player was already told the game had started (e.g. they saw it on
+  // the room screen) before leaving, so the bootstrap fetch returning "playing" is not new news
+  vi.spyOn(document, 'hasFocus').mockReturnValue(false)
+  setMyRoom({ code: 'ABCD', status: 'playing' })
+  vi.mocked(request).mockResolvedValue(playing({ current_speaker: null }))
+  renderAt('/bots')
+  await act(async () => {})
+  expect(fireNotification).not.toHaveBeenCalled()
+  vi.restoreAllMocks()
+})
