@@ -11,7 +11,6 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  // @ts-expect-error restoring a possibly-undefined global
   globalThis.Notification = OriginalNotification
 })
 

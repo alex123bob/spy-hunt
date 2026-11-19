@@ -7,7 +7,7 @@ export const TOAST_MS = 2500
  * A short confirmation at the bottom of the screen. It hides itself after `ms`; setting
  * `text` again (or bumping `nonce` for the same text) shows it again.
  */
-export function Toast({ text, nonce, ms = TOAST_MS }: { text: string; nonce?: number; ms?: number }) {
+export function Toast({ text, nonce, ms = TOAST_MS, className }: { text: string; nonce?: number; ms?: number; className?: string }) {
   const [shown, setShown] = useState(text)
   useEffect(() => {
     setShown(text)
@@ -16,5 +16,5 @@ export function Toast({ text, nonce, ms = TOAST_MS }: { text: string; nonce?: nu
     return () => clearTimeout(id)
   }, [text, nonce, ms])
   if (!shown) return null
-  return <p role="status" className="toast">{shown}</p>
+  return <p role="status" className={`toast${className ? ' ' + className : ''}`}>{shown}</p>
 }

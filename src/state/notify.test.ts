@@ -3,7 +3,6 @@ import { fireNotification, notificationsSupported } from './notify'
 const OriginalNotification = globalThis.Notification
 
 afterEach(() => {
-  // @ts-expect-error restoring a possibly-undefined global
   globalThis.Notification = OriginalNotification
 })
 
