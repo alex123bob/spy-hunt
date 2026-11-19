@@ -4,6 +4,7 @@ import { request } from '../api/client'
 import { openRoomStream } from '../api/stream'
 import type { Snapshot } from '../api/types'
 import { t } from '../i18n'
+import { reloadDelay } from '../state/backoff'
 import { useMyRoom } from '../state/myRoom'
 import { fireNotification, notificationsSupported } from '../state/notify'
 import { detectNotifyEvents } from '../state/notifyEvents'
@@ -17,15 +18,18 @@ export function RoomWatcher() {
   const navigate = useNavigate()
   const navigateRef = useRef(navigate)
   navigateRef.current = navigate
-  const onOwnRoomPage = !!room && pathname.toUpperCase() === `/R/${room.code}`
+  const onOwnRoomPage = !!room && pathname.replace(/\/+$/, '').toUpperCase() === `/R/${room.code}`
   const active = room && !onOwnRoomPage ? room.code : null
 
-  const [toast, setToast] = useState({ text: '', n: 0 })
+  const [toast, setToast] = useState({ text: '', code: '', n: 0 })
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     if (!active) return
     let closed = false
     let stream: { close(): void; reconnectNow(): void } | null = null
+    let retry: ReturnType<typeof setTimeout> | undefined
+    let failures = 0
     const store = new RoomStore()
     const prevRef: { current: Snapshot | null } = { current: null }
     const unsubscribe = store.subscribe(() => {
@@ -36,7 +40,7 @@ export function RoomWatcher() {
       for (const event of events) {
         const key = event.kind === 'started' ? 'notify.started' : 'notify.turn'
         if (document.hasFocus()) {
-          setToast((c) => ({ text: t(key), n: c.n + 1 }))
+          setToast((c) => ({ text: t(key), code: state.code, n: c.n + 1 }))
         } else if (notificationsSupported() && getNotifyPref() === 'on') {
           fireNotification(t(key), {
             tag: `${state.code}:${event.kind}:${state.phase}:${state.game_no}:${state.round}`,
@@ -45,18 +49,36 @@ export function RoomWatcher() {
         }
       }
     })
-    void request<Snapshot>('GET', `/rooms/${active}`).then((snap) => {
-      if (closed) return
-      store.setSnapshot(snap)
-      stream = openRoomStream(active, (ev) => store.dispatch(ev), () => {}, { after: snap.last_seq })
-    })
+    void request<Snapshot>('GET', `/rooms/${active}`)
+      .then((snap) => {
+        if (closed) return
+        store.setSnapshot(snap)
+        stream = openRoomStream(
+          active,
+          (ev) => store.dispatch(ev),
+          (st) => {
+            if (st === 'failed') retry = setTimeout(() => setAttempt((a) => a + 1), reloadDelay(failures++))
+          },
+          { after: snap.last_seq },
+        )
+      })
+      .catch(() => {
+        if (closed) return
+        retry = setTimeout(() => setAttempt((a) => a + 1), reloadDelay(failures++))
+      })
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') stream?.reconnectNow()
+    }
+    document.addEventListener('visibilitychange', onVisible)
     return () => {
       closed = true
+      document.removeEventListener('visibilitychange', onVisible)
+      clearTimeout(retry)
       unsubscribe()
       stream?.close()
     }
-  }, [active])
+  }, [active, attempt])
 
   if (!active) return null
-  return <Toast text={toast.text} nonce={toast.n} className="toast-top" />
+  return <Toast text={toast.text} nonce={toast.n} className="toast-top" onClick={() => navigate(`/r/${toast.code}`)} />
 }

@@ -11,7 +11,7 @@ export function NotifyToggle() {
 
   if (permission === 'denied') {
     return (
-      <button type="button" className="pill" disabled>
+      <button type="button" className="pill" disabled title={t('notify.blockedHint')}>
         {t('notify.blocked')}
       </button>
     )

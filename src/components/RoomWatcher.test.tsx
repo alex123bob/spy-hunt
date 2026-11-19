@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
-import { createMemoryRouter, MemoryRouter, RouterProvider, useNavigate } from 'react-router-dom'
+import { createMemoryRouter, MemoryRouter, RouterProvider, useLocation, useNavigate } from 'react-router-dom'
 import { RoomWatcher } from './RoomWatcher'
 import { request } from '../api/client'
 import { openRoomStream } from '../api/stream'
@@ -28,6 +28,11 @@ function renderAt(path: string) {
   return render(<MemoryRouter initialEntries={[path]}><RoomWatcher /></MemoryRouter>)
 }
 
+function ShowPath() {
+  const { pathname } = useLocation()
+  return <span data-testid="path">{pathname}</span>
+}
+
 beforeEach(() => {
   vi.mocked(request).mockReset()
   vi.mocked(openRoomStream).mockClear()
@@ -36,14 +41,21 @@ beforeEach(() => {
   setMyRoom(null)
 })
 
-test('opens no connection and renders nothing with no active room', () => {
-  renderAt('/bots')
-  expect(openRoomStream).not.toHaveBeenCalled()
-})
-
 test('opens no connection while on that room\'s own page', () => {
   setMyRoom({ code: 'ABCD', status: 'playing' })
   renderAt('/r/ABCD')
+  expect(openRoomStream).not.toHaveBeenCalled()
+})
+
+test('opens no connection while on that room\'s own page with a trailing slash', () => {
+  setMyRoom({ code: 'ABCD', status: 'playing' })
+  renderAt('/r/ABCD/')
+  expect(openRoomStream).not.toHaveBeenCalled()
+})
+
+test('opens no connection and makes no request with no active room', () => {
+  renderAt('/bots')
+  expect(request).not.toHaveBeenCalled()
   expect(openRoomStream).not.toHaveBeenCalled()
 })
 
@@ -65,6 +77,24 @@ test('shows a toast when it becomes my turn while focused and away from the room
   const onEvent = vi.mocked(openRoomStream).mock.calls[0][1]
   act(() => onEvent({ event: 'turn', data: { seat: 0, phase: 'describe' } }))
   expect(await screen.findByRole('status')).toBeInTheDocument()
+  vi.restoreAllMocks()
+})
+
+test('clicking the out-of-room toast navigates back into the room', async () => {
+  vi.spyOn(document, 'hasFocus').mockReturnValue(true)
+  setMyRoom({ code: 'ABCD', status: 'playing' })
+  vi.mocked(request).mockResolvedValue(playing({ current_speaker: null }))
+  render(
+    <MemoryRouter initialEntries={['/bots']}>
+      <RoomWatcher />
+      <ShowPath />
+    </MemoryRouter>,
+  )
+  await act(async () => {})
+  const onEvent = vi.mocked(openRoomStream).mock.calls[0][1]
+  act(() => onEvent({ event: 'turn', data: { seat: 0, phase: 'describe' } }))
+  fireEvent.click(await screen.findByRole('status'))
+  expect(screen.getByTestId('path')).toHaveTextContent('/r/ABCD')
   vi.restoreAllMocks()
 })
 
@@ -112,4 +142,43 @@ test('navigating between two non-room screens keeps the same stream open (does n
   await act(async () => {})
   expect(openRoomStream).toHaveBeenCalledTimes(1)
   expect(request).toHaveBeenCalledTimes(1)
+})
+
+test('retries the initial snapshot fetch after it fails, and opens a stream once it succeeds', async () => {
+  vi.useFakeTimers()
+  setMyRoom({ code: 'ABCD', status: 'playing' })
+  vi.mocked(request).mockRejectedValueOnce(new Error('network')).mockResolvedValueOnce(playing())
+  renderAt('/bots')
+  await act(async () => {})
+  expect(openRoomStream).not.toHaveBeenCalled()
+  await act(async () => { await vi.runOnlyPendingTimersAsync() })
+  expect(request).toHaveBeenCalledTimes(2)
+  expect(openRoomStream).toHaveBeenCalledTimes(1)
+  vi.useRealTimers()
+})
+
+test('reopens the stream after it reports failed', async () => {
+  vi.useFakeTimers()
+  setMyRoom({ code: 'ABCD', status: 'playing' })
+  vi.mocked(request).mockResolvedValue(playing())
+  renderAt('/bots')
+  await act(async () => {})
+  expect(openRoomStream).toHaveBeenCalledTimes(1)
+  const onStatus = vi.mocked(openRoomStream).mock.calls[0][2]
+  act(() => onStatus('failed'))
+  await act(async () => { await vi.runOnlyPendingTimersAsync() })
+  expect(openRoomStream).toHaveBeenCalledTimes(2)
+  vi.useRealTimers()
+})
+
+test('reconnects the stream when the tab becomes visible again', async () => {
+  setMyRoom({ code: 'ABCD', status: 'playing' })
+  vi.mocked(request).mockResolvedValue(playing())
+  const reconnectNow = vi.fn()
+  vi.mocked(openRoomStream).mockReturnValue({ close: vi.fn(), reconnectNow })
+  renderAt('/bots')
+  await act(async () => {})
+  Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true })
+  act(() => document.dispatchEvent(new Event('visibilitychange')))
+  expect(reconnectNow).toHaveBeenCalled()
 })

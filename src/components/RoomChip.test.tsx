@@ -53,6 +53,12 @@ test('is hidden on the landing page, which has its own banner', () => {
   expect(screen.queryByRole('link')).toBeNull()
 })
 
+test('is hidden on that same room screen even with a trailing slash', () => {
+  setMyRoom({ code: 'ABC', status: 'lobby' })
+  renderAt('/r/ABC/')
+  expect(screen.queryByRole('link')).toBeNull()
+})
+
 test('refreshes the player room on every page, including a room screen (hard load of another room)', () => {
   vi.mocked(refreshMyRoom).mockClear()
   renderAt('/bots')

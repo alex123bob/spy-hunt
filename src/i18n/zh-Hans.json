@@ -460,6 +460,7 @@
   "notify.on": "通知已开启",
   "notify.off": "通知已关闭",
   "notify.blocked": "通知已被阻止",
+  "notify.blockedHint": "已在浏览器设置中被阻止",
   "notify.started": "游戏开始了",
   "notify.turn": "轮到你了",
   "landing.inRoom": "你在房间 {code} 中",

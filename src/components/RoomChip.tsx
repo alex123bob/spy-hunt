@@ -15,7 +15,7 @@ export function RoomChip() {
     void refreshMyRoom()
   }, [pathname])
   if (!room) return null
-  if (pathname === '/' || pathname.toUpperCase() === `/R/${room.code}`) return null
+  if (pathname === '/' || pathname.replace(/\/+$/, '').toUpperCase() === `/R/${room.code}`) return null
   return (
     <Link to={`/r/${room.code}`} className="room-chip">
       {t('room.chip', { code: room.code })}

@@ -91,6 +91,14 @@ test('shows a disabled blocked state when permission is denied', () => {
   vi.unstubAllGlobals()
 })
 
+test('the blocked state has a title pointing at browser settings', () => {
+  vi.stubGlobal('Notification', Object.assign(vi.fn(), { permission: 'denied', requestPermission: vi.fn() }))
+  render(<NotifyToggle />)
+  const btn = screen.getByRole('button', { name: 'Notifications blocked' })
+  expect(btn).toHaveAttribute('title', 'Blocked in your browser settings')
+  vi.unstubAllGlobals()
+})
+
 test('reflects permission revoked mid-session on the next render, not a stale cached value', () => {
   const stub = Object.assign(vi.fn(), { permission: 'granted' as NotificationPermission, requestPermission: vi.fn() })
   vi.stubGlobal('Notification', stub)
