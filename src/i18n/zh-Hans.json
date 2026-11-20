@@ -249,7 +249,7 @@
   "bots.do.copy_previous": "模仿上一条线索",
   "bots.do.go_vague": "说得含糊些",
   "bots.do.vote_accuser": "投给投我的人",
-  "bots.do.vote_leader": "跟票数最多的人投",
+  "bots.do.vote_leader": "投上轮得票最多的幸存者",
   "error.code.bad_name": "这个名字无效。",
   "error.code.bad_avatar": "这个头像无效。",
   "error.code.bad_outfit": "这套装扮无效。",

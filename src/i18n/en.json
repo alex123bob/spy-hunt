@@ -249,7 +249,7 @@
   "bots.do.copy_previous": "copy the previous clue",
   "bots.do.go_vague": "go vague",
   "bots.do.vote_accuser": "vote for who voted for me",
-  "bots.do.vote_leader": "vote with the leader",
+  "bots.do.vote_leader": "vote for last round's most suspected survivor",
   "error.code.bad_name": "That name is not valid.",
   "error.code.bad_avatar": "That avatar is not valid.",
   "error.code.bad_outfit": "That outfit is not valid.",
