@@ -262,3 +262,24 @@ test('the Voting info button opens a bubble and the chosen strategy shows its de
   expect(screen.getByText(/stay unnoticed/)).toBeInTheDocument()
   expect(screen.queryByText(/own judgement/)).toBeNull()
 })
+
+test('the voting copy describes last round\'s most suspected survivor and revealed votes only', () => {
+  ui()
+  fireEvent.click(screen.getByRole('button', { name: 'About Voting' }))
+  expect(screen.getByRole('tooltip')).toHaveTextContent(/rounds already revealed/)
+  fireEvent.click(screen.getByRole('radio', { name: 'Cover story' }))
+  expect(screen.getByText(/votes for last round's most suspected surviving player/)).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('radio', { name: 'Follow the table' }))
+  expect(screen.getByText(/still in the game/)).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('radio', { name: 'Think independently' }))
+  expect(screen.getByText(/when there are other choices/)).toBeInTheDocument()
+  expect(screen.queryByText(/piles on/)).toBeNull()
+})
+
+test('zh-Hans voting labels keep follow-last distinct from blend-in', () => {
+  setLang('zh-Hans')
+  ui()
+  const group = screen.getByRole('radiogroup', { name: '投票方式' })
+  expect(within(group).getByRole('radio', { name: '跟上轮多数' })).toBeInTheDocument()
+  expect(within(group).queryByRole('radio', { name: '随大流' })).toBeNull()
+})

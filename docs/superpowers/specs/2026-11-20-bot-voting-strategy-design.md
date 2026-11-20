@@ -35,12 +35,13 @@ Field `vote` in the outfit and `custom_bots.mind_json` (extends `MIND_DEFAULTS`;
 | id | Label | Behavior |
 |---|---|---|
 | `evidence` | Follow the evidence | Today: the model decides. |
-| `follow_last` | Follow the table | Votes the seat that got the most votes last reveal, if there was a single leader who is a legal target and not itself. Server picks, no model call. Otherwise `evidence`. |
+| `follow_last` | Follow the table | Votes the **favourite survivor** of the last reveal (the alive seat, other than itself and the seat that reveal eliminated, with the most votes; a single top seat only, a tie means none) when it is a legal target. Server picks, no model call. Otherwise `evidence`. |
 | `grudge` | Hold a grudge | Votes a seat that voted for it last round (random among them) if legal. Server picks, no model call. Otherwise `evidence`. |
 | `odd_one_out` | Odd one out | Model call with an added line: vote the player whose statements fit least with the others'. |
-| `independent` | Think independently | The model is shown the legal seats **without** last round's leader (when at least 2 others remain), so it never joins the pile-on. |
-| `cover` | Cover story | Model call with a conditional line: if you suspect you may be the spy (your word does not fit the others' statements), vote seat N, the table's favorite last round, to stay unnoticed. Added only when a last-round leader exists. |
+| `independent` | Think independently | The model is shown the legal seats **without** the favourite survivor (when it is a legal target and at least 2 others remain; the `deep` suspects hint drops it too), so it avoids the pile-on. |
+| `cover` | Cover story | Model call with a conditional line: if you suspect you may be the spy (your word does not fit the others' statements), vote seat N, the favourite survivor, to stay unnoticed. Added only when a favourite survivor exists and is a legal target. |
 
+- **Favourite survivor, not leader (final review):** `engine.resolve_vote` always eliminates a single top vote-getter, so last reveal's `leader` is always a dead seat (or none). `follow_last`, `independent` and `cover` therefore use `rules.RuleContext.top_survivor` instead (via `votes.favourite_survivor`, which also requires a legal target). Rule card `vote_leader` keeps `leader` unchanged (out of scope).
 - Order in `bots._run_vote`: rule-card vote pick first (explicit tactic), then the server-picked strategies, then the model path with any strategy line / filtered seats and the `deep` suspects hint. The existing validity check and random fallback stay.
 - Pure functions in `rules.py` / `minds.py`: `vote_strategy_pick(strategy, ctx, valid_targets, rng) -> Optional[int]` and `vote_strategy_line(strategy, ctx) -> str`, plus `vote_targets_for_prompt(strategy, ctx, valid_targets)`. `rules.context` already carries `leader` and `accusers`.
 - Built-in weights **(call)**: `evidence` 50, `follow_last` 15, `grudge` 10, `odd_one_out` 10, `independent` 5, `cover` 10; picked by `sha256(player_id)`. Built-in bots stay believable, most play straight.

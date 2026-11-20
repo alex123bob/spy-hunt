@@ -555,11 +555,11 @@
   "bots.vote.odd_one_out": "Odd one out",
   "bots.vote.independent": "Think independently",
   "bots.vote.cover": "Cover story",
-  "bots.help.vote": "How the bot picks who to vote for. A rule card that fires still wins over the strategy. Strategies only use last round's revealed votes.",
+  "bots.help.vote": "How the bot picks who to vote for. A rule card that fires still wins over the strategy. Strategies only see votes from rounds already revealed, never this round's votes.",
   "bots.vote.evidence.desc": "Votes on its own judgement of the clues.",
-  "bots.vote.follow_last.desc": "Votes for whoever got the most votes last round, if there was a clear leader.",
+  "bots.vote.follow_last.desc": "Votes for whoever was most suspected last round and is still in the game, if there is a clear one.",
   "bots.vote.grudge.desc": "Votes for someone who voted for it last round.",
   "bots.vote.odd_one_out.desc": "Votes for the player whose clues fit least with everyone else's.",
-  "bots.vote.independent.desc": "Never piles on last round's favourite.",
-  "bots.vote.cover.desc": "If it suspects it's the spy, votes with last round's favourite to stay unnoticed."
+  "bots.vote.independent.desc": "Avoids last round's most suspected surviving player when there are other choices.",
+  "bots.vote.cover.desc": "If it suspects it's the spy, votes for last round's most suspected surviving player to stay unnoticed."
 }
