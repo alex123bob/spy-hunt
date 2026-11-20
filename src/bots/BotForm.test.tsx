@@ -220,3 +220,20 @@ test('an old bot without the fields shows defaults and saves them', async () => 
   await waitFor(() => expect(updateBot).toHaveBeenCalled())
   expect(vi.mocked(updateBot).mock.calls[0]![1]!.outfit).toMatchObject({ words: 3, form: 'plain', think: 'instinct', suspicion: 3, reaction: 'blend_in' })
 })
+
+test('the info button explains a setting in a bubble, and the chosen option shows its description', () => {
+  ui()
+  fireEvent.click(screen.getByRole('button', { name: 'About Thinking' }))
+  expect(screen.getByRole('tooltip')).toHaveTextContent(/How hard the bot thinks/)
+  expect(screen.getByRole('button', { name: 'About Thinking' })).toHaveAttribute('aria-expanded', 'true')
+  expect(screen.getByText(/Answers straight away with one AI call/)).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('radio', { name: 'Deep' }))
+  expect(screen.getByText(/Adds a separate analysis step/)).toBeInTheDocument()
+  expect(screen.queryByText(/Answers straight away with one AI call/)).toBeNull()
+})
+
+test('a dial shows the description for its current value', () => {
+  ui()
+  fireEvent.change(screen.getByLabelText('Suspicion'), { target: { value: '5' } })
+  expect(screen.getByText(/Paranoid/)).toBeInTheDocument()
+})

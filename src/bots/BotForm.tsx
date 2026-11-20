@@ -8,6 +8,7 @@ import { BotCardView } from './BotCardView'
 import { WhyButton } from '../components/WhyButton'
 import { colorName } from '../looks/Picker'
 import { MIND_DEFAULTS, withMind } from './mind'
+import { FieldHelp } from './FieldHelp'
 
 type Slot = 'voice' | 'style' | 'quirk'
 const GROUPS: { slot: Slot; key: 'voices' | 'styles' | 'quirks' }[] = [
@@ -17,11 +18,16 @@ const GROUPS: { slot: Slot; key: 'voices' | 'styles' | 'quirks' }[] = [
 ]
 
 
-function Group({ label, children }: { label: string; children: React.ReactNode }) {
+function Label({ text, help }: { text: string; help?: string }) {
+  return <span className="field-label">{text}{help && <FieldHelp label={text} text={help} />}</span>
+}
+
+function Group({ label, help, desc, children }: { label: string; help?: string; desc?: string; children: React.ReactNode }) {
   return (
     <div>
-      <span className="field-label">{label}</span>
+      <Label text={label} help={help} />
       <div role="radiogroup" aria-label={label} className="picker">{children}</div>
+      {desc && <p className="field-desc" aria-live="polite">{desc}</p>}
     </div>
   )
 }
@@ -67,17 +73,18 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
   const mind = withMind(draft.outfit)
   const setOutfit = (patch: Partial<BotDraft['outfit']>) => setDraft({ ...draft, outfit: { ...draft.outfit, ...patch } })
   const dial = (key: 'words' | 'suspicion', label: string) => (
-    <label className="dial">
-      <span className="field-label">{label}</span>
+    <div className="dial">
+      <Label text={label} help={t(`bots.help.${key}`)} />
       <span className="row">
         <input type="range" min={1} max={5} step={1} aria-label={label} value={mind[key]}
           onChange={(e) => setOutfit({ [key]: Number(e.target.value) })} />
         <output>{mind[key]}</output>
       </span>
-    </label>
+      <p className="field-desc" aria-live="polite">{t(`bots.${key}.${mind[key]}.desc`)}</p>
+    </div>
   )
   const picker = (field: 'form' | 'think' | 'reaction', ids: string[] | undefined) => (
-    <Group label={t(`bots.${field}`)}>
+    <Group label={t(`bots.${field}`)} help={t(`bots.help.${field}`)} desc={t(`bots.${field}.${mind[field]}.desc`)}>
       {(ids ?? []).map((id) =>
         radio(mind[field] === id, t(`bots.${field}.${id}`), () => setOutfit({ [field]: id }), { text: t(`bots.${field}.${id}`) }))}
     </Group>
@@ -122,7 +129,7 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
             { className: 'swatch', style: { background: c }, text: draft.avatar.color === c ? '✓' : '' }))}
       </Group></div>
       <div className="form-sec">{GROUPS.map(({ slot, key }) => (
-        <Group key={slot} label={t(`bots.slot.${slot}`)}>
+        <Group key={slot} label={t(`bots.slot.${slot}`)} help={t(`bots.help.${slot}`)} desc={t(`bots.${slot}.${draft.outfit[slot]}.desc`)}>
           {catalog[key].map((id) =>
             radio(draft.outfit[slot] === id, t(`bots.${slot}.${id}`), () => setDraft({ ...draft, outfit: { ...draft.outfit, [slot]: id } }),
               { text: t(`bots.${slot}.${id}`) }))}
@@ -140,7 +147,7 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
         {picker('reaction', catalog.reactions)}
       </div>
       <div className="form-sec">
-        <span className="field-label">{t('bots.rules')}</span>
+        <Label text={t('bots.rules')} help={t('bots.help.rules')} />
         {rules.map((r, i) => (
           <div key={i} className="rule-row">
             <select aria-label={t('bots.rules.whenN', { n: i + 1 })} value={r.when} onChange={(e) => setRule(i, { when: e.target.value })}>

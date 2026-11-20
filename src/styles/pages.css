@@ -138,6 +138,8 @@
 .dial .row { display: flex; align-items: center; gap: 14px; width: 100%; }
 .dial input[type="range"] { flex: 1 1 auto; min-width: 0; width: 100%; height: 32px; margin: 0; accent-color: var(--tomato-deep); cursor: pointer; }
 .dial output { flex: 0 0 auto; min-width: 1.5ch; text-align: right; font: 700 20px/1 var(--font-display); color: var(--ink); }
+.help-btn { margin-left: 8px; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); font: 800 12px/1 var(--font-display); display: inline-grid; place-items: center; vertical-align: 1px; }
+.field-desc { margin: 6px 2px 0; font-size: 14px; line-height: 1.35; color: var(--muted); }
 .picker { gap: 8px; }
 .picker .chip { border-radius: var(--radius-pill); min-width: 44px; min-height: 44px; padding: 8px 14px; font-size: 15px; }
 .picker .chip:not(.swatch) { background: var(--paper); }

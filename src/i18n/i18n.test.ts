@@ -236,3 +236,21 @@ test('a brand-new browser with no stored session still falls back to the browser
   vi.unstubAllGlobals()
   vi.resetModules()
 })
+
+test('every bot option, dial value and setting has a help text in both languages', () => {
+  const opts: Record<string, string[]> = {
+    voice: ['cheerful', 'dry', 'chatty', 'terse', 'pirate', 'grandma', 'sleepy_cat', 'robot'],
+    style: ['concrete', 'vague', 'metaphor', 'brief', 'memory', 'contrast'],
+    quirk: ['question', 'agree', 'number', 'emoji', 'honestly', 'color'],
+    form: ['plain', 'riddle', 'rhyme', 'one_word', 'emoji_only', 'no_adjectives', 'question_only'],
+    think: ['instinct', 'careful', 'deep'],
+    reaction: ['blend_in', 'go_vague', 'mirror', 'deflect'],
+    words: ['1', '2', '3', '4', '5'],
+    suspicion: ['1', '2', '3', '4', '5'],
+  }
+  for (const [slot, list] of Object.entries(opts)) {
+    for (const d of [en, zh] as Record<string, string>[]) expect(d[`bots.help.${slot}`]).toBeTruthy()
+    for (const id of list) for (const d of [en, zh] as Record<string, string>[]) expect(d[`bots.${slot}.${id}.desc`]).toBeTruthy()
+  }
+  for (const d of [en, zh] as Record<string, string>[]) expect(d['bots.help.rules']).toBeTruthy()
+})
