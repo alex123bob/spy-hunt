@@ -133,6 +133,10 @@
 .bot-form .form-sec { display: flex; flex-direction: column; gap: 12px; }
 .bot-form label.form-sec { gap: 6px; }
 .field-label { display: block; font: 700 14px/1.2 var(--font-display); margin-bottom: 6px; color: var(--ink); }
+.dial { display: flex; flex-direction: column; gap: 6px; }
+.dial .row { display: flex; align-items: center; gap: 14px; width: 100%; }
+.dial input[type="range"] { flex: 1 1 auto; min-width: 0; width: 100%; height: 44px; margin: 0; accent-color: var(--tomato-deep); cursor: pointer; }
+.dial output { flex: 0 0 auto; min-width: 1.5ch; text-align: right; font: 700 20px/1 var(--font-display); color: var(--ink); }
 .picker { gap: 8px; }
 .picker .chip { border-radius: var(--radius-pill); min-width: 44px; min-height: 44px; padding: 8px 14px; font-size: 15px; }
 .picker .chip:not(.swatch) { background: var(--paper); }
