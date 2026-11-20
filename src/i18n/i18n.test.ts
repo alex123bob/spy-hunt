@@ -28,6 +28,17 @@ test('every bot option id has a label in both languages', () => {
     style: ['concrete', 'vague', 'metaphor', 'brief', 'memory', 'contrast'],
     quirk: ['question', 'agree', 'number', 'emoji', 'honestly', 'color'],
   }
+  const mind = {
+    form: ['plain', 'riddle', 'rhyme', 'one_word', 'emoji_only', 'no_adjectives', 'question_only'],
+    think: ['instinct', 'careful', 'deep'],
+    reaction: ['blend_in', 'go_vague', 'mirror', 'deflect'],
+  }
+  for (const k of ['words', 'suspicion', 'form', 'think', 'reaction', 'group.mouth', 'group.mind']) {
+    expect(en).toHaveProperty(['bots.' + k]); expect(zh).toHaveProperty(['bots.' + k])
+  }
+  for (const [slot, list] of Object.entries(mind)) for (const id of list) {
+    expect(en).toHaveProperty([`bots.${slot}.${id}`]); expect(zh).toHaveProperty([`bots.${slot}.${id}`])
+  }
   for (const [slot, list] of Object.entries(ids)) {
     expect(en).toHaveProperty(['bots.slot.' + slot])
     for (const id of list) {

@@ -184,7 +184,9 @@ export interface LooksCatalog {
 }
 export interface BadgeCatalog { badges: ClanBadge[]; emojis: string[]; colors: string[] }
 export interface BotRule { when: string; do: string }
-export interface BotOutfit { voice: string; style: string; quirk: string; rules: BotRule[] }
+export interface BotOutfit { voice: string; style: string; quirk: string; rules: BotRule[]
+  // absent on cards from an older server; readers fall back to the defaults
+  words?: number; form?: string; think?: string; suspicion?: number; reaction?: string }
 export interface BotRecord { games: number; wins: number; spy_games: number; spy_wins: number }
 export type BotRanked = BotRecord
 export interface BotCard {
@@ -197,7 +199,7 @@ export interface BotCard {
   arena: boolean
   arena_record: BotRanked
 }
-export interface BotCatalog { voices: string[]; styles: string[]; quirks: string[]; emojis: string[]; colors: string[]; triggers: string[]; actions: string[]; max_rules: number }
+export interface BotCatalog { voices: string[]; styles: string[]; quirks: string[]; emojis: string[]; colors: string[]; triggers: string[]; actions: string[]; max_rules: number; forms: string[]; thinks: string[]; reactions: string[] }
 export interface BotDraft { name: string; avatar: Avatar; outfit: BotOutfit; listed?: boolean; arena?: boolean; remix_of?: string }
 export type TopKind = 'winners' | 'spies'
 export interface TopBot { rank: number; id: string; name: string; avatar: Avatar; rate: number; games: number; remixes: number }

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import type { Avatar as AvatarData, BotOutfit, BotRanked, BotRecord } from '../api/types'
 import { Avatar } from '../components/Avatar'
 import { t } from '../i18n'
+import { withMind } from './mind'
 
 export interface BotDraftPreview {
   name: string
@@ -17,6 +18,7 @@ const ICON = { voice: '🗣️', style: '🎨', quirk: '✨' } as const
 
 export function BotCardView({ bot, float }: { bot: BotDraftPreview; float?: boolean }) {
   const { record } = bot
+  const mind = withMind(bot.outfit)
   const rules = Array.isArray(bot.outfit.rules) ? bot.outfit.rules : []
   return (
     <section className={`card trading-card${float ? ' float' : ''}`} data-testid="bot-card">
@@ -36,6 +38,18 @@ export function BotCardView({ bot, float }: { bot: BotDraftPreview; float?: bool
             <p key={slot} className="wrap tc-line">
               <span aria-hidden>{ICON[slot]}</span>
               <span>{t('bots.line', { label: t(`bots.slot.${slot}`), value: t(`bots.${slot}.${bot.outfit[slot]}`) })}</span>
+            </p>
+          ))}
+          {([
+            ['💬', 'words', String(mind.words)],
+            ['🧩', 'form', t(`bots.form.${mind.form}`)],
+            ['🧠', 'think', t(`bots.think.${mind.think}`)],
+            ['🕵️', 'suspicion', String(mind.suspicion)],
+            ['🛡️', 'reaction', t(`bots.reaction.${mind.reaction}`)],
+          ] as const).map(([icon, key, value]) => (
+            <p key={key} className="wrap tc-line">
+              <span aria-hidden>{icon}</span>
+              <span>{t('bots.line', { label: t(`bots.${key}`), value })}</span>
             </p>
           ))}
         </div>

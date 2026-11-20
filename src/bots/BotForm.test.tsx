@@ -10,6 +10,7 @@ vi.mock('./api', () => ({ createBot: vi.fn(), updateBot: vi.fn() }))
 const catalog: BotCatalog = {
   voices: ['cheerful'], styles: ['concrete'], quirks: ['question'], emojis: ['🦊'], colors: ['#ff6b6b', '#5b8cff', '#111111'],
   triggers: ['accused', 'late_game', 'after_elimination'], actions: ['counter_accuse', 'go_vague', 'vote_leader'], max_rules: 3,
+  forms: ['plain', 'riddle'], thinks: ['instinct', 'careful', 'deep'], reactions: ['blend_in', 'mirror'],
 }
 const rec = { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }
 const bot = (outfit: object): BotCard => ({ id: 'abcdefgh', name: 'Bo', avatar: { emoji: '🦊', color: '#ff6b6b' }, outfit, record: rec, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false, arena: false, arena_record: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 } } as BotCard)
@@ -191,4 +192,31 @@ test('arena checkbox defaults checked and unchecking sends false', async () => {
 test('editing a bot with arena false shows it unchecked', () => {
   ui(bot({ ...base, rules: [] }))
   expect(screen.getByRole('checkbox', { name: 'Let my bot play in the daily arena' })).not.toBeChecked()
+})
+
+test('Mouth and Mind controls update the preview and the saved body', async () => {
+  ui()
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Zed' } })
+  expect(screen.getByRole('heading', { name: 'Mouth' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'Mind' })).toBeInTheDocument()
+  fireEvent.change(screen.getByRole('slider', { name: 'Wordiness' }), { target: { value: '1' } })
+  fireEvent.change(screen.getByRole('slider', { name: 'Suspicion' }), { target: { value: '5' } })
+  fireEvent.click(screen.getByRole('radio', { name: 'Deep' }))
+  fireEvent.click(screen.getByRole('radio', { name: 'Riddle' }))
+  fireEvent.click(screen.getByRole('radio', { name: 'Mirror' }))
+  expect(screen.getByText('Thinking: Deep')).toBeInTheDocument()
+  expect(screen.getByText('Wordiness: 1')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(createBot).toHaveBeenCalled())
+  expect(vi.mocked(createBot).mock.calls[0]![0]!.outfit).toMatchObject({ words: 1, suspicion: 5, think: 'deep', form: 'riddle', reaction: 'mirror' })
+})
+
+test('an old bot without the fields shows defaults and saves them', async () => {
+  ui(bot({ ...base, rules: [] }))
+  expect(screen.getByRole('slider', { name: 'Wordiness' })).toHaveValue('3')
+  expect(screen.getByRole('radio', { name: 'Instinct' })).toBeChecked()
+  expect(screen.queryByText(/undefined/)).toBeNull()
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(updateBot).toHaveBeenCalled())
+  expect(vi.mocked(updateBot).mock.calls[0]![1]!.outfit).toMatchObject({ words: 3, form: 'plain', think: 'instinct', suspicion: 3, reaction: 'blend_in' })
 })

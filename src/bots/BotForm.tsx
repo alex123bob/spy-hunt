@@ -7,6 +7,7 @@ import { createBot, updateBot } from './api'
 import { BotCardView } from './BotCardView'
 import { WhyButton } from '../components/WhyButton'
 import { colorName } from '../looks/Picker'
+import { MIND_DEFAULTS, withMind } from './mind'
 
 type Slot = 'voice' | 'style' | 'quirk'
 const GROUPS: { slot: Slot; key: 'voices' | 'styles' | 'quirks' }[] = [
@@ -38,7 +39,7 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
       return {
         name: initial ? initial.name : '',
         avatar: { ...src.avatar },
-        outfit: { ...src.outfit, rules: Array.isArray(src.outfit.rules) ? src.outfit.rules.map((r) => ({ ...r })) : [] },
+        outfit: { ...withMind(src.outfit), rules: Array.isArray(src.outfit.rules) ? src.outfit.rules.map((r) => ({ ...r })) : [] },
         listed: initial ? initial.listed : true,
         arena: initial ? initial.arena : true,
       }
@@ -46,7 +47,7 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
     return {
       name: '',
       avatar: { emoji: catalog.emojis[0] ?? '', color: catalog.colors[0] ?? '' },
-      outfit: { voice: catalog.voices[0] ?? '', style: catalog.styles[0] ?? '', quirk: catalog.quirks[0] ?? '', rules: [] },
+      outfit: { voice: catalog.voices[0] ?? '', style: catalog.styles[0] ?? '', quirk: catalog.quirks[0] ?? '', rules: [], ...MIND_DEFAULTS },
       listed: true,
       arena: true,
     }
@@ -61,6 +62,25 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
     >
       {extra.text}
     </button>
+  )
+
+  const mind = withMind(draft.outfit)
+  const setOutfit = (patch: Partial<BotDraft['outfit']>) => setDraft({ ...draft, outfit: { ...draft.outfit, ...patch } })
+  const dial = (key: 'words' | 'suspicion', label: string) => (
+    <label className="dial">
+      <span className="field-label">{label}</span>
+      <span className="row">
+        <input type="range" min={1} max={5} step={1} aria-label={label} value={mind[key]}
+          onChange={(e) => setOutfit({ [key]: Number(e.target.value) })} />
+        <output>{mind[key]}</output>
+      </span>
+    </label>
+  )
+  const picker = (field: 'form' | 'think' | 'reaction', ids: string[] | undefined) => (
+    <Group label={t(`bots.${field}`)}>
+      {(ids ?? []).map((id) =>
+        radio(mind[field] === id, t(`bots.${field}.${id}`), () => setOutfit({ [field]: id }), { text: t(`bots.${field}.${id}`) }))}
+    </Group>
   )
 
   const rules = draft.outfit.rules
@@ -108,6 +128,17 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
               { text: t(`bots.${slot}.${id}`) }))}
         </Group>
       ))}</div>
+      <div className="form-sec">
+        <h3 className="field-label">{t('bots.group.mouth')}</h3>
+        {dial('words', t('bots.words'))}
+        {picker('form', catalog.forms)}
+      </div>
+      <div className="form-sec">
+        <h3 className="field-label">{t('bots.group.mind')}</h3>
+        {picker('think', catalog.thinks)}
+        {dial('suspicion', t('bots.suspicion'))}
+        {picker('reaction', catalog.reactions)}
+      </div>
       <div className="form-sec">
         <span className="field-label">{t('bots.rules')}</span>
         {rules.map((r, i) => (

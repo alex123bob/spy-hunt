@@ -11,7 +11,7 @@ afterEach(() => setLang('en'))
 test('renders rule lines in order', () => {
   setLang('en')
   render(<BotCardView bot={{ ...base, outfit: { ...outfit, rules: [{ when: 'accused', do: 'counter_accuse' }, { when: 'late_game', do: 'go_vague' }] } }} />)
-  const lines = screen.getAllByText(/^When /).map((e) => e.textContent)
+  const lines = screen.getAllByText(/^When .*→/).map((e) => e.textContent)
   expect(lines).toEqual(['When I am accused → counter-accuse', 'When it is late in the game → go vague'])
 })
 
@@ -49,4 +49,23 @@ test('arena line shows only with arena games', () => {
   expect(screen.getByText('Arena: 3 games · 2 wins')).toBeInTheDocument()
   rerender(<BotCardView bot={{ ...plain, arena_record: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 } }} />)
   expect(screen.queryByText(/^Arena:/)).toBeNull()
+})
+
+test('shows mind lines in both locales and defaults when absent', () => {
+  setLang('en')
+  const { unmount } = render(<BotCardView bot={{ ...base, outfit: { ...outfit, rules: [], think: 'deep', form: 'rhyme', words: 5, suspicion: 2, reaction: 'deflect' } }} />)
+  expect(screen.getByText('Thinking: Deep')).toBeInTheDocument()
+  expect(screen.getByText('Clue form: Rhyme')).toBeInTheDocument()
+  expect(screen.getByText('Wordiness: 5')).toBeInTheDocument()
+  unmount()
+  render(<BotCardView bot={{ ...base, outfit: { ...outfit, rules: [] } }} />)
+  expect(screen.getByText('Thinking: Instinct')).toBeInTheDocument()
+  expect(document.body.textContent).not.toContain('undefined')
+  setLang('zh-Hans')
+})
+
+test('mind lines in Chinese', () => {
+  setLang('zh-Hans')
+  render(<BotCardView bot={{ ...base, outfit: { ...outfit, rules: [], think: 'deep' } }} />)
+  expect(screen.getByText('思考方式：深思熟虑')).toBeInTheDocument()
 })
