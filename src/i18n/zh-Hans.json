@@ -547,5 +547,19 @@
   "bots.reaction.blend_in.desc": "给出笼统、安全的线索,几乎适用于任何相关的词。",
   "bots.reaction.go_vague.desc": "给出模糊到没法被抓住把柄的暗示。",
   "bots.reaction.mirror.desc": "附和大家线索里共有的主题,不说自己词的细节。",
-  "bots.reaction.deflect.desc": "向别的玩家提问或表示怀疑,转移注意力。"
+  "bots.reaction.deflect.desc": "向别的玩家提问或表示怀疑,转移注意力。",
+  "bots.vote": "投票方式",
+  "bots.vote.evidence": "看证据",
+  "bots.vote.follow_last": "跟着多数票",
+  "bots.vote.grudge": "记仇",
+  "bots.vote.odd_one_out": "找不合群的",
+  "bots.vote.independent": "独立思考",
+  "bots.vote.cover": "打掩护",
+  "bots.help.vote": "机器人决定投给谁的方式。如果有规则卡被触发,仍以规则卡为准。各策略只参考上一轮公开的投票。",
+  "bots.vote.evidence.desc": "根据自己对线索的判断来投票。",
+  "bots.vote.follow_last.desc": "投给上一轮得票最多的人(前提是有明显领先者)。",
+  "bots.vote.grudge.desc": "投给上一轮投过自己的人。",
+  "bots.vote.odd_one_out.desc": "投给线索和其他人最不搭的那位玩家。",
+  "bots.vote.independent.desc": "绝不跟风投上一轮票数最多的人。",
+  "bots.vote.cover.desc": "如果怀疑自己是卧底,就跟着投上一轮票数最多的人,免得引人注意。"
 }

@@ -547,5 +547,19 @@
   "bots.reaction.blend_in.desc": "Gives generic, safe clues that fit almost any related word.",
   "bots.reaction.go_vague.desc": "Gives hints too fuzzy for anyone to pin on it.",
   "bots.reaction.mirror.desc": "Echoes the theme the other clues share, without specifics of its own word.",
-  "bots.reaction.deflect.desc": "Questions or casts doubt on another player to shift attention."
+  "bots.reaction.deflect.desc": "Questions or casts doubt on another player to shift attention.",
+  "bots.vote": "Voting",
+  "bots.vote.evidence": "Follow the evidence",
+  "bots.vote.follow_last": "Follow the table",
+  "bots.vote.grudge": "Hold a grudge",
+  "bots.vote.odd_one_out": "Odd one out",
+  "bots.vote.independent": "Think independently",
+  "bots.vote.cover": "Cover story",
+  "bots.help.vote": "How the bot picks who to vote for. A rule card that fires still wins over the strategy. Strategies only use last round's revealed votes.",
+  "bots.vote.evidence.desc": "Votes on its own judgement of the clues.",
+  "bots.vote.follow_last.desc": "Votes for whoever got the most votes last round, if there was a clear leader.",
+  "bots.vote.grudge.desc": "Votes for someone who voted for it last round.",
+  "bots.vote.odd_one_out.desc": "Votes for the player whose clues fit least with everyone else's.",
+  "bots.vote.independent.desc": "Never piles on last round's favourite.",
+  "bots.vote.cover.desc": "If it suspects it's the spy, votes with last round's favourite to stay unnoticed."
 }

@@ -53,19 +53,22 @@ test('arena line shows only with arena games', () => {
 
 test('shows mind lines in both locales and defaults when absent', () => {
   setLang('en')
-  const { unmount } = render(<BotCardView bot={{ ...base, outfit: { ...outfit, rules: [], think: 'deep', form: 'rhyme', words: 5, suspicion: 2, reaction: 'deflect' } }} />)
+  const { unmount } = render(<BotCardView bot={{ ...base, outfit: { ...outfit, rules: [], think: 'deep', form: 'rhyme', words: 5, suspicion: 2, reaction: 'deflect', vote: 'odd_one_out' } }} />)
   expect(screen.getByText('Thinking: Deep')).toBeInTheDocument()
+  expect(screen.getByText('Voting: Odd one out')).toBeInTheDocument()
   expect(screen.getByText('Clue form: Rhyme')).toBeInTheDocument()
   expect(screen.getByText('Wordiness: 5')).toBeInTheDocument()
   unmount()
   render(<BotCardView bot={{ ...base, outfit: { ...outfit, rules: [] } }} />)
   expect(screen.getByText('Thinking: Instinct')).toBeInTheDocument()
+  expect(screen.getByText('Voting: Follow the evidence')).toBeInTheDocument()
   expect(document.body.textContent).not.toContain('undefined')
   setLang('zh-Hans')
 })
 
 test('mind lines in Chinese', () => {
   setLang('zh-Hans')
-  render(<BotCardView bot={{ ...base, outfit: { ...outfit, rules: [], think: 'deep' } }} />)
+  render(<BotCardView bot={{ ...base, outfit: { ...outfit, rules: [], think: 'deep', vote: 'cover' } }} />)
   expect(screen.getByText('思考方式：深思熟虑')).toBeInTheDocument()
+  expect(screen.getByText('投票方式：打掩护')).toBeInTheDocument()
 })

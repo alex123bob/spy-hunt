@@ -1,6 +1,6 @@
 import type { BotOutfit } from '../api/types'
 
-export const MIND_DEFAULTS = { words: 3, form: 'plain', think: 'instinct', suspicion: 3, reaction: 'blend_in' } as const
+export const MIND_DEFAULTS = { words: 3, form: 'plain', think: 'instinct', suspicion: 3, reaction: 'blend_in', vote: 'evidence' } as const
 
 const dial = (v: unknown, d: number) => (typeof v === 'number' && v >= 1 && v <= 5 ? v : d)
 const id = (v: unknown, d: string) => (typeof v === 'string' && v ? v : d)
@@ -14,5 +14,6 @@ export function withMind(o: BotOutfit) {
     think: id(o.think, MIND_DEFAULTS.think),
     suspicion: dial(o.suspicion, MIND_DEFAULTS.suspicion),
     reaction: id(o.reaction, MIND_DEFAULTS.reaction),
+    vote: id(o.vote, MIND_DEFAULTS.vote),
   }
 }

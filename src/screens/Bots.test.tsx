@@ -16,7 +16,7 @@ const catalog: BotCatalog = {
   voices: ['cheerful', 'dry'], styles: ['concrete', 'vague'], quirks: ['question', 'agree'],
   emojis: ['🦊', '🐼', '🐸'], colors: ['#111111', '#222222'],
   triggers: ['accused', 'late_game'], actions: ['counter_accuse', 'go_vague'], max_rules: 3,
-  forms: ['plain'], thinks: ['instinct'], reactions: ['blend_in'],
+  forms: ['plain'], thinks: ['instinct'], reactions: ['blend_in'], votes: ['evidence'],
 }
 const rec = { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }
 const mk = (id: string, name: string): BotCard => ({
@@ -131,7 +131,7 @@ test('save creates the bot and shows it', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(createBot).toHaveBeenCalledWith({
     name: 'Zed', avatar: { emoji: '🐸', color: '#222222' },
-    outfit: { voice: 'cheerful', style: 'vague', quirk: 'question', rules: [], words: 3, form: 'plain', think: 'instinct', suspicion: 3, reaction: 'blend_in' }, listed: true, arena: true,
+    outfit: { voice: 'cheerful', style: 'vague', quirk: 'question', rules: [], words: 3, form: 'plain', think: 'instinct', suspicion: 3, reaction: 'blend_in', vote: 'evidence' }, listed: true, arena: true,
   }))
   expect(await screen.findByText('Zed')).toBeInTheDocument()
   expect(screen.queryByLabelText('Name')).toBeNull()
@@ -147,7 +147,7 @@ test('edit prefills and saves with updateBot', async () => {
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alpha2' } })
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(updateBot).toHaveBeenCalledWith('aaaaaaaa', {
-    name: 'Alpha2', avatar: a.avatar, outfit: { ...a.outfit, words: 3, form: 'plain', think: 'instinct', suspicion: 3, reaction: 'blend_in' }, listed: false, arena: true,
+    name: 'Alpha2', avatar: a.avatar, outfit: { ...a.outfit, words: 3, form: 'plain', think: 'instinct', suspicion: 3, reaction: 'blend_in', vote: 'evidence' }, listed: false, arena: true,
   }))
   expect(await screen.findByText('Alpha2')).toBeInTheDocument()
 })

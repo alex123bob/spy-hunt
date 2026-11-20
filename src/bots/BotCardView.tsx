@@ -46,6 +46,7 @@ export function BotCardView({ bot, float }: { bot: BotDraftPreview; float?: bool
             ['🧠', 'think', t(`bots.think.${mind.think}`)],
             ['🕵️', 'suspicion', String(mind.suspicion)],
             ['🛡️', 'reaction', t(`bots.reaction.${mind.reaction}`)],
+            ['🗳️', 'vote', t(`bots.vote.${mind.vote}`)],
           ] as const).map(([icon, key, value]) => (
             <p key={key} className="wrap tc-line">
               <span aria-hidden>{icon}</span>

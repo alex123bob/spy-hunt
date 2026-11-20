@@ -11,6 +11,7 @@ const catalog: BotCatalog = {
   voices: ['cheerful'], styles: ['concrete'], quirks: ['question'], emojis: ['🦊'], colors: ['#ff6b6b', '#5b8cff', '#111111'],
   triggers: ['accused', 'late_game', 'after_elimination'], actions: ['counter_accuse', 'go_vague', 'vote_leader'], max_rules: 3,
   forms: ['plain', 'riddle'], thinks: ['instinct', 'careful', 'deep'], reactions: ['blend_in', 'mirror'],
+  votes: ['evidence', 'follow_last', 'grudge', 'odd_one_out', 'independent', 'cover'],
 }
 const rec = { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }
 const bot = (outfit: object): BotCard => ({ id: 'abcdefgh', name: 'Bo', avatar: { emoji: '🦊', color: '#ff6b6b' }, outfit, record: rec, remix_of: null, remixes: 0, remixable: true, ranked: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 }, listed: false, arena: false, arena_record: { games: 0, wins: 0, spy_games: 0, spy_wins: 0 } } as BotCard)
@@ -218,7 +219,8 @@ test('an old bot without the fields shows defaults and saves them', async () => 
   expect(screen.queryByText(/undefined/)).toBeNull()
   fireEvent.click(screen.getByRole('button', { name: 'Save' }))
   await waitFor(() => expect(updateBot).toHaveBeenCalled())
-  expect(vi.mocked(updateBot).mock.calls[0]![1]!.outfit).toMatchObject({ words: 3, form: 'plain', think: 'instinct', suspicion: 3, reaction: 'blend_in' })
+  expect(screen.getByRole('radio', { name: 'Follow the evidence' })).toBeChecked()
+  expect(vi.mocked(updateBot).mock.calls[0]![1]!.outfit).toMatchObject({ words: 3, form: 'plain', think: 'instinct', suspicion: 3, reaction: 'blend_in', vote: 'evidence' })
 })
 
 test('the info button explains a setting in a bubble, and the chosen option shows its description', () => {
@@ -236,4 +238,27 @@ test('a dial shows the description for its current value', () => {
   ui()
   fireEvent.change(screen.getByLabelText('Suspicion'), { target: { value: '5' } })
   expect(screen.getByText(/Paranoid/)).toBeInTheDocument()
+})
+
+test('the Voting picker lists the catalog strategies and saves the chosen one', async () => {
+  ui()
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Zed' } })
+  const group = screen.getByRole('radiogroup', { name: 'Voting' })
+  expect(within(group).getAllByRole('radio').map((r) => r.textContent)).toEqual(
+    ['Follow the evidence', 'Follow the table', 'Hold a grudge', 'Odd one out', 'Think independently', 'Cover story'])
+  expect(within(group).getByRole('radio', { name: 'Follow the evidence' })).toBeChecked()
+  fireEvent.click(within(group).getByRole('radio', { name: 'Hold a grudge' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+  await waitFor(() => expect(createBot).toHaveBeenCalled())
+  expect(vi.mocked(createBot).mock.calls[0]![0]!.outfit).toMatchObject({ vote: 'grudge' })
+})
+
+test('the Voting info button opens a bubble and the chosen strategy shows its description', () => {
+  ui()
+  fireEvent.click(screen.getByRole('button', { name: 'About Voting' }))
+  expect(screen.getByRole('tooltip')).toHaveTextContent(/rule card/)
+  expect(screen.getByText(/own judgement/)).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('radio', { name: 'Cover story' }))
+  expect(screen.getByText(/stay unnoticed/)).toBeInTheDocument()
+  expect(screen.queryByText(/own judgement/)).toBeNull()
 })

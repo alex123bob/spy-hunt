@@ -83,7 +83,7 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
       <p className="field-desc" aria-live="polite">{t(`bots.${key}.${mind[key]}.desc`)}</p>
     </div>
   )
-  const picker = (field: 'form' | 'think' | 'reaction', ids: string[] | undefined) => (
+  const picker = (field: 'form' | 'think' | 'reaction' | 'vote', ids: string[] | undefined) => (
     <Group label={t(`bots.${field}`)} help={t(`bots.help.${field}`)} desc={t(`bots.${field}.${mind[field]}.desc`)}>
       {(ids ?? []).map((id) =>
         radio(mind[field] === id, t(`bots.${field}.${id}`), () => setOutfit({ [field]: id }), { text: t(`bots.${field}.${id}`) }))}
@@ -145,6 +145,7 @@ export function BotForm({ initial, remix, catalog, onSaved, onCancel }: {
         {picker('think', catalog.thinks)}
         {dial('suspicion', t('bots.suspicion'))}
         {picker('reaction', catalog.reactions)}
+        {picker('vote', catalog.votes)}
       </div>
       <div className="form-sec">
         <Label text={t('bots.rules')} help={t('bots.help.rules')} />

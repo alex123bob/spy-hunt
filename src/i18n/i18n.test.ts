@@ -32,8 +32,9 @@ test('every bot option id has a label in both languages', () => {
     form: ['plain', 'riddle', 'rhyme', 'one_word', 'emoji_only', 'no_adjectives', 'question_only'],
     think: ['instinct', 'careful', 'deep'],
     reaction: ['blend_in', 'go_vague', 'mirror', 'deflect'],
+    vote: ['evidence', 'follow_last', 'grudge', 'odd_one_out', 'independent', 'cover'],
   }
-  for (const k of ['words', 'suspicion', 'form', 'think', 'reaction', 'group.mouth', 'group.mind']) {
+  for (const k of ['words', 'suspicion', 'form', 'think', 'reaction', 'vote', 'group.mouth', 'group.mind']) {
     expect(en).toHaveProperty(['bots.' + k]); expect(zh).toHaveProperty(['bots.' + k])
   }
   for (const [slot, list] of Object.entries(mind)) for (const id of list) {
@@ -245,6 +246,7 @@ test('every bot option, dial value and setting has a help text in both languages
     form: ['plain', 'riddle', 'rhyme', 'one_word', 'emoji_only', 'no_adjectives', 'question_only'],
     think: ['instinct', 'careful', 'deep'],
     reaction: ['blend_in', 'go_vague', 'mirror', 'deflect'],
+    vote: ['evidence', 'follow_last', 'grudge', 'odd_one_out', 'independent', 'cover'],
     words: ['1', '2', '3', '4', '5'],
     suspicion: ['1', '2', '3', '4', '5'],
   }
