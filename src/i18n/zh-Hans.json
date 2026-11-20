@@ -479,7 +479,7 @@
   "bots.form": "线索形式",
   "bots.think": "思考方式",
   "bots.suspicion": "多疑程度",
-  "bots.reaction": "被怀疑时",
+  "bots.reaction": "觉得自己是卧底时",
   "bots.form.plain": "直白",
   "bots.form.riddle": "谜语",
   "bots.form.rhyme": "押韵",
@@ -492,6 +492,6 @@
   "bots.think.deep": "深思熟虑",
   "bots.reaction.blend_in": "随大流",
   "bots.reaction.go_vague": "含糊其辞",
-  "bots.reaction.mirror": "照搬别人",
+  "bots.reaction.mirror": "附和大家",
   "bots.reaction.deflect": "转移话题"
 }

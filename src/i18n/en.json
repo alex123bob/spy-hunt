@@ -479,7 +479,7 @@
   "bots.form": "Clue form",
   "bots.think": "Thinking",
   "bots.suspicion": "Suspicion",
-  "bots.reaction": "When suspected",
+  "bots.reaction": "If I think I'm the spy",
   "bots.form.plain": "Plain",
   "bots.form.riddle": "Riddle",
   "bots.form.rhyme": "Rhyme",
