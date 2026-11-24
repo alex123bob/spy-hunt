@@ -56,8 +56,10 @@ export function SharePreviewSheet(props: SharePreviewSheetProps) {
       <h2>{label}</h2>
       <p className="muted">{sub}</p>
       <canvas ref={canvasRef} className="share-card" role="img" aria-label={label} />
-      <button type="button" className="btn primary" disabled={busy} onClick={() => void doShare()}>{shareLabel}</button>
-      <button type="button" className="btn secondary" disabled={busy} onClick={() => void doSave()}>{saveLabel}</button>
+      <div className="share-actions">
+        <button type="button" className="btn primary" disabled={busy} onClick={() => void doShare()}>{shareLabel}</button>
+        <button type="button" className="btn secondary" disabled={busy} onClick={() => void doSave()}>{saveLabel}</button>
+      </div>
     </Sheet>
   )
 }
