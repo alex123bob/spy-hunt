@@ -274,6 +274,28 @@ async function cardFile(m: ShareCardModel, filename: string): Promise<File | nul
   }
 }
 
+/** Draw `model` and trigger a browser download of the PNG; never throws, resolves false if it can't. */
+export async function downloadCard(model: ShareCardModel, filename: string): Promise<boolean> {
+  if (typeof document === 'undefined') return false
+  try {
+    const canvas = document.createElement('canvas')
+    await drawCard(canvas, model)
+    const blob = await canvasToBlob(canvas)
+    if (!blob) return false
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+    return true
+  } catch {
+    return false
+  }
+}
+
 /**
  * Share a cartoon PNG card via the native share sheet; falls back to sharing/copying the plain
  * text so it always does something useful. A user-cancelled native share returns 'cancelled'

@@ -1,17 +1,17 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { Lobby } from './Lobby'
 import { setLang, getLang } from '../i18n'
 import type { Snapshot } from '../api/types'
 import { ApiError } from '../api/client'
-import { shareCard } from '../daily/share'
+import { downloadCard, shareCard } from '../daily/share'
 
 vi.mock('../api/client', async (orig) => {
   const m = await orig<typeof import('../api/client')>()
   return { ...m, request: vi.fn().mockResolvedValue({}) }
 })
 import { request } from '../api/client'
-vi.mock('../daily/share', () => ({ shareCard: vi.fn(), drawCard: vi.fn() }))
+vi.mock('../daily/share', () => ({ shareCard: vi.fn(), downloadCard: vi.fn(), drawCard: vi.fn() }))
 vi.mock('../bots/api', () => ({ listMyBots: vi.fn() }))
 import { listMyBots } from '../bots/api'
 vi.mock('../state/accounts', async (orig) => ({ ...(await orig<typeof import('../state/accounts')>()), patchMyLang: vi.fn() }))
@@ -291,28 +291,39 @@ test('clicking the QR icon opens the ShareSheet with the invite link', () => {
   expect(screen.getByText(`${window.location.origin}/r/ABCD`)).toBeInTheDocument()
 })
 
-test('clicking Invite shares the room invite card and toasts the outcome', async () => {
-  vi.mocked(shareCard).mockResolvedValue('copied')
+const openInvite = () => {
   render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
   fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+  return within(screen.getByRole('dialog', { name: 'Invite friends' }))
+}
+
+test('clicking Invite opens a preview dialog; Share inside shares the invite card and toasts', async () => {
+  vi.mocked(shareCard).mockResolvedValue('copied')
+  fireEvent.click(openInvite().getByRole('button', { name: 'Invite' }))
   await waitFor(() => expect(shareCard).toHaveBeenCalled())
   const arg = vi.mocked(shareCard).mock.calls[0][0]
   expect(arg.model.puzzle).toContain('ABCD')
   expect(arg.model.url).toBe(`${window.location.origin}/r/ABCD`)
   expect(await screen.findByText('Copied!')).toBeInTheDocument()
+  expect(screen.queryByRole('dialog')).toBeNull()
 })
 
-test('Invite when the native share is cancelled or fails shows an error toast, no throw', async () => {
+test('a failed share from the Invite dialog shows the failure toast', async () => {
   vi.mocked(shareCard).mockResolvedValue('failed')
-  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
-  fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+  fireEvent.click(openInvite().getByRole('button', { name: 'Invite' }))
   expect(await screen.findByText('Could not share.')).toBeInTheDocument()
 })
 
-test('cancelling the native share shows no toast at all', async () => {
+test('Save image in the Invite dialog downloads the card and toasts Image saved', async () => {
+  vi.mocked(downloadCard).mockResolvedValue(true)
+  fireEvent.click(openInvite().getByRole('button', { name: 'Save image' }))
+  await waitFor(() => expect(downloadCard).toHaveBeenCalledWith(expect.anything(), 'spy-hunt-room-ABCD.png'))
+  expect(await screen.findByText('Image saved!')).toBeInTheDocument()
+})
+
+test('cancelling the native share from the Invite dialog shows no toast', async () => {
   vi.mocked(shareCard).mockResolvedValue('cancelled')
-  render(<MemoryRouter><Lobby state={snap(true)} /></MemoryRouter>)
-  fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+  fireEvent.click(openInvite().getByRole('button', { name: 'Invite' }))
   await waitFor(() => expect(shareCard).toHaveBeenCalled())
   await act(async () => {})
   expect(screen.queryByRole('status')).toBeNull()
