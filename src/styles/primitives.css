@@ -68,6 +68,8 @@
   border-radius: var(--radius-pill);
   padding: 4px 10px;
 }
+button.pill, a.pill { cursor: pointer; }
+button.pill:disabled { cursor: default; }
 .tag {
   display: inline-block;
   font: 700 12px/1.3 var(--font-body);
