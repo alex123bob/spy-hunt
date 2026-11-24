@@ -148,6 +148,7 @@ beforeEach(() => {
   vi.mocked(getDailyStreak).mockReset().mockResolvedValue({ streak: 0, best: 0, played_today: false })
   vi.mocked(getSession).mockImplementation(() => ({ playerId: 'p', token: 't', lang: 'en', name: '' }))
   vi.mocked(getRecaps).mockReset().mockResolvedValue({ recaps: [], unseen: 0 })
+  vi.mocked(shareCard).mockReset()
 })
 
 test('clicking Share shares the promo card and toasts the outcome', async () => {
@@ -158,6 +159,7 @@ test('clicking Share shares the promo card and toasts the outcome', async () => 
   const arg = vi.mocked(shareCard).mock.calls[0][0]
   expect(arg.model.tiles).toEqual([])
   expect(arg.model.url).toBe(`${window.location.origin}/`)
+  expect(arg.text).toContain(`${window.location.origin}/`)
   expect(await screen.findByText('Copied!')).toBeInTheDocument()
 })
 
@@ -167,7 +169,7 @@ test('cancelling the native share on Landing shows no toast', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Share' }))
   await waitFor(() => expect(shareCard).toHaveBeenCalled())
   await act(async () => {})
-  expect(screen.queryByText('Could not share.')).toBeNull()
+  expect(screen.queryByRole('status')).toBeNull()
 })
 
 test('a failed share on Landing shows the failure toast', async () => {

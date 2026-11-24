@@ -116,7 +116,7 @@ export function Landing() {
     const url = `${window.location.origin}${import.meta.env.BASE_URL}`
     const r = await shareCard({
       model: promoCardModel(url),
-      text: t('landing.shareText'),
+      text: `${t('landing.shareText')}\n${url}`,
       filename: 'spy-hunt.png',
     })
     setShareState((s) => ({
