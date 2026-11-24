@@ -19,3 +19,20 @@ export function lobbyInviteCardModel(
     url,
   }
 }
+
+/** Image share card for promoting the app generally — no room, no player count. */
+export function promoCardModel(url: string): ShareCardModel {
+  return {
+    title: t('app.title'),
+    puzzle: t('landing.tagline'),
+    solved: true,
+    verdict: t('landing.shareVerdict'),
+    mascot: '🕵️',
+    hero: '',
+    rankTitle: '',
+    tiles: [],
+    badge: null,
+    scanHint: t('landing.shareScanHint'),
+    url,
+  }
+}

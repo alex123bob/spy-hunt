@@ -8,8 +8,10 @@ import { leaveRoom, setMyRoom } from '../state/myRoom'
 import { getRecaps } from '../bots/api'
 import { getDailyStreak } from '../daily/api'
 import { recordPageLoadVisit, recordStreakMilestone } from '../state/nudges'
+import { shareCard } from '../daily/share'
 
 vi.mock('../bots/api', () => ({ getRecaps: vi.fn() }))
+vi.mock('../daily/share', () => ({ shareCard: vi.fn(), drawCard: vi.fn() }))
 
 vi.mock('../state/session', async () => {
   let name = ''
@@ -146,6 +148,35 @@ beforeEach(() => {
   vi.mocked(getDailyStreak).mockReset().mockResolvedValue({ streak: 0, best: 0, played_today: false })
   vi.mocked(getSession).mockImplementation(() => ({ playerId: 'p', token: 't', lang: 'en', name: '' }))
   vi.mocked(getRecaps).mockReset().mockResolvedValue({ recaps: [], unseen: 0 })
+  vi.mocked(shareCard).mockReset()
+})
+
+test('clicking Share shares the promo card and toasts the outcome', async () => {
+  vi.mocked(shareCard).mockResolvedValue('copied')
+  renderLanding()
+  fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+  await waitFor(() => expect(shareCard).toHaveBeenCalled())
+  const arg = vi.mocked(shareCard).mock.calls[0][0]
+  expect(arg.model.tiles).toEqual([])
+  expect(arg.model.url).toBe(`${window.location.origin}/`)
+  expect(arg.text).toContain(`${window.location.origin}/`)
+  expect(await screen.findByText('Copied!')).toBeInTheDocument()
+})
+
+test('cancelling the native share on Landing shows no toast', async () => {
+  vi.mocked(shareCard).mockResolvedValue('cancelled')
+  renderLanding()
+  fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+  await waitFor(() => expect(shareCard).toHaveBeenCalled())
+  await act(async () => {})
+  expect(screen.queryByRole('status')).toBeNull()
+})
+
+test('a failed share on Landing shows the failure toast', async () => {
+  vi.mocked(shareCard).mockResolvedValue('failed')
+  renderLanding()
+  fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+  expect(await screen.findByText('Could not share.')).toBeInTheDocument()
 })
 
 test('Landing records a page-load visit on mount', () => {
