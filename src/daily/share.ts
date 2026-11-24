@@ -150,22 +150,48 @@ export async function drawCard(canvas: HTMLCanvasElement, m: ShareCardModel): Pr
   ctx.fillStyle = ink
   ctx.font = font(78)
   ctx.fillText(`🕵️ ${m.title}`, S / 2, 175)
-  ctx.font = font(40, 600)
+  // tagline: wrap to the card's inner width (at most 2 lines), shrinking if a single word is too wide
+  const maxW = S - 2 * pad - 80
+  let ps = 40
+  ctx.font = font(ps, 600)
+  const words = m.puzzle.toUpperCase().split(' ')
+  const lines: string[] = []
+  let cur = ''
+  for (const w of words) {
+    const next = cur ? `${cur} ${w}` : w
+    if (cur && ctx.measureText(next).width > maxW) { lines.push(cur); cur = w } else cur = next
+  }
+  if (cur) lines.push(cur)
+  while (ps > 24 && (lines.length > 2 || lines.some((l) => ctx.measureText(l).width > maxW))) {
+    ps -= 2
+    ctx.font = font(ps, 600)
+    lines.length = 0; cur = ''
+    for (const w of words) {
+      const next = cur ? `${cur} ${w}` : w
+      if (cur && ctx.measureText(next).width > maxW) { lines.push(cur); cur = w } else cur = next
+    }
+    if (cur) lines.push(cur)
+  }
   ctx.fillStyle = c('--tomato')
-  ctx.fillText(m.puzzle.toUpperCase(), S / 2, 235)
+  const lh = ps + 10
+  lines.forEach((l, i) => ctx.fillText(l, S / 2, 235 + i * lh))
+  const headEnd = 235 + (lines.length - 1) * lh
 
-  // hero + rank title band
-  const hW = 520, hH = 66, hX = (S - hW) / 2, hY = 272
-  ctx.fillStyle = ink
-  rounded(ctx, hX + 5, hY + 6, hW, hH, hH / 2); ctx.fill()
-  ctx.fillStyle = c('--sun'); ctx.lineWidth = 6; ctx.strokeStyle = ink
-  rounded(ctx, hX, hY, hW, hH, hH / 2); ctx.fill(); ctx.stroke()
-  ctx.fillStyle = ink
-  ctx.font = font(38)
-  ctx.fillText(`${m.hero} ${m.rankTitle}`, S / 2, hY + hH / 2 + 3)
+  // hero + rank title band (skipped when there is nothing to show)
+  const hasBand = !!(m.hero || m.rankTitle)
+  const hW = 520, hH = 66, hX = (S - hW) / 2, hY = headEnd + 37
+  if (hasBand) {
+    ctx.fillStyle = ink
+    rounded(ctx, hX + 5, hY + 6, hW, hH, hH / 2); ctx.fill()
+    ctx.fillStyle = c('--sun'); ctx.lineWidth = 6; ctx.strokeStyle = ink
+    rounded(ctx, hX, hY, hW, hH, hH / 2); ctx.fill(); ctx.stroke()
+    ctx.fillStyle = ink
+    ctx.font = font(38)
+    ctx.fillText(`${m.hero} ${m.rankTitle}`.trim(), S / 2, hY + hH / 2 + 3)
+  }
 
   // verdict pill
-  const vW = 620, vH = 98, vX = (S - vW) / 2, vY = 364
+  const vW = 620, vH = 98, vX = (S - vW) / 2, vY = hasBand ? hY + hH + 26 : headEnd + 50
   ctx.fillStyle = ink
   rounded(ctx, vX + 7, vY + 9, vW, vH, vH / 2); ctx.fill()
   ctx.fillStyle = m.solved ? c('--mint') : c('--pink')
@@ -176,10 +202,10 @@ export async function drawCard(canvas: HTMLCanvasElement, m: ShareCardModel): Pr
   ctx.fillText(`${m.mascot} ${m.verdict}`, S / 2, vY + vH / 2 + 4)
 
   // badge ribbon (optional)
-  let statY = 532
+  let statY = vY + vH + 70
   if (m.badge) {
     ctx.save()
-    ctx.translate(S / 2, 500)
+    ctx.translate(S / 2, vY + vH + 38)
     ctx.rotate(-0.04)
     ctx.font = font(34, 600)
     const bw = ctx.measureText(m.badge).width + 60
@@ -188,7 +214,7 @@ export async function drawCard(canvas: HTMLCanvasElement, m: ShareCardModel): Pr
     ctx.fillStyle = ink
     ctx.fillText(m.badge, 0, 2)
     ctx.restore()
-    statY = 548
+    statY = vY + vH + 86
   }
 
   // three stat tiles
@@ -209,8 +235,8 @@ export async function drawCard(canvas: HTMLCanvasElement, m: ShareCardModel): Pr
   })
 
   // QR + hint at the bottom, positioned from the tiles so nothing clips the card edge
-  const qrSize = 172
-  const qrBoxTop = statY + tH + 30
+  const qrSize = m.tiles.length ? 172 : 260
+  const qrBoxTop = m.tiles.length ? statY + tH + 30 : statY - 20
   const qrX = (S - qrSize) / 2, qrY = qrBoxTop + 12
   try {
     const dataUrl = await QRCode.toDataURL(m.url, { margin: 1, width: qrSize * 2, color: { dark: '#1d3b33', light: '#fffaf0' } })
