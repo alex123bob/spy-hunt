@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Landing } from './Landing'
 import { ApiError, request } from '../api/client'
@@ -8,10 +8,10 @@ import { leaveRoom, setMyRoom } from '../state/myRoom'
 import { getRecaps } from '../bots/api'
 import { getDailyStreak } from '../daily/api'
 import { recordPageLoadVisit, recordStreakMilestone } from '../state/nudges'
-import { shareCard } from '../daily/share'
+import { downloadCard, shareCard } from '../daily/share'
 
 vi.mock('../bots/api', () => ({ getRecaps: vi.fn() }))
-vi.mock('../daily/share', () => ({ shareCard: vi.fn(), drawCard: vi.fn() }))
+vi.mock('../daily/share', () => ({ shareCard: vi.fn(), downloadCard: vi.fn(), drawCard: vi.fn() }))
 
 vi.mock('../state/session', async () => {
   let name = ''
@@ -149,34 +149,46 @@ beforeEach(() => {
   vi.mocked(getSession).mockImplementation(() => ({ playerId: 'p', token: 't', lang: 'en', name: '' }))
   vi.mocked(getRecaps).mockReset().mockResolvedValue({ recaps: [], unseen: 0 })
   vi.mocked(shareCard).mockReset()
+  vi.mocked(downloadCard).mockReset()
 })
 
-test('clicking Share shares the promo card and toasts the outcome', async () => {
+test('clicking Share opens a preview dialog showing the promo card', () => {
+  renderLanding()
+  fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+  expect(screen.getByRole('dialog', { name: 'Share Spy Hunt' })).toBeInTheDocument()
+})
+
+test('Share inside the dialog shares the promo card and toasts the outcome', async () => {
   vi.mocked(shareCard).mockResolvedValue('copied')
   renderLanding()
   fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Share' }))
   await waitFor(() => expect(shareCard).toHaveBeenCalled())
   const arg = vi.mocked(shareCard).mock.calls[0][0]
   expect(arg.model.tiles).toEqual([])
   expect(arg.model.url).toBe(`${window.location.origin}/`)
   expect(arg.text).toContain(`${window.location.origin}/`)
   expect(await screen.findByText('Copied!')).toBeInTheDocument()
+  expect(screen.queryByRole('dialog')).toBeNull()
 })
 
-test('cancelling the native share on Landing shows no toast', async () => {
+test('Save image inside the dialog downloads the card and toasts Image saved', async () => {
+  vi.mocked(downloadCard).mockResolvedValue(true)
+  renderLanding()
+  fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Save image' }))
+  await waitFor(() => expect(downloadCard).toHaveBeenCalled())
+  expect(await screen.findByText('Image saved!')).toBeInTheDocument()
+})
+
+test('cancelling the native share from the dialog shows no toast', async () => {
   vi.mocked(shareCard).mockResolvedValue('cancelled')
   renderLanding()
   fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Share' }))
   await waitFor(() => expect(shareCard).toHaveBeenCalled())
   await act(async () => {})
   expect(screen.queryByRole('status')).toBeNull()
-})
-
-test('a failed share on Landing shows the failure toast', async () => {
-  vi.mocked(shareCard).mockResolvedValue('failed')
-  renderLanding()
-  fireEvent.click(screen.getByRole('button', { name: 'Share' }))
-  expect(await screen.findByText('Could not share.')).toBeInTheDocument()
 })
 
 test('Landing records a page-load visit on mount', () => {

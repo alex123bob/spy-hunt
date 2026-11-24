@@ -3,12 +3,11 @@ import { request } from '../api/client'
 import { errorText } from '../api/errors'
 import type { BotCard, Snapshot } from '../api/types'
 import { listMyBots } from '../bots/api'
-import { shareCard } from '../daily/share'
-import { shareToast } from '../daily/shareToast'
 import { lobbyInviteCardModel } from '../game/lobbyShare'
 import { AddBotMenu } from '../components/AddBotMenu'
 import { LangMenu } from '../components/LangMenu'
 import { Loader } from '../components/Loader'
+import { SharePreviewSheet } from '../components/SharePreviewSheet'
 import { ShareSheet } from '../components/ShareSheet'
 import { Toast } from '../components/Toast'
 import { PlayerChip } from '../components/PlayerChip'
@@ -18,6 +17,7 @@ export function Lobby({ state }: { state: Snapshot }) {
   const lang = useLang()
   const [err, setErr] = useState('')
   const [qrOpen, setQrOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const [shareState, setShareState] = useState({ text: '', n: 0 })
   const [myBots, setMyBots] = useState<BotCard[]>([])
   const code = state.code
@@ -53,15 +53,6 @@ export function Lobby({ state }: { state: Snapshot }) {
     }
   }
 
-  const inviteShare = async () => {
-    const r = await shareCard({
-      model: lobbyInviteCardModel(code, state.players.length, state.config.max_players, link),
-      text: t('lobby.shareText', { code }) + `\n${link}`,
-      filename: `spy-hunt-room-${code}.png`,
-    })
-    setShareState((s) => ({ text: shareToast(r, { shared: 'lobby.shared', copied: 'lobby.copied', failed: 'lobby.shareFailed' }), n: s.n + 1 }))
-  }
-
   // Placeholders only for seats still needed to reach min_players; the add-bot pill lives in the header.
   const seatSlots = Math.max(state.config.min_players - state.players.length, 0)
   return (
@@ -76,11 +67,28 @@ export function Lobby({ state }: { state: Snapshot }) {
             <AddBotMenu isHost={isHost} myBots={myBots} ownBotIn={ownBotIn}
               onAdd={(botId) => call('POST', '/bots', botId === undefined ? { action: 'add' } : { action: 'add', bot_id: botId })} />
           )}
-          <button type="button" className="pill" onClick={inviteShare}>{t('lobby.invitePill')}</button>
+          <button type="button" className="pill" onClick={() => setShareOpen(true)}>{t('lobby.invitePill')}</button>
           <button type="button" className="pill" aria-label={t('lobby.qrCode')} onClick={() => setQrOpen(true)}><span aria-hidden>▦</span></button>
         </div>
       </header>
       {qrOpen && <ShareSheet link={link} onClose={() => setQrOpen(false)} />}
+      {shareOpen && (
+        <SharePreviewSheet
+          model={lobbyInviteCardModel(code, state.players.length, state.config.max_players, link)}
+          label={t('lobby.invite')}
+          sub={t('share.dialogSub')}
+          shareText={`${t('lobby.shareText', { code })}\n${link}`}
+          filename={`spy-hunt-room-${code}.png`}
+          shareLabel={t('lobby.invitePill')}
+          saveLabel={t('lobby.saveImage')}
+          sharedText={t('lobby.shared')}
+          copiedText={t('lobby.copied')}
+          failedText={t('lobby.shareFailed')}
+          savedText={t('lobby.imageSaved')}
+          onClose={() => setShareOpen(false)}
+          onOutcome={(text) => setShareState((st) => ({ text, n: st.n + 1 }))}
+        />
+      )}
       <Toast text={shareState.text} nonce={shareState.n} />
       <section className="card">
         <div className="cardhead">

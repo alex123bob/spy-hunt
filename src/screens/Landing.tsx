@@ -5,14 +5,13 @@ import type { Snapshot } from '../api/types'
 import { getRecaps } from '../bots/api'
 import { t, useLang } from '../i18n'
 import { getDailyStreak } from '../daily/api'
-import { shareCard } from '../daily/share'
-import { shareToast } from '../daily/shareToast'
 import { promoCardModel } from '../game/lobbyShare'
 import { recordPageLoadVisit, recordStreakMilestone } from '../state/nudges'
 import { ensureGuest, getSession, setName as saveName } from '../state/session'
 import { leaveRoom, useMyRoom } from '../state/myRoom'
 import { blockingRoom, type BlockingRoom } from '../state/blockingRoom'
 import { AlreadyInRoomSheet } from '../components/AlreadyInRoomSheet'
+import { SharePreviewSheet } from '../components/SharePreviewSheet'
 import { Toast } from '../components/Toast'
 
 const MASCOTS = [['🦊', 'sky'], ['🐸', 'pink'], ['🕵️', 'sun'], ['🐼', 'mint'], ['🐙', 'lilac']] as const
@@ -29,6 +28,7 @@ export function Landing() {
   const [confirmLeave, setConfirmLeave] = useState(false)
   const [unseen, setUnseen] = useState(0)
   const [shareState, setShareState] = useState({ text: '', n: 0 })
+  const [shareOpen, setShareOpen] = useState(false)
   // null until the server answers, so the card never flashes a status it hasn't confirmed
   const [daily, setDaily] = useState<{ streak: number; played: boolean } | null>(null)
   const nameRef = useRef<HTMLInputElement>(null)
@@ -112,18 +112,7 @@ export function Landing() {
     if (c) nav(`/r/${c}`)
   }
 
-  const promoShare = async () => {
-    const url = `${window.location.origin}${import.meta.env.BASE_URL}`
-    const r = await shareCard({
-      model: promoCardModel(url),
-      text: `${t('landing.shareText')}\n${url}`,
-      filename: 'spy-hunt.png',
-    })
-    setShareState((s) => ({
-      text: shareToast(r, { shared: 'landing.shared', copied: 'landing.copied', failed: 'landing.shareFailed' }),
-      n: s.n + 1,
-    }))
-  }
+  const promoUrl = `${window.location.origin}${import.meta.env.BASE_URL}`
 
   return (
     <main className="screen landing">
@@ -142,8 +131,25 @@ export function Landing() {
             <div key={emoji} className={`m c-${c}`}>{emoji}</div>
           ))}
         </div>
-        <button type="button" className="pill" onClick={() => void promoShare()}>{t('landing.sharePill')}</button>
+        <button type="button" className="pill" onClick={() => setShareOpen(true)}>{t('landing.sharePill')}</button>
         <Toast text={shareState.text} nonce={shareState.n} />
+        {shareOpen && (
+          <SharePreviewSheet
+            model={promoCardModel(promoUrl)}
+            label={t('landing.shareDialogTitle')}
+            sub={t('share.dialogSub')}
+            shareText={`${t('landing.shareText')}\n${promoUrl}`}
+            filename="spy-hunt.png"
+            shareLabel={t('landing.sharePill')}
+            saveLabel={t('landing.saveImage')}
+            sharedText={t('landing.shared')}
+            copiedText={t('landing.copied')}
+            failedText={t('landing.shareFailed')}
+            savedText={t('landing.imageSaved')}
+            onClose={() => setShareOpen(false)}
+            onOutcome={(text) => setShareState((st) => ({ text, n: st.n + 1 }))}
+          />
+        )}
       </div>
       <div className="tiles">
         <button type="button" className="tile c-sun" onClick={() => nav('/daily')}>
