@@ -1,4 +1,4 @@
-import { shareCardModel, shareDailyResult, shareText } from './share'
+import { downloadCard, shareCardModel, shareDailyResult, shareText } from './share'
 import { setLang } from '../i18n'
 
 const base = {
@@ -110,6 +110,38 @@ describe('shareResult', () => {
     })
     expect(await shareDailyResult(base)).toBe('cancelled')
     expect(writeText).not.toHaveBeenCalled()
+  })
+})
+
+describe('downloadCard', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  test('returns false when no document is available', async () => {
+    vi.stubGlobal('document', undefined)
+    expect(await downloadCard(shareCardModel(base), 'x.png')).toBe(false)
+    vi.unstubAllGlobals()
+  })
+
+  test('returns false when toBlob yields null, without creating an object URL', async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation((cb: BlobCallback) => cb(null))
+    const createSpy = vi.spyOn(URL, 'createObjectURL')
+    expect(await downloadCard(shareCardModel(base), 'x.png')).toBe(false)
+    expect(createSpy).not.toHaveBeenCalled()
+  })
+
+  test('creates an object URL, clicks a download anchor with the filename, then revokes it', async () => {
+    const fakeBlob = new Blob(['fake'], { type: 'image/png' })
+    vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation((cb: BlobCallback) => cb(fakeBlob))
+    const createSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake-url')
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+
+    const ok = await downloadCard(shareCardModel(base), 'spy-hunt.png')
+
+    expect(ok).toBe(true)
+    expect(createSpy).toHaveBeenCalledWith(fakeBlob)
+    expect(clickSpy).toHaveBeenCalled()
+    expect(revokeSpy).toHaveBeenCalledWith('blob:fake-url')
   })
 })
 
