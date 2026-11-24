@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { SharePreviewSheet } from './SharePreviewSheet'
 import { drawCard, shareCard, downloadCard } from '../daily/share'
 import type { ShareCardModel } from '../daily/share'
@@ -78,4 +78,31 @@ test('a failed Save image reports the failure toast', async () => {
   render(<SharePreviewSheet {...props} />)
   fireEvent.click(screen.getByRole('button', { name: 'Save image' }))
   await waitFor(() => expect(props.onOutcome).toHaveBeenCalledWith('Could not share.'))
+})
+
+test('a double tap on Share only shares once', async () => {
+  vi.mocked(shareCard).mockResolvedValue('shared')
+  render(<SharePreviewSheet {...props} />)
+  const btn = screen.getByRole('button', { name: 'Share' })
+  fireEvent.click(btn)
+  fireEvent.click(btn)
+  await waitFor(() => expect(props.onClose).toHaveBeenCalled())
+  expect(shareCard).toHaveBeenCalledTimes(1)
+})
+
+test('Save image while a share is in flight does nothing', async () => {
+  vi.mocked(shareCard).mockResolvedValue('shared')
+  render(<SharePreviewSheet {...props} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Save image' }))
+  await waitFor(() => expect(props.onClose).toHaveBeenCalled())
+  expect(downloadCard).not.toHaveBeenCalled()
+})
+
+test('re-rendering with an equal but new model object does not redraw the canvas', async () => {
+  const { rerender } = render(<SharePreviewSheet {...props} />)
+  await waitFor(() => expect(drawCard).toHaveBeenCalledTimes(1))
+  rerender(<SharePreviewSheet {...props} model={{ ...model }} />)
+  await act(async () => {})
+  expect(drawCard).toHaveBeenCalledTimes(1)
 })
