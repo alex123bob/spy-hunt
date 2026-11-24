@@ -2,12 +2,12 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { MemoryRouter } from 'react-router-dom'
 import { Result } from './Result'
 import type { Role, Snapshot } from '../api/types'
-import { shareCard } from '../daily/share'
+import { downloadCard, shareCard } from '../daily/share'
 import { setLang } from '../i18n'
 import { recordWin } from '../state/nudges'
 import { player, snap } from '../test/fixtures'
 
-vi.mock('../daily/share', () => ({ shareCard: vi.fn(), drawCard: vi.fn() }))
+vi.mock('../daily/share', () => ({ shareCard: vi.fn(), drawCard: vi.fn(), downloadCard: vi.fn() }))
 vi.mock('../state/nudges', () => ({ recordWin: vi.fn() }))
 
 const WORDS = { civilian: { en: 'piano', 'zh-Hans': '钢琴' }, spy: { en: 'organ', 'zh-Hans': '风琴' } }
@@ -33,7 +33,35 @@ const view = (s: Snapshot) => render(<MemoryRouter><Result state={s} /></MemoryR
 beforeEach(() => {
   setLang('en')
   vi.mocked(shareCard).mockReset()
+  vi.mocked(downloadCard).mockReset()
   vi.mocked(recordWin).mockClear()
+})
+
+test('shows a Save image button next to Share', () => {
+  view(finished())
+  expect(screen.getByRole('button', { name: 'Save image' })).toBeInTheDocument()
+})
+
+test('Save image downloads the card and toasts Image saved', async () => {
+  vi.mocked(downloadCard).mockResolvedValue(true)
+  view(finished())
+  fireEvent.click(screen.getByRole('button', { name: 'Save image' }))
+  expect(await screen.findByText('Image saved!')).toBeInTheDocument()
+  const [modelArg, filenameArg] = vi.mocked(downloadCard).mock.calls[0]
+  expect(modelArg.verdict).toBe('We won!')
+  expect(filenameArg).toMatch(/\.png$/)
+})
+
+test('a failed Save image shows the failure toast', async () => {
+  vi.mocked(downloadCard).mockResolvedValue(false)
+  view(finished())
+  fireEvent.click(screen.getByRole('button', { name: 'Save image' }))
+  expect(await screen.findByText('Could not share.')).toBeInTheDocument()
+})
+
+test('Save image is absent when the game ended with no winner', () => {
+  view(finished({ winner: null }))
+  expect(screen.queryByRole('button', { name: 'Save image' })).toBeNull()
 })
 
 test('shows You won for the winning viewer and You lost for the losing one', () => {

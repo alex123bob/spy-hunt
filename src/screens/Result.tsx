@@ -12,7 +12,7 @@ import { Confetti } from '../components/Confetti'
 import { FlipCard } from '../components/FlipCard'
 import { Toast } from '../components/Toast'
 import { useStaged } from '../motion/useStaged'
-import { drawCard, shareCard } from '../daily/share'
+import { downloadCard, drawCard, shareCard } from '../daily/share'
 import { shareToast } from '../daily/shareToast'
 import { resultInfo, resultShareText, roomCardModel } from '../game/result'
 import { t, useLang } from '../i18n'
@@ -53,6 +53,12 @@ export function Result({ state }: { state: Snapshot }) {
       model: model(), text: resultShareText(state, info, url), filename: `spy-hunt-${state.code}-${state.game_no}.png`,
     })
     setShareState((s) => ({ text: shareToast(r, { shared: 'result.shared', copied: 'result.copied', failed: 'result.shareFailed' }), n: s.n + 1 }))
+  }
+
+  const saveImage = async () => {
+    if (!shareable) return
+    const ok = await downloadCard(model(), `spy-hunt-${state.code}-${state.game_no}.png`)
+    setShareState((s) => ({ text: ok ? t('result.imageSaved') : t('result.shareFailed'), n: s.n + 1 }))
   }
 
   return (
@@ -123,6 +129,7 @@ export function Result({ state }: { state: Snapshot }) {
         <>
           <canvas ref={canvasRef} className="share-card" data-testid="share-card" role="img" aria-label={t('result.title')} />
           <button type="button" className="btn" onClick={share}>{t('result.share')}</button>
+          <button type="button" className="btn secondary" onClick={() => void saveImage()}>{t('result.saveImage')}</button>
           <Toast text={shareState.text} nonce={shareState.n} />
         </>
       )}
