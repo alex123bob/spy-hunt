@@ -55,13 +55,18 @@ test('registering sends the typed values, shows signed in, then reloads', async 
 })
 
 test('logging in calls login', async () => {
+  vi.useFakeTimers()
   vi.mocked(login).mockResolvedValue(undefined)
   render(<AuthModal onClose={() => {}} />)
   fireEvent.click(screen.getByRole('tab', { name: 'Log in' }))
   fill()
   fireEvent.click(screen.getByRole('button', { name: 'Log in' }))
-  await screen.findByText('Signed in')
+  await act(async () => { await Promise.resolve() })
+  expect(screen.getByText('Signed in')).toBeInTheDocument()
   expect(login).toHaveBeenCalledWith('a@b.com', 'longenough')
+  await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+  expect(reload).toHaveBeenCalled()
+  vi.useRealTimers()
 })
 
 test.each([
